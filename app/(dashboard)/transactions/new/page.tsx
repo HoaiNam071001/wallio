@@ -1,0 +1,48 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { TransactionForm, type TransactionFormValues } from "@/components/transactions/transaction-form";
+import { useAuth } from "@/lib/hooks/use-auth";
+import { useCreateTransaction } from "@/lib/hooks/use-transactions";
+
+export default function NewTransactionPage() {
+  const router = useRouter();
+  const { user } = useAuth();
+  const createTransaction = useCreateTransaction();
+
+  function handleSubmit(values: TransactionFormValues) {
+    if (!user) return;
+
+    createTransaction.mutate(
+      {
+        ...values,
+        category_id: values.category_id ?? null,
+        to_account_id: values.to_account_id ?? null,
+        user_id: user.id,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Đã lưu giao dịch");
+          router.push("/transactions");
+        },
+        onError: () => toast.error("Có lỗi xảy ra, thử lại sau"),
+      },
+    );
+  }
+
+  return (
+    <div className="mx-auto flex max-w-md flex-col gap-4">
+      <div className="flex items-center gap-2">
+        <Button variant="ghost" size="icon" onClick={() => router.back()}>
+          <ArrowLeft className="size-4" />
+        </Button>
+        <h1 className="text-xl font-semibold">Thêm giao dịch</h1>
+      </div>
+
+      <TransactionForm onSubmit={handleSubmit} submitting={createTransaction.isPending} />
+    </div>
+  );
+}
