@@ -4,23 +4,15 @@ import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { format } from "date-fns";
+import { format, subDays } from "date-fns";
 import { ArrowDownLeft, ArrowUpRight, ArrowLeftRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { CurrencyInput } from "@/components/ui/currency-input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { DateField } from "@/components/ui/date-field";
 import { EntityIcon } from "@/components/shared/entity-icon";
-import { ACCOUNT_TYPE_META } from "@/components/accounts/account-type";
-import { useAccounts } from "@/lib/hooks/use-accounts";
+import { AccountSelect } from "@/components/accounts/account-select";
 import { useCategories } from "@/lib/hooks/use-categories";
 import { cn, formatAmount } from "@/lib/utils";
 import { normalizeColor, withAlpha } from "@/lib/theme/palette";
@@ -61,6 +53,11 @@ const TYPE_OPTIONS = [
 /** Gợi ý nhập nhanh cho mobile. */
 const QUICK_AMOUNTS = [10_000, 20_000, 50_000, 100_000, 200_000, 500_000];
 
+const DATE_SHORTCUTS = [
+  { label: "Hôm nay", value: () => format(new Date(), "yyyy-MM-dd") },
+  { label: "Hôm qua", value: () => format(subDays(new Date(), 1), "yyyy-MM-dd") },
+];
+
 export function TransactionForm({
   defaultValues,
   onSubmit,
@@ -70,7 +67,6 @@ export function TransactionForm({
   onSubmit: (values: TransactionFormValues) => void;
   submitting?: boolean;
 }) {
-  const { data: accounts } = useAccounts();
   const { data: categories } = useCategories();
 
   const {
@@ -96,6 +92,7 @@ export function TransactionForm({
   const amount = watch("amount");
   const accountId = watch("account_id");
   const categoryId = watch("category_id");
+  const transactionDate = watch("transaction_date");
 
   const relevantCategories = useMemo(
     () => categories?.filter((c) => c.kind === type) ?? [],
@@ -222,53 +219,19 @@ export function TransactionForm({
       {/* Nguồn tiền */}
       <div className="flex flex-col gap-2">
         <Label>{type === "transfer" ? "Từ nguồn tiền" : "Nguồn tiền"}</Label>
-        <Select value={accountId} onValueChange={(v) => setValue("account_id", v)}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Chọn nguồn tiền" />
-          </SelectTrigger>
-          <SelectContent>
-            {accounts?.map((a) => (
-              <SelectItem key={a.id} value={a.id}>
-                <EntityIcon
-                  icon={a.icon ?? ACCOUNT_TYPE_META[a.type].icon}
-                  color={a.color ?? ACCOUNT_TYPE_META[a.type].color}
-                  className="size-6 rounded-lg"
-                  iconClassName="size-3.5"
-                />
-                {a.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <AccountSelect value={accountId} onChange={(v) => setValue("account_id", v)} />
         {errors.account_id && <p className="text-sm text-destructive">{errors.account_id.message}</p>}
       </div>
 
       {type === "transfer" && (
         <div className="flex flex-col gap-2">
           <Label>Đến nguồn tiền</Label>
-          <Select
+          <AccountSelect
             value={watch("to_account_id")}
-            onValueChange={(v) => setValue("to_account_id", v)}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Chọn nguồn tiền nhận" />
-            </SelectTrigger>
-            <SelectContent>
-              {accounts
-                ?.filter((a) => a.id !== accountId)
-                .map((a) => (
-                  <SelectItem key={a.id} value={a.id}>
-                    <EntityIcon
-                      icon={a.icon ?? ACCOUNT_TYPE_META[a.type].icon}
-                      color={a.color ?? ACCOUNT_TYPE_META[a.type].color}
-                      className="size-6 rounded-lg"
-                      iconClassName="size-3.5"
-                    />
-                    {a.name}
-                  </SelectItem>
-                ))}
-            </SelectContent>
-          </Select>
+            onChange={(v) => setValue("to_account_id", v)}
+            placeholder="Chọn nguồn tiền nhận"
+            excludeId={accountId}
+          />
           {errors.to_account_id && (
             <p className="text-sm text-destructive">{errors.to_account_id.message}</p>
           )}
@@ -277,7 +240,32 @@ export function TransactionForm({
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="transaction_date">Ngày</Label>
-        <Input id="transaction_date" type="date" {...register("transaction_date")} />
+        <div className="flex flex-wrap items-center gap-2">
+          <DateField
+            id="transaction_date"
+            value={transactionDate}
+            onChange={(next) => setValue("transaction_date", next, { shouldValidate: true })}
+            className="w-40"
+          />
+          {DATE_SHORTCUTS.map((shortcut) => {
+            const target = shortcut.value();
+            return (
+              <button
+                key={shortcut.label}
+                type="button"
+                onClick={() => setValue("transaction_date", target, { shouldValidate: true })}
+                className={cn(
+                  "rounded-full border px-3 py-1.5 text-xs font-bold transition-all active:scale-95",
+                  transactionDate === target
+                    ? "border-transparent bg-brand-500/15 text-brand-700"
+                    : "border-border bg-card/70 text-muted-foreground",
+                )}
+              >
+                {shortcut.label}
+              </button>
+            );
+          })}
+        </div>
         {errors.transaction_date && (
           <p className="text-sm text-destructive">{errors.transaction_date.message}</p>
         )}

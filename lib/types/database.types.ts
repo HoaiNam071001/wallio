@@ -173,4 +173,8 @@ export type TransactionUpdate = Database["public"]["Tables"]["transactions"]["Up
 export type AccountBalance = Database["public"]["Views"]["account_balances"]["Row"];
 
 /** Bản ghi account đầy đủ (kèm icon/color/initial_balance) ghép với số dư hiện tại. */
-export type AccountWithBalance = Account & { current_balance: number };
+export type AccountWithBalance = Account & {
+  current_balance: number;
+  /** Ngày có giao dịch gần nhất chạm vào nguồn tiền này (null nếu chưa có). */
+  last_activity_date: string | null;
+};

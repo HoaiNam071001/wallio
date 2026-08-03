@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Download, X } from "lucide-react";
+import { useIsHandheld } from "@/lib/hooks/use-is-handheld";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -12,9 +13,12 @@ const DISMISS_KEY = "wallio:install-dismissed";
 
 export function InstallPrompt() {
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
+  const isHandheld = useIsHandheld();
 
   useEffect(() => {
     if (localStorage.getItem(DISMISS_KEY) === "1") return;
+    // Chỉ mời cài trên điện thoại/tablet — trên máy tính banner này chỉ gây vướng.
+    if (!isHandheld) return;
 
     function onPrompt(event: Event) {
       event.preventDefault();
@@ -24,7 +28,7 @@ export function InstallPrompt() {
     window.addEventListener("beforeinstallprompt", onPrompt);
     window.addEventListener("appinstalled", () => setDeferred(null));
     return () => window.removeEventListener("beforeinstallprompt", onPrompt);
-  }, []);
+  }, [isHandheld]);
 
   if (!deferred) return null;
 

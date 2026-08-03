@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { DateField } from "@/components/ui/date-field";
 import {
   Select,
   SelectContent,
@@ -90,16 +91,17 @@ export function TransactionFilterBar({
       </div>
 
       {value.preset === "custom" && (
-        <div className="flex gap-2">
-          <Input
-            type="date"
+        <div className="flex items-center gap-2">
+          <DateField
             value={value.customStart}
-            onChange={(e) => update("customStart", e.target.value)}
+            onChange={(next) => update("customStart", next)}
+            className="flex-1"
           />
-          <Input
-            type="date"
+          <span className="text-xs font-bold text-muted-foreground">→</span>
+          <DateField
             value={value.customEnd}
-            onChange={(e) => update("customEnd", e.target.value)}
+            onChange={(next) => update("customEnd", next)}
+            className="flex-1"
           />
         </div>
       )}

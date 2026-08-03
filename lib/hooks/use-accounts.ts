@@ -5,11 +5,16 @@ import { useSupabase } from "@/lib/hooks/use-supabase";
 import {
   createAccount,
   deleteAccount,
+  getAccountBalanceAsOf,
   listAccountBalances,
   listAccounts,
   listAccountsWithBalance,
   updateAccount,
 } from "@/lib/queries/accounts";
+import {
+  adjustAccountBalance,
+  type AdjustBalanceInput,
+} from "@/lib/queries/balance-adjustment";
 import type { AccountInsert, AccountUpdate } from "@/lib/types/database.types";
 
 export function useAccounts() {
@@ -34,6 +39,32 @@ export function useAccountsWithBalance() {
   return useQuery({
     queryKey: ["accounts", "with-balance"],
     queryFn: () => listAccountsWithBalance(supabase),
+  });
+}
+
+/** Số dư app đang tính cho một nguồn tiền tính đến hết ngày `date`. */
+export function useAccountBalanceAsOf(accountId: string | undefined, date: string) {
+  const supabase = useSupabase();
+  return useQuery({
+    queryKey: ["accounts", "balance-as-of", accountId, date],
+    queryFn: () => getAccountBalanceAsOf(supabase, accountId!, date),
+    enabled: !!accountId && !!date,
+  });
+}
+
+/** Ghi bút toán cân đối để số dư khớp với số tiền thực tế. */
+export function useAdjustBalance() {
+  const supabase = useSupabase();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: AdjustBalanceInput) => adjustAccountBalance(supabase, input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      queryClient.invalidateQueries({ queryKey: ["account-balances"] });
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      queryClient.invalidateQueries({ queryKey: ["summary"] });
+    },
   });
 }
 

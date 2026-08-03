@@ -5,7 +5,7 @@ import { Download } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { DateField } from "@/components/ui/date-field";
 import { CategoryBreakdownChart } from "@/components/charts/category-breakdown-chart";
 import { AccountBreakdownChart } from "@/components/charts/account-breakdown-chart";
 import { PageHeader } from "@/components/layout/page-header";
@@ -103,9 +103,10 @@ export default function ReportsPage() {
       </Tabs>
 
       {preset === "custom" && (
-        <div className="flex gap-2">
-          <Input type="date" value={customStart} onChange={(e) => setCustomStart(e.target.value)} />
-          <Input type="date" value={customEnd} onChange={(e) => setCustomEnd(e.target.value)} />
+        <div className="flex items-center gap-2">
+          <DateField value={customStart} onChange={setCustomStart} className="flex-1" />
+          <span className="text-xs font-bold text-muted-foreground">→</span>
+          <DateField value={customEnd} onChange={setCustomEnd} className="flex-1" />
         </div>
       )}
 

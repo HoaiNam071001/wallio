@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AccountCard } from "@/components/accounts/account-card";
 import { AccountForm, type AccountFormValues } from "@/components/accounts/account-form";
+import { BalanceAdjustDialog } from "@/components/accounts/balance-adjust-dialog";
 import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useAuth } from "@/lib/hooks/use-auth";
@@ -46,6 +47,7 @@ export default function AccountsPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<AccountWithBalance | null>(null);
   const [deleting, setDeleting] = useState<AccountWithBalance | null>(null);
+  const [adjusting, setAdjusting] = useState<AccountWithBalance | null>(null);
 
   const total = useMemo(
     () =>
@@ -143,9 +145,16 @@ export default function AccountsPage() {
             account={account}
             onEdit={() => openEdit(account)}
             onDelete={() => setDeleting(account)}
+            onAdjust={() => setAdjusting(account)}
           />
         ))}
       </div>
+
+      <BalanceAdjustDialog
+        account={adjusting}
+        open={!!adjusting}
+        onOpenChange={(open) => !open && setAdjusting(null)}
+      />
 
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
         <DialogContent>

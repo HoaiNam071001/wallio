@@ -42,6 +42,7 @@ import {
   Pizza,
   Plane,
   Receipt,
+  Scale,
   Scissors,
   Shirt,
   ShoppingBag,
@@ -125,6 +126,7 @@ export const ICON_REGISTRY = {
   PiggyBank,
   HandCoins,
   Receipt,
+  Scale,
 } satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof ICON_REGISTRY;
@@ -187,6 +189,7 @@ export const CATEGORY_ICON_NAMES: IconName[] = [
   "PiggyBank",
   "HandCoins",
   "Receipt",
+  "Scale",
 ];
 
 /** Icon gợi ý cho nguồn tiền. */
