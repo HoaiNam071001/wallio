@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CategoryBreakdownChart } from "@/components/charts/category-breakdown-chart";
 import { AccountBreakdownChart } from "@/components/charts/account-breakdown-chart";
+import { PageHeader } from "@/components/layout/page-header";
 import { useAccountBreakdown, useCategoryBreakdown, usePeriodTotals } from "@/lib/hooks/use-summary";
 import { useTransactions } from "@/lib/hooks/use-transactions";
 import {
@@ -18,7 +19,16 @@ import {
   type DateRangePreset,
 } from "@/lib/utils";
 
-function exportCsv(rows: { date: string; type: string; amount: number; account: string; category: string; note: string }[]) {
+function exportCsv(
+  rows: {
+    date: string;
+    type: string;
+    amount: number;
+    account: string;
+    category: string;
+    note: string;
+  }[],
+) {
   const header = ["Ngày", "Loại", "Số tiền", "Nguồn tiền", "Danh mục", "Ghi chú"];
   const lines = rows.map((r) =>
     [r.date, r.type, r.amount, r.account, r.category, r.note]
@@ -59,7 +69,10 @@ export default function ReportsPage() {
         date: t.transaction_date,
         type: t.type,
         amount: t.amount,
-        account: t.type === "transfer" ? `${t.account?.name ?? ""} → ${t.to_account?.name ?? ""}` : t.account?.name ?? "",
+        account:
+          t.type === "transfer"
+            ? `${t.account?.name ?? ""} → ${t.to_account?.name ?? ""}`
+            : (t.account?.name ?? ""),
         category: t.category?.name ?? "",
         note: t.note ?? "",
       })),
@@ -68,18 +81,21 @@ export default function ReportsPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Báo cáo</h1>
-        <Button variant="outline" onClick={handleExport}>
-          <Download className="size-4" />
-          Xuất CSV
-        </Button>
-      </div>
+      <PageHeader
+        title="Báo cáo"
+        subtitle="Tiền của bạn đã đi đâu"
+        action={
+          <Button variant="outline" size="sm" onClick={handleExport}>
+            <Download className="size-4" />
+            CSV
+          </Button>
+        }
+      />
 
       <Tabs value={preset} onValueChange={(v) => setPreset(v as DateRangePreset)}>
         <TabsList className="grid w-full grid-cols-5">
           {(Object.keys(DATE_RANGE_PRESET_LABELS) as DateRangePreset[]).map((p) => (
-            <TabsTrigger key={p} value={p} className="text-xs sm:text-sm">
+            <TabsTrigger key={p} value={p} className="px-1 text-[11px] sm:text-sm">
               {DATE_RANGE_PRESET_LABELS[p]}
             </TabsTrigger>
           ))}
@@ -94,35 +110,37 @@ export default function ReportsPage() {
       )}
 
       {totals && (
-        <div className="grid grid-cols-3 gap-3">
-          <Card>
-            <CardContent className="flex flex-col gap-1">
-              <span className="text-sm text-muted-foreground">Thu nhập</span>
-              <span className="text-lg font-semibold text-income">{formatCurrency(totals.income)}</span>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="flex flex-col gap-1">
-              <span className="text-sm text-muted-foreground">Chi tiêu</span>
-              <span className="text-lg font-semibold text-expense">{formatCurrency(totals.expense)}</span>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="flex flex-col gap-1">
-              <span className="text-sm text-muted-foreground">Chênh lệch</span>
-              <span className="text-lg font-semibold">{formatCurrency(totals.net)}</span>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { label: "Thu nhập", value: totals.income, className: "text-income" },
+            { label: "Chi tiêu", value: totals.expense, className: "text-expense" },
+            {
+              label: "Chênh lệch",
+              value: totals.net,
+              className: totals.net >= 0 ? "text-income" : "text-expense",
+            },
+          ].map((item) => (
+            <div key={item.label} className="glass rounded-2xl px-3 py-2.5">
+              <p className="text-[11px] font-semibold text-muted-foreground">{item.label}</p>
+              <p className={`truncate text-sm font-extrabold tabular-nums ${item.className}`}>
+                {formatCurrency(item.value)}
+              </p>
+            </div>
+          ))}
         </div>
       )}
 
       <Card>
-        <CardHeader className="flex-row items-center justify-between">
-          <CardTitle>Theo danh mục</CardTitle>
+        <CardHeader className="flex-row items-center justify-between gap-2">
+          <CardTitle className="text-base">Theo danh mục</CardTitle>
           <Tabs value={kind} onValueChange={(v) => setKind(v as "income" | "expense")}>
-            <TabsList>
-              <TabsTrigger value="expense">Chi tiêu</TabsTrigger>
-              <TabsTrigger value="income">Thu nhập</TabsTrigger>
+            <TabsList className="h-9">
+              <TabsTrigger value="expense" className="text-xs">
+                Chi
+              </TabsTrigger>
+              <TabsTrigger value="income" className="text-xs">
+                Thu
+              </TabsTrigger>
             </TabsList>
           </Tabs>
         </CardHeader>
@@ -133,7 +151,7 @@ export default function ReportsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Theo nguồn tiền</CardTitle>
+          <CardTitle className="text-base">Theo nguồn tiền</CardTitle>
         </CardHeader>
         <CardContent>
           <AccountBreakdownChart data={accountBreakdown ?? []} />

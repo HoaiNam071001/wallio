@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/types/database.types";
-import { listAccountBalances } from "@/lib/queries/accounts";
+import { listAccountBalances, listAccountsWithBalance } from "@/lib/queries/accounts";
 
 type Client = SupabaseClient<Database>;
 
@@ -21,9 +21,10 @@ export async function getNetWorthSummary(supabase: Client): Promise<NetWorthSumm
   let debt = 0;
 
   for (const b of balances) {
-    if (LIQUID_TYPES.has(b.type)) availableCash += b.current_balance;
-    else if (b.type === "lending") lending += b.current_balance;
-    else if (b.type === "debt") debt += Math.abs(b.current_balance);
+    const balance = Number(b.current_balance) || 0;
+    if (LIQUID_TYPES.has(b.type)) availableCash += balance;
+    else if (b.type === "lending") lending += balance;
+    else if (b.type === "debt") debt += Math.abs(balance);
   }
 
   const netWorth = availableCash + lending - debt;
@@ -54,8 +55,9 @@ export async function getPeriodTotals(
   let income = 0;
   let expense = 0;
   for (const row of data) {
-    if (row.type === "income") income += row.amount;
-    else if (row.type === "expense") expense += row.amount;
+    const amount = Number(row.amount) || 0;
+    if (row.type === "income") income += amount;
+    else if (row.type === "expense") expense += amount;
   }
 
   return { income, expense, net: income - expense };
@@ -64,6 +66,8 @@ export async function getPeriodTotals(
 export interface CategoryBreakdownItem {
   categoryId: string | null;
   categoryName: string;
+  color: string | null;
+  icon: string | null;
   total: number;
 }
 
@@ -75,20 +79,34 @@ export async function getCategoryBreakdown(
 ): Promise<CategoryBreakdownItem[]> {
   const { data, error } = await supabase
     .from("transactions")
-    .select("amount, category:categories(id,name)")
+    .select("amount, category:categories(id,name,color,icon)")
     .eq("type", kind)
     .gte("transaction_date", startDate)
     .lte("transaction_date", endDate);
 
   if (error) throw error;
 
+  type Row = {
+    amount: number;
+    category: { id: string; name: string; color: string | null; icon: string | null } | null;
+  };
+
   const totals = new Map<string, CategoryBreakdownItem>();
-  for (const row of data as unknown as { amount: number; category: { id: string; name: string } | null }[]) {
+  for (const row of data as unknown as Row[]) {
     const key = row.category?.id ?? "uncategorized";
-    const name = row.category?.name ?? "Không phân loại";
+    const amount = Number(row.amount) || 0;
     const existing = totals.get(key);
-    if (existing) existing.total += row.amount;
-    else totals.set(key, { categoryId: row.category?.id ?? null, categoryName: name, total: row.amount });
+    if (existing) {
+      existing.total += amount;
+      continue;
+    }
+    totals.set(key, {
+      categoryId: row.category?.id ?? null,
+      categoryName: row.category?.name ?? "Không phân loại",
+      color: row.category?.color ?? null,
+      icon: row.category?.icon ?? null,
+      total: amount,
+    });
   }
 
   return Array.from(totals.values()).sort((a, b) => b.total - a.total);
@@ -97,14 +115,20 @@ export async function getCategoryBreakdown(
 export interface AccountBreakdownItem {
   accountId: string;
   accountName: string;
+  color: string | null;
+  icon: string | null;
+  type: string;
   balance: number;
 }
 
 export async function getAccountBreakdown(supabase: Client): Promise<AccountBreakdownItem[]> {
-  const balances = await listAccountBalances(supabase);
-  return balances.map((b) => ({
-    accountId: b.account_id,
-    accountName: b.name,
-    balance: b.current_balance,
+  const accounts = await listAccountsWithBalance(supabase);
+  return accounts.map((a) => ({
+    accountId: a.id,
+    accountName: a.name,
+    color: a.color,
+    icon: a.icon,
+    type: a.type,
+    balance: a.current_balance,
   }));
 }

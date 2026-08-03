@@ -1,43 +1,122 @@
 "use client";
 
-import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import { useMemo } from "react";
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import { EntityIcon } from "@/components/shared/entity-icon";
 import { formatCurrency } from "@/lib/utils";
+import { colorForKey } from "@/lib/theme/palette";
 import type { CategoryBreakdownItem } from "@/lib/queries/summary";
 
-const PALETTE = [
-  "oklch(0.65 0.19 25)",
-  "oklch(0.7 0.15 150)",
-  "oklch(0.65 0.18 260)",
-  "oklch(0.75 0.15 80)",
-  "oklch(0.65 0.2 330)",
-  "oklch(0.7 0.13 200)",
-  "oklch(0.6 0.15 40)",
-  "oklch(0.7 0.1 300)",
-];
+interface Slice extends CategoryBreakdownItem {
+  key: string;
+  fill: string;
+  percent: number;
+}
 
-export function CategoryBreakdownChart({ data }: { data: CategoryBreakdownItem[] }) {
-  if (data.length === 0) {
-    return <p className="text-muted-foreground">Không có dữ liệu trong khoảng thời gian này.</p>;
+function TooltipCard({ slice }: { slice: Slice }) {
+  return (
+    <div className="glass rounded-2xl px-3 py-2 text-xs">
+      <p className="font-bold">{slice.categoryName}</p>
+      <p className="text-muted-foreground">
+        {formatCurrency(slice.total)} · {slice.percent.toFixed(1)}%
+      </p>
+    </div>
+  );
+}
+
+/**
+ * Donut phần trăm theo danh mục. Màu bám theo danh mục (do người dùng chọn),
+ * không theo thứ hạng — lọc bớt mục không làm đổi màu các mục còn lại.
+ */
+export function CategoryBreakdownChart({
+  data,
+  emptyLabel = "Chưa có dữ liệu trong khoảng thời gian này.",
+}: {
+  data: CategoryBreakdownItem[];
+  emptyLabel?: string;
+}) {
+  const { slices, total } = useMemo(() => {
+    const sum = data.reduce((acc, item) => acc + item.total, 0);
+    const sorted = [...data].sort((a, b) => b.total - a.total);
+    return {
+      total: sum,
+      slices: sorted.map<Slice>((item) => {
+        const key = item.categoryId ?? "uncategorized";
+        return {
+          ...item,
+          key,
+          fill: colorForKey(key, item.color),
+          percent: sum > 0 ? (item.total / sum) * 100 : 0,
+        };
+      }),
+    };
+  }, [data]);
+
+  if (slices.length === 0) {
+    return <p className="py-6 text-center text-sm text-muted-foreground">{emptyLabel}</p>;
   }
 
   return (
-    <ResponsiveContainer width="100%" height={280}>
-      <PieChart>
-        <Pie
-          data={data}
-          dataKey="total"
-          nameKey="categoryName"
-          innerRadius={60}
-          outerRadius={100}
-          paddingAngle={2}
-        >
-          {data.map((entry, index) => (
-            <Cell key={entry.categoryId ?? "uncategorized"} fill={PALETTE[index % PALETTE.length]} />
-          ))}
-        </Pie>
-        <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-        <Legend />
-      </PieChart>
-    </ResponsiveContainer>
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+      <div className="relative mx-auto size-52 shrink-0">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={slices}
+              dataKey="total"
+              nameKey="categoryName"
+              innerRadius="64%"
+              outerRadius="98%"
+              paddingAngle={2}
+              stroke="var(--card)"
+              strokeWidth={2}
+              isAnimationActive={false}
+            >
+              {slices.map((slice) => (
+                <Cell key={slice.key} fill={slice.fill} />
+              ))}
+            </Pie>
+            <Tooltip
+              content={({ active, payload }) =>
+                active && payload?.length ? (
+                  <TooltipCard slice={payload[0].payload as Slice} />
+                ) : null
+              }
+            />
+          </PieChart>
+        </ResponsiveContainer>
+
+        {/* Số tổng đặt giữa donut */}
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-[11px] font-semibold text-muted-foreground">Tổng</span>
+          <span className="px-6 text-center text-sm leading-tight font-extrabold tabular-nums">
+            {formatCurrency(total)}
+          </span>
+        </div>
+      </div>
+
+      {/* Chú giải kiêm bảng số liệu */}
+      <ul className="hide-scrollbar flex max-h-52 min-w-0 flex-1 flex-col gap-1.5 overflow-y-auto">
+        {slices.map((slice) => (
+          <li key={slice.key} className="flex items-center gap-2.5">
+            <EntityIcon
+              icon={slice.icon}
+              color={slice.fill}
+              className="size-8 rounded-xl"
+              iconClassName="size-4"
+            />
+            <span className="min-w-0 flex-1 truncate text-sm font-semibold">
+              {slice.categoryName}
+            </span>
+            <span className="shrink-0 text-right text-sm font-bold tabular-nums">
+              {formatCurrency(slice.total)}
+            </span>
+            <span className="w-11 shrink-0 text-right text-xs font-semibold text-muted-foreground tabular-nums">
+              {slice.percent.toFixed(0)}%
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

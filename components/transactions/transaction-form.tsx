@@ -5,11 +5,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
+import { ArrowDownLeft, ArrowUpRight, ArrowLeftRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CurrencyInput } from "@/components/ui/currency-input";
 import {
   Select,
   SelectContent,
@@ -17,8 +18,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { EntityIcon } from "@/components/shared/entity-icon";
+import { ACCOUNT_TYPE_META } from "@/components/accounts/account-type";
 import { useAccounts } from "@/lib/hooks/use-accounts";
 import { useCategories } from "@/lib/hooks/use-categories";
+import { cn, formatAmount } from "@/lib/utils";
+import { normalizeColor, withAlpha } from "@/lib/theme/palette";
 import type { Transaction, TransactionType } from "@/lib/types/database.types";
 
 const transactionFormSchema = z
@@ -42,11 +47,19 @@ const transactionFormSchema = z
 
 export type TransactionFormValues = z.infer<typeof transactionFormSchema>;
 
-const TYPE_LABELS: Record<TransactionType, string> = {
-  expense: "Chi tiêu",
-  income: "Thu nhập",
-  transfer: "Chuyển khoản",
-};
+const TYPE_OPTIONS = [
+  { value: "expense" as const, label: "Chi tiêu", icon: ArrowUpRight, color: "var(--expense)" },
+  { value: "income" as const, label: "Thu nhập", icon: ArrowDownLeft, color: "var(--income)" },
+  {
+    value: "transfer" as const,
+    label: "Chuyển khoản",
+    icon: ArrowLeftRight,
+    color: "var(--transfer)",
+  },
+];
+
+/** Gợi ý nhập nhanh cho mobile. */
+const QUICK_AMOUNTS = [10_000, 20_000, 50_000, 100_000, 200_000, 500_000];
 
 export function TransactionForm({
   defaultValues,
@@ -70,7 +83,7 @@ export function TransactionForm({
     resolver: zodResolver(transactionFormSchema),
     defaultValues: {
       type: defaultValues?.type ?? "expense",
-      amount: defaultValues?.amount ?? undefined,
+      amount: defaultValues?.amount ? Number(defaultValues.amount) : undefined,
       account_id: defaultValues?.account_id ?? "",
       to_account_id: defaultValues?.to_account_id ?? undefined,
       category_id: defaultValues?.category_id ?? undefined,
@@ -80,7 +93,9 @@ export function TransactionForm({
   });
 
   const type = watch("type");
+  const amount = watch("amount");
   const accountId = watch("account_id");
+  const categoryId = watch("category_id");
 
   const relevantCategories = useMemo(
     () => categories?.filter((c) => c.kind === type) ?? [],
@@ -95,32 +110,116 @@ export function TransactionForm({
     }
   }, [type, setValue]);
 
-  return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-      <Tabs value={type} onValueChange={(v) => setValue("type", v as TransactionType)}>
-        <TabsList className="grid w-full grid-cols-3">
-          {(Object.keys(TYPE_LABELS) as TransactionType[]).map((t) => (
-            <TabsTrigger key={t} value={t}>
-              {TYPE_LABELS[t]}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
+  const activeType = TYPE_OPTIONS.find((t) => t.value === type)!;
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="amount">Số tiền</Label>
-        <Input
-          id="amount"
-          type="number"
-          inputMode="decimal"
-          step="any"
-          placeholder="0"
-          autoFocus
-          {...register("amount", { valueAsNumber: true })}
-        />
-        {errors.amount && <p className="text-sm text-destructive">{errors.amount.message}</p>}
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
+      {/* Chọn loại giao dịch */}
+      <div className="grid grid-cols-3 gap-2">
+        {TYPE_OPTIONS.map((option) => {
+          const Icon = option.icon;
+          const active = type === option.value;
+          return (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => setValue("type", option.value as TransactionType)}
+              className={cn(
+                "flex flex-col items-center gap-1.5 rounded-2xl border p-3 text-xs font-bold transition-all active:scale-95",
+                active
+                  ? "border-transparent text-white shadow-soft"
+                  : "border-input bg-card/60 text-muted-foreground",
+              )}
+              style={active ? { backgroundColor: option.color } : undefined}
+            >
+              <Icon className="size-5" />
+              {option.label}
+            </button>
+          );
+        })}
       </div>
 
+      {/* Số tiền */}
+      <div
+        className="rounded-3xl p-4"
+        style={{ backgroundColor: `color-mix(in oklab, ${activeType.color} 10%, transparent)` }}
+      >
+        <Label htmlFor="amount" className="text-xs font-bold tracking-wide uppercase opacity-70">
+          Số tiền
+        </Label>
+        <CurrencyInput
+          id="amount"
+          autoFocus
+          placeholder="0"
+          value={amount}
+          onValueChange={(next) =>
+            setValue("amount", next as number, { shouldValidate: !!errors.amount })
+          }
+          className="mt-1 h-14 border-0 bg-transparent px-0 text-3xl font-extrabold focus-visible:ring-0 md:text-3xl"
+          style={{ color: activeType.color }}
+        />
+        <div className="hide-scrollbar -mx-1 mt-2 flex gap-2 overflow-x-auto px-1">
+          {QUICK_AMOUNTS.map((quick) => (
+            <button
+              key={quick}
+              type="button"
+              onClick={() => setValue("amount", quick, { shouldValidate: true })}
+              className="shrink-0 rounded-full bg-white/70 px-3 py-1 text-xs font-semibold text-foreground/80 transition-transform active:scale-95 dark:bg-white/10"
+            >
+              {formatAmount(quick)}
+            </button>
+          ))}
+        </div>
+        {errors.amount && <p className="mt-1 text-sm text-destructive">{errors.amount.message}</p>}
+      </div>
+
+      {/* Danh mục dạng chip */}
+      {type !== "transfer" && (
+        <div className="flex flex-col gap-2">
+          <Label>Danh mục</Label>
+          {relevantCategories.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Chưa có danh mục {type === "income" ? "thu nhập" : "chi tiêu"} nào — tạo ở mục Danh mục.
+            </p>
+          ) : (
+            <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
+              {relevantCategories.map((category) => {
+                const active = categoryId === category.id;
+                const color = normalizeColor(category.color);
+                return (
+                  <button
+                    key={category.id}
+                    type="button"
+                    onClick={() => setValue("category_id", active ? undefined : category.id)}
+                    className={cn(
+                      "flex flex-col items-center gap-1 rounded-2xl border p-2 transition-all active:scale-95",
+                      active ? "border-transparent" : "border-transparent",
+                    )}
+                    style={active ? { backgroundColor: withAlpha(color, 0.14) } : undefined}
+                  >
+                    <EntityIcon
+                      icon={category.icon}
+                      color={category.color}
+                      className={cn("size-10", active && "ring-2")}
+                    />
+                    <span
+                      className={cn(
+                        "line-clamp-1 text-[11px] font-semibold",
+                        active ? "" : "text-muted-foreground",
+                      )}
+                      style={active ? { color } : undefined}
+                    >
+                      {category.name}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Nguồn tiền */}
       <div className="flex flex-col gap-2">
         <Label>{type === "transfer" ? "Từ nguồn tiền" : "Nguồn tiền"}</Label>
         <Select value={accountId} onValueChange={(v) => setValue("account_id", v)}>
@@ -130,6 +229,12 @@ export function TransactionForm({
           <SelectContent>
             {accounts?.map((a) => (
               <SelectItem key={a.id} value={a.id}>
+                <EntityIcon
+                  icon={a.icon ?? ACCOUNT_TYPE_META[a.type].icon}
+                  color={a.color ?? ACCOUNT_TYPE_META[a.type].color}
+                  className="size-6 rounded-lg"
+                  iconClassName="size-3.5"
+                />
                 {a.name}
               </SelectItem>
             ))}
@@ -153,6 +258,12 @@ export function TransactionForm({
                 ?.filter((a) => a.id !== accountId)
                 .map((a) => (
                   <SelectItem key={a.id} value={a.id}>
+                    <EntityIcon
+                      icon={a.icon ?? ACCOUNT_TYPE_META[a.type].icon}
+                      color={a.color ?? ACCOUNT_TYPE_META[a.type].color}
+                      className="size-6 rounded-lg"
+                      iconClassName="size-3.5"
+                    />
                     {a.name}
                   </SelectItem>
                 ))}
@@ -161,27 +272,6 @@ export function TransactionForm({
           {errors.to_account_id && (
             <p className="text-sm text-destructive">{errors.to_account_id.message}</p>
           )}
-        </div>
-      )}
-
-      {type !== "transfer" && (
-        <div className="flex flex-col gap-2">
-          <Label>Danh mục</Label>
-          <Select
-            value={watch("category_id")}
-            onValueChange={(v) => setValue("category_id", v)}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Chọn danh mục" />
-            </SelectTrigger>
-            <SelectContent>
-              {relevantCategories.map((c) => (
-                <SelectItem key={c.id} value={c.id}>
-                  {c.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </div>
       )}
 
@@ -198,7 +288,7 @@ export function TransactionForm({
         <Textarea id="note" placeholder="Ghi chú (tuỳ chọn)" {...register("note")} />
       </div>
 
-      <Button type="submit" size="lg" disabled={submitting} className="mt-2">
+      <Button type="submit" size="lg" disabled={submitting}>
         {submitting ? "Đang lưu..." : "Lưu giao dịch"}
       </Button>
     </form>

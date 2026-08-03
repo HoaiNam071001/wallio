@@ -1,32 +1,67 @@
 "use client";
 
-import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
+/**
+ * So sánh thu / chi trong kỳ. Chỉ có hai giá trị nên dùng thanh tỉ lệ trực tiếp
+ * (kèm nhãn số) thay vì biểu đồ cột — dễ đọc hơn trên màn hình hẹp.
+ */
 export function IncomeExpenseChart({ income, expense }: { income: number; expense: number }) {
-  const data = [
-    { name: "Thu nhập", value: income, fill: "var(--color-income)" },
-    { name: "Chi tiêu", value: expense, fill: "var(--color-expense)" },
+  const max = Math.max(income, expense, 1);
+  const rows = [
+    {
+      label: "Thu nhập",
+      value: income,
+      icon: ArrowDownLeft,
+      color: "var(--income)",
+    },
+    {
+      label: "Chi tiêu",
+      value: expense,
+      icon: ArrowUpRight,
+      color: "var(--expense)",
+    },
   ];
 
   return (
-    <ResponsiveContainer width="100%" height={220}>
-      <BarChart data={data} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border" />
-        <XAxis dataKey="name" tickLine={false} axisLine={false} fontSize={12} />
-        <YAxis
-          tickLine={false}
-          axisLine={false}
-          fontSize={12}
-          tickFormatter={(v) => new Intl.NumberFormat("vi-VN", { notation: "compact" }).format(v)}
-        />
-        <Tooltip formatter={(value) => formatCurrency(Number(value))} cursor={{ fill: "var(--muted)" }} />
-        <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-          {data.map((entry) => (
-            <Cell key={entry.name} fill={entry.fill} />
-          ))}
-        </Bar>
-      </BarChart>
-    </ResponsiveContainer>
+    <div className="flex flex-col gap-4">
+      {rows.map((row) => {
+        const Icon = row.icon;
+        return (
+          <div key={row.label} className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-2">
+              <span
+                className="flex size-7 items-center justify-center rounded-xl"
+                style={{ backgroundColor: `color-mix(in oklab, ${row.color} 16%, transparent)`, color: row.color }}
+              >
+                <Icon className="size-4" />
+              </span>
+              <span className="text-sm font-semibold">{row.label}</span>
+              <span className="ml-auto text-sm font-extrabold tabular-nums">
+                {formatCurrency(row.value)}
+              </span>
+            </div>
+            <div className="h-2.5 overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full transition-[width] duration-500"
+                style={{ width: `${(row.value / max) * 100}%`, backgroundColor: row.color }}
+              />
+            </div>
+          </div>
+        );
+      })}
+
+      <div className="flex items-center justify-between rounded-2xl bg-muted/60 px-3 py-2">
+        <span className="text-sm font-semibold text-muted-foreground">Còn lại</span>
+        <span
+          className={`text-base font-extrabold tabular-nums ${
+            income - expense >= 0 ? "text-income" : "text-expense"
+          }`}
+        >
+          {formatCurrency(income - expense)}
+        </span>
+      </div>
+    </div>
   );
 }

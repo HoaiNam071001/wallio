@@ -4,63 +4,80 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --radius: 1.25rem;
 
-  /* domain accent colors */
-  --income: oklch(0.6 0.16 149);
-  --income-foreground: oklch(0.985 0 0);
-  --expense: oklch(0.58 0.22 27);
-  --expense-foreground: oklch(0.985 0 0);
-  --transfer: oklch(0.55 0.19 265);
-  --transfer-foreground: oklch(0.985 0 0);
+  /* ---- Brand: xanh dương tươi ---- */
+  --brand-50: oklch(0.976 0.015 255);
+  --brand-100: oklch(0.946 0.034 255);
+  --brand-200: oklch(0.898 0.065 256);
+  --brand-300: oklch(0.822 0.108 258);
+  --brand-400: oklch(0.722 0.163 260);
+  --brand-500: oklch(0.638 0.196 262);
+  --brand-600: oklch(0.566 0.216 264);
+  --brand-700: oklch(0.492 0.202 266);
+  --brand-800: oklch(0.424 0.166 267);
+  --brand-900: oklch(0.362 0.132 268);
+
+  --background: oklch(0.982 0.011 250);
+  --foreground: oklch(0.24 0.035 265);
+  --card: oklch(1 0 0);
+  --card-foreground: var(--foreground);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--foreground);
+  --primary: var(--brand-600);
+  --primary-foreground: oklch(0.99 0.005 250);
+  --secondary: oklch(0.955 0.023 253);
+  --secondary-foreground: var(--brand-700);
+  --muted: oklch(0.958 0.014 250);
+  --muted-foreground: oklch(0.53 0.037 262);
+  --accent: oklch(0.94 0.035 253);
+  --accent-foreground: var(--brand-700);
+  --destructive: oklch(0.632 0.216 24);
+  --destructive-foreground: oklch(0.99 0.005 250);
+  --border: oklch(0.905 0.021 253);
+  --input: oklch(0.9 0.024 253);
+  --ring: var(--brand-500);
+
+  /* ---- Màu nghiệp vụ ---- */
+  --income: oklch(0.66 0.165 158);
+  --income-foreground: oklch(0.99 0.005 250);
+  --expense: oklch(0.635 0.212 22);
+  --expense-foreground: oklch(0.99 0.005 250);
+  --transfer: oklch(0.6 0.198 295);
+  --transfer-foreground: oklch(0.99 0.005 250);
+
+  --shadow-soft: 0 10px 30px -16px oklch(0.42 0.166 267 / 0.45);
+  --shadow-card: 0 16px 40px -28px oklch(0.42 0.166 267 / 0.55);
+  --shadow-glow: 0 18px 40px -18px oklch(0.566 0.216 264 / 0.55);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --background: oklch(0.19 0.03 266);
+  --foreground: oklch(0.965 0.012 250);
+  --card: oklch(0.245 0.035 266);
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.245 0.035 266);
+  --popover-foreground: var(--foreground);
+  --primary: var(--brand-400);
+  --primary-foreground: oklch(0.19 0.03 266);
+  --secondary: oklch(0.29 0.04 266);
+  --secondary-foreground: oklch(0.94 0.02 255);
+  --muted: oklch(0.29 0.04 266);
+  --muted-foreground: oklch(0.73 0.03 258);
+  --accent: oklch(0.32 0.05 266);
+  --accent-foreground: oklch(0.95 0.02 255);
+  --destructive: oklch(0.68 0.19 24);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 16%);
+  --ring: var(--brand-400);
 
-  --income: oklch(0.7 0.16 149);
-  --income-foreground: oklch(0.145 0 0);
-  --expense: oklch(0.7 0.19 27);
-  --expense-foreground: oklch(0.145 0 0);
-  --transfer: oklch(0.68 0.16 265);
-  --transfer-foreground: oklch(0.145 0 0);
+  --income: oklch(0.75 0.16 158);
+  --expense: oklch(0.72 0.19 22);
+  --transfer: oklch(0.72 0.17 295);
+
+  --shadow-soft: 0 10px 30px -16px oklch(0 0 0 / 0.6);
+  --shadow-card: 0 16px 40px -28px oklch(0 0 0 / 0.7);
+  --shadow-glow: 0 18px 40px -18px oklch(0.566 0.216 264 / 0.65);
 }
 
 @theme inline {
@@ -83,6 +100,18 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+
+  --color-brand-50: var(--brand-50);
+  --color-brand-100: var(--brand-100);
+  --color-brand-200: var(--brand-200);
+  --color-brand-300: var(--brand-300);
+  --color-brand-400: var(--brand-400);
+  --color-brand-500: var(--brand-500);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+  --color-brand-800: var(--brand-800);
+  --color-brand-900: var(--brand-900);
+
   --color-income: var(--income);
   --color-income-foreground: var(--income-foreground);
   --color-expense: var(--expense);
@@ -90,20 +119,85 @@
   --color-transfer: var(--transfer);
   --color-transfer-foreground: var(--transfer-foreground);
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --shadow-soft: var(--shadow-soft);
+  --shadow-card: var(--shadow-card);
+  --shadow-glow: var(--shadow-glow);
 
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --radius-sm: calc(var(--radius) - 0.6rem);
+  --radius-md: calc(var(--radius) - 0.4rem);
+  --radius-lg: calc(var(--radius) - 0.2rem);
+  --radius-xl: var(--radius);
+  --radius-2xl: calc(var(--radius) + 0.4rem);
+  --radius-3xl: calc(var(--radius) + 0.9rem);
+
+  --font-sans: var(--font-be-vietnam), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
   body {
     @apply bg-background text-foreground;
+    background-image:
+      radial-gradient(72rem 42rem at 12% -12%, oklch(0.638 0.196 262 / 0.16), transparent 62%),
+      radial-gradient(60rem 36rem at 100% 0%, oklch(0.7 0.19 350 / 0.12), transparent 58%),
+      radial-gradient(58rem 34rem at 50% 108%, oklch(0.72 0.15 165 / 0.13), transparent 60%);
+    background-attachment: fixed;
+  }
+
+  /* Bỏ mũi tên tăng/giảm của input number */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+}
+
+@layer components {
+  /* Thẻ kính mờ dùng chung cho card/panel */
+  .glass {
+    background-color: color-mix(in oklab, var(--card) 74%, transparent);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid color-mix(in oklab, white 55%, transparent);
+    box-shadow: var(--shadow-card);
+  }
+
+  .dark .glass {
+    background-color: color-mix(in oklab, var(--card) 72%, transparent);
+    border-color: color-mix(in oklab, white 12%, transparent);
+  }
+
+  /* Nền gradient thương hiệu cho hero / nút nổi bật */
+  .brand-gradient {
+    background-image: linear-gradient(
+      135deg,
+      var(--brand-700) 0%,
+      var(--brand-500) 48%,
+      oklch(0.74 0.14 232) 100%
+    );
+  }
+
+  .hide-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Vùng an toàn cho bottom nav trên iOS standalone */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }

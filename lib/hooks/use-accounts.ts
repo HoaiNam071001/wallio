@@ -7,6 +7,7 @@ import {
   deleteAccount,
   listAccountBalances,
   listAccounts,
+  listAccountsWithBalance,
   updateAccount,
 } from "@/lib/queries/accounts";
 import type { AccountInsert, AccountUpdate } from "@/lib/types/database.types";
@@ -24,6 +25,15 @@ export function useAccountBalances() {
   return useQuery({
     queryKey: ["account-balances"],
     queryFn: () => listAccountBalances(supabase),
+  });
+}
+
+/** Account đầy đủ (icon, color, initial_balance) kèm số dư hiện tại. */
+export function useAccountsWithBalance() {
+  const supabase = useSupabase();
+  return useQuery({
+    queryKey: ["accounts", "with-balance"],
+    queryFn: () => listAccountsWithBalance(supabase),
   });
 }
 

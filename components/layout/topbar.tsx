@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LogOut, User as UserIcon, Wallet } from "lucide-react";
+import { LogOut, User as UserIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -9,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { BrandMark } from "@/components/layout/brand-mark";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { useSupabase } from "@/lib/hooks/use-supabase";
 
@@ -26,24 +28,23 @@ export function Topbar() {
   const initials = user?.email?.slice(0, 2).toUpperCase() ?? "??";
 
   return (
-    <header className="flex h-14 items-center justify-between border-b bg-background px-4 md:justify-end">
-      <div className="flex items-center gap-2 md:hidden">
-        <div className="flex size-7 items-center justify-center rounded-full bg-primary text-primary-foreground">
-          <Wallet className="size-3.5" />
-        </div>
-        <span className="font-semibold">Wallio</span>
-      </div>
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-white/40 bg-white/60 px-4 backdrop-blur-xl md:justify-end dark:border-white/10 dark:bg-white/5">
+      <Link href="/transactions" className="flex items-center gap-2 md:hidden">
+        <BrandMark size={32} />
+        <span className="text-lg font-extrabold tracking-tight">Wallio</span>
+      </Link>
+
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button className="flex items-center gap-2 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring/50">
-            <Avatar>
+            <Avatar className="ring-2 ring-white/70">
               <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.email ?? ""} />
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <div className="flex items-center gap-2 px-2 py-1.5 text-sm">
+          <div className="flex items-center gap-2 px-3 py-2 text-sm">
             <UserIcon className="size-4 text-muted-foreground" />
             <span className="max-w-[180px] truncate text-muted-foreground">{user?.email}</span>
           </div>

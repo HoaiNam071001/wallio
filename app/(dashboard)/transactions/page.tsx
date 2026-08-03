@@ -2,9 +2,11 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { NotebookPen, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -21,15 +23,28 @@ import {
   type TransactionFilterState,
 } from "@/components/transactions/transaction-filter";
 import { TransactionList } from "@/components/transactions/transaction-list";
-import { TransactionForm, type TransactionFormValues } from "@/components/transactions/transaction-form";
-import { useTransactions, useUpdateTransaction, useDeleteTransaction } from "@/lib/hooks/use-transactions";
-import { getPresetRange, toQueryDate } from "@/lib/utils";
+import { TodayHero } from "@/components/transactions/today-hero";
+import {
+  TransactionForm,
+  type TransactionFormValues,
+} from "@/components/transactions/transaction-form";
+import { CategoryBreakdownChart } from "@/components/charts/category-breakdown-chart";
+import { EmptyState } from "@/components/shared/empty-state";
+import {
+  useTransactions,
+  useUpdateTransaction,
+  useDeleteTransaction,
+} from "@/lib/hooks/use-transactions";
+import { useCategoryBreakdown, usePeriodTotals } from "@/lib/hooks/use-summary";
+import { formatCurrency, getPresetRange, toQueryDate } from "@/lib/utils";
 import type { TransactionWithRelations } from "@/lib/queries/transactions";
+
+const TODAY = toQueryDate(new Date());
 
 const DEFAULT_FILTER: TransactionFilterState = {
   preset: "month",
-  customStart: toQueryDate(new Date()),
-  customEnd: toQueryDate(new Date()),
+  customStart: TODAY,
+  customEnd: TODAY,
   accountId: "",
   categoryId: "",
   search: "",
@@ -37,6 +52,7 @@ const DEFAULT_FILTER: TransactionFilterState = {
 
 export default function TransactionsPage() {
   const [filter, setFilter] = useState<TransactionFilterState>(DEFAULT_FILTER);
+  const [breakdownKind, setBreakdownKind] = useState<"expense" | "income">("expense");
   const [editing, setEditing] = useState<TransactionWithRelations | null>(null);
   const [deleting, setDeleting] = useState<TransactionWithRelations | null>(null);
 
@@ -50,6 +66,10 @@ export default function TransactionsPage() {
     const range = getPresetRange(filter.preset);
     return { startDate: toQueryDate(range.start), endDate: toQueryDate(range.end) };
   }, [filter.preset, filter.customStart, filter.customEnd]);
+
+  const { data: todayTotals, isLoading: loadingToday } = usePeriodTotals(TODAY, TODAY);
+  const { data: periodTotals } = usePeriodTotals(startDate, endDate);
+  const { data: breakdown } = useCategoryBreakdown(startDate, endDate, breakdownKind);
 
   const { data: transactions, isLoading } = useTransactions({
     startDate,
@@ -93,20 +113,85 @@ export default function TransactionsPage() {
 
   return (
     <div className="flex flex-col gap-4">
+      <TodayHero
+        income={todayTotals?.income ?? 0}
+        expense={todayTotals?.expense ?? 0}
+        loading={loadingToday}
+      />
+
+      <TransactionFilterBar value={filter} onChange={setFilter} />
+
+      {/* Tổng quan kỳ đang xem */}
+      {periodTotals && (
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { label: "Thu", value: periodTotals.income, className: "text-income" },
+            { label: "Chi", value: periodTotals.expense, className: "text-expense" },
+            {
+              label: "Còn lại",
+              value: periodTotals.net,
+              className: periodTotals.net >= 0 ? "text-income" : "text-expense",
+            },
+          ].map((item) => (
+            <div key={item.label} className="glass rounded-2xl px-3 py-2.5">
+              <p className="text-[11px] font-semibold text-muted-foreground">{item.label}</p>
+              <p className={`truncate text-sm font-extrabold tabular-nums ${item.className}`}>
+                {formatCurrency(item.value)}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Cơ cấu theo danh mục */}
+      <Card>
+        <CardHeader className="flex-row items-center justify-between gap-2">
+          <CardTitle className="text-base">Cơ cấu theo danh mục</CardTitle>
+          <Tabs
+            value={breakdownKind}
+            onValueChange={(v) => setBreakdownKind(v as "expense" | "income")}
+          >
+            <TabsList className="h-9">
+              <TabsTrigger value="expense" className="text-xs">
+                Chi
+              </TabsTrigger>
+              <TabsTrigger value="income" className="text-xs">
+                Thu
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </CardHeader>
+        <CardContent>
+          <CategoryBreakdownChart data={breakdown ?? []} />
+        </CardContent>
+      </Card>
+
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Giao dịch</h1>
-        <Button asChild>
+        <h2 className="text-lg font-bold">Các khoản đã ghi</h2>
+        <Button size="sm" asChild>
           <Link href="/transactions/new">
             <Plus className="size-4" />
-            Thêm giao dịch
+            Ghi khoản mới
           </Link>
         </Button>
       </div>
 
-      <TransactionFilterBar value={filter} onChange={setFilter} />
-
       {isLoading ? (
         <p className="text-muted-foreground">Đang tải...</p>
+      ) : transactions?.length === 0 ? (
+        <EmptyState
+          icon={NotebookPen}
+          title="Chưa ghi khoản nào"
+          description="Ghi lại khoản chi đầu tiên — chỉ mất vài giây thôi."
+          action={
+            <Button asChild>
+              <Link href="/transactions/new">
+                <Plus className="size-4" />
+                Ghi khoản mới
+              </Link>
+            </Button>
+          }
+        />
       ) : (
         <TransactionList
           transactions={transactions ?? []}
@@ -118,7 +203,7 @@ export default function TransactionsPage() {
       <Dialog open={!!editing} onOpenChange={(open) => !open && setEditing(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Sửa giao dịch</DialogTitle>
+            <DialogTitle>Sửa khoản đã ghi</DialogTitle>
           </DialogHeader>
           {editing && (
             <TransactionForm
@@ -133,7 +218,7 @@ export default function TransactionsPage() {
       <AlertDialog open={!!deleting} onOpenChange={(open) => !open && setDeleting(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Xoá giao dịch này?</AlertDialogTitle>
+            <AlertDialogTitle>Xoá khoản này?</AlertDialogTitle>
             <AlertDialogDescription>Hành động này không thể hoàn tác.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

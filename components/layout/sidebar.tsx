@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LogOut, Wallet } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NAV_ITEMS } from "@/components/layout/nav-items";
+import { BrandMark } from "@/components/layout/brand-mark";
 import { Button } from "@/components/ui/button";
 import { useSupabase } from "@/lib/hooks/use-supabase";
 
@@ -20,13 +21,12 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="hidden w-60 shrink-0 flex-col border-r bg-background md:flex">
-      <div className="flex h-14 items-center gap-2 border-b px-4">
-        <div className="flex size-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-          <Wallet className="size-4" />
-        </div>
-        <span className="font-semibold">Wallio</span>
+    <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-white/40 bg-white/45 backdrop-blur-xl md:flex dark:border-white/10 dark:bg-white/5">
+      <div className="flex h-16 items-center gap-2.5 px-5">
+        <BrandMark size={36} />
+        <span className="text-lg font-extrabold tracking-tight">Wallio</span>
       </div>
+
       <nav className="flex flex-1 flex-col gap-1 p-3">
         {NAV_ITEMS.map((item) => {
           const active = pathname.startsWith(item.href);
@@ -36,20 +36,25 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                "flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-semibold transition-all",
                 active
-                  ? "bg-secondary text-secondary-foreground"
-                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                  ? "brand-gradient text-white shadow-glow"
+                  : "text-muted-foreground hover:bg-white/70 hover:text-foreground dark:hover:bg-white/10",
               )}
             >
-              <Icon className="size-4" />
+              <Icon className="size-4.5" />
               {item.label}
             </Link>
           );
         })}
       </nav>
-      <div className="border-t p-3">
-        <Button variant="ghost" className="w-full justify-start gap-3" onClick={handleSignOut}>
+
+      <div className="p-3">
+        <Button
+          variant="ghost"
+          className="w-full justify-start gap-3 text-muted-foreground"
+          onClick={handleSignOut}
+        >
           <LogOut className="size-4" />
           Đăng xuất
         </Button>

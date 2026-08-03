@@ -7,9 +7,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex min-h-screen flex-1">
       <Sidebar />
-      <div className="flex flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col">
         <Topbar />
-        <main className="flex-1 overflow-x-hidden p-4 pb-24 md:p-6 md:pb-6">{children}</main>
+        {/* pb lớn trên mobile để nội dung không bị bottom nav + FAB che */}
+        <main className="mx-auto w-full max-w-4xl flex-1 overflow-x-hidden p-4 pb-32 md:p-6 md:pb-10">
+          {children}
+        </main>
       </div>
       <BottomNav />
       <QuickAddFab />

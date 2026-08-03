@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Plus } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Plus, WalletMinimal } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,32 +22,45 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AccountCard } from "@/components/accounts/account-card";
 import { AccountForm, type AccountFormValues } from "@/components/accounts/account-form";
+import { PageHeader } from "@/components/layout/page-header";
+import { EmptyState } from "@/components/shared/empty-state";
 import { useAuth } from "@/lib/hooks/use-auth";
 import {
-  useAccountBalances,
+  useAccountsWithBalance,
   useCreateAccount,
   useDeleteAccount,
   useUpdateAccount,
 } from "@/lib/hooks/use-accounts";
-import type { AccountBalance } from "@/lib/types/database.types";
+import { formatCurrency } from "@/lib/utils";
+import type { AccountWithBalance } from "@/lib/types/database.types";
+
+const LIQUID_TYPES = new Set(["cash", "ewallet", "bank"]);
 
 export default function AccountsPage() {
   const { user } = useAuth();
-  const { data: accounts, isLoading } = useAccountBalances();
+  const { data: accounts, isLoading } = useAccountsWithBalance();
   const createAccount = useCreateAccount();
   const updateAccount = useUpdateAccount();
   const deleteAccount = useDeleteAccount();
 
   const [formOpen, setFormOpen] = useState(false);
-  const [editing, setEditing] = useState<AccountBalance | null>(null);
-  const [deleting, setDeleting] = useState<AccountBalance | null>(null);
+  const [editing, setEditing] = useState<AccountWithBalance | null>(null);
+  const [deleting, setDeleting] = useState<AccountWithBalance | null>(null);
+
+  const total = useMemo(
+    () =>
+      (accounts ?? [])
+        .filter((a) => LIQUID_TYPES.has(a.type))
+        .reduce((sum, a) => sum + a.current_balance, 0),
+    [accounts],
+  );
 
   function openCreate() {
     setEditing(null);
     setFormOpen(true);
   }
 
-  function openEdit(account: AccountBalance) {
+  function openEdit(account: AccountWithBalance) {
     setEditing(account);
     setFormOpen(true);
   }
@@ -55,7 +68,7 @@ export default function AccountsPage() {
   function handleSubmit(values: AccountFormValues) {
     if (editing) {
       updateAccount.mutate(
-        { id: editing.account_id, input: values },
+        { id: editing.id, input: values },
         {
           onSuccess: () => {
             toast.success("Đã cập nhật nguồn tiền");
@@ -82,7 +95,7 @@ export default function AccountsPage() {
 
   function handleDelete() {
     if (!deleting) return;
-    deleteAccount.mutate(deleting.account_id, {
+    deleteAccount.mutate(deleting.id, {
       onSuccess: () => {
         toast.success("Đã xoá nguồn tiền");
         setDeleting(null);
@@ -96,24 +109,37 @@ export default function AccountsPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Nguồn tiền</h1>
-        <Button onClick={openCreate}>
-          <Plus className="size-4" />
-          Thêm nguồn tiền
-        </Button>
-      </div>
+      <PageHeader
+        title="Nguồn tiền"
+        subtitle={`Tiền khả dụng: ${formatCurrency(total)}`}
+        action={
+          <Button onClick={openCreate} size="sm">
+            <Plus className="size-4" />
+            Thêm
+          </Button>
+        }
+      />
 
       {isLoading && <p className="text-muted-foreground">Đang tải...</p>}
 
       {!isLoading && accounts?.length === 0 && (
-        <p className="text-muted-foreground">Chưa có nguồn tiền nào. Thêm nguồn tiền đầu tiên của bạn.</p>
+        <EmptyState
+          icon={WalletMinimal}
+          title="Chưa có nguồn tiền nào"
+          description="Thêm ví, tài khoản ngân hàng hay khoản nợ để bắt đầu theo dõi."
+          action={
+            <Button onClick={openCreate}>
+              <Plus className="size-4" />
+              Thêm nguồn tiền
+            </Button>
+          }
+        />
       )}
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {accounts?.map((account) => (
           <AccountCard
-            key={account.account_id}
+            key={account.id}
             account={account}
             onEdit={() => openEdit(account)}
             onDelete={() => setDeleting(account)}

@@ -1,8 +1,6 @@
 "use client";
 
 import { MoreVertical, Pencil, Trash2 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,44 +8,41 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ACCOUNT_TYPE_LABELS } from "@/components/accounts/account-type";
+import { EntityIcon } from "@/components/shared/entity-icon";
+import { ACCOUNT_TYPE_META } from "@/components/accounts/account-type";
 import { formatCurrency } from "@/lib/utils";
-import type { AccountBalance } from "@/lib/types/database.types";
+import { normalizeColor, withAlpha } from "@/lib/theme/palette";
+import type { AccountWithBalance } from "@/lib/types/database.types";
 
 export function AccountCard({
   account,
   onEdit,
   onDelete,
 }: {
-  account: AccountBalance;
+  account: AccountWithBalance;
   onEdit: () => void;
   onDelete: () => void;
 }) {
+  const meta = ACCOUNT_TYPE_META[account.type];
+  const color = normalizeColor(account.color ?? meta.color);
   const isDebt = account.type === "debt";
   const displayBalance = isDebt ? Math.abs(account.current_balance) : account.current_balance;
 
   return (
-    <Card>
-      <CardContent className="flex items-center justify-between gap-3">
-        <div className="flex min-w-0 flex-col gap-1">
-          <div className="flex items-center gap-2">
-            <span className="truncate font-medium">{account.name}</span>
-            <Badge variant="outline">{ACCOUNT_TYPE_LABELS[account.type]}</Badge>
-          </div>
-          <span
-            className={
-              isDebt
-                ? "text-lg font-semibold text-expense"
-                : "text-lg font-semibold"
-            }
-          >
-            {isDebt ? "-" : ""}
-            {formatCurrency(displayBalance)}
-          </span>
-        </div>
+    <div
+      className="glass relative overflow-hidden rounded-3xl p-4"
+      style={{ backgroundImage: `linear-gradient(135deg, ${withAlpha(color, 0.16)}, transparent 65%)` }}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <EntityIcon
+          icon={account.icon ?? meta.icon}
+          color={color}
+          className="size-12"
+          iconClassName="size-6"
+        />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="-mt-1 -mr-1 size-8">
               <MoreVertical className="size-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -62,7 +57,19 @@ export function AccountCard({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      </CardContent>
-    </Card>
+      </div>
+
+      <p className="mt-3 truncate font-bold">{account.name}</p>
+      <p className="text-xs font-medium" style={{ color }}>
+        {meta.label}
+      </p>
+
+      <p
+        className={`mt-2 text-xl font-extrabold tabular-nums ${isDebt ? "text-expense" : ""}`}
+      >
+        {isDebt && displayBalance !== 0 ? "-" : ""}
+        {formatCurrency(displayBalance)}
+      </p>
+    </div>
   );
 }

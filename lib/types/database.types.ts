@@ -138,13 +138,15 @@ export interface Database {
       };
     };
     Views: {
+      // Lưu ý: view chỉ trả về các cột dưới đây — `initial_balance` bị gộp vào
+      // biểu thức tính `current_balance` nên KHÔNG phải là một cột riêng.
+      // Cần initial_balance/icon/color thì đọc từ bảng `accounts`.
       account_balances: {
         Row: {
           account_id: string;
           user_id: string;
           name: string;
           type: AccountType;
-          initial_balance: number;
           current_balance: number;
         };
         Relationships: [];
@@ -169,3 +171,6 @@ export type TransactionInsert = Database["public"]["Tables"]["transactions"]["In
 export type TransactionUpdate = Database["public"]["Tables"]["transactions"]["Update"];
 
 export type AccountBalance = Database["public"]["Views"]["account_balances"]["Row"];
+
+/** Bản ghi account đầy đủ (kèm icon/color/initial_balance) ghép với số dư hiện tại. */
+export type AccountWithBalance = Account & { current_balance: number };

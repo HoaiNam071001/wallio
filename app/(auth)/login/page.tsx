@@ -1,10 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Wallet } from "lucide-react";
+import Image from "next/image";
+import { Sparkles, PieChart, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSupabase } from "@/lib/hooks/use-supabase";
+
+const HIGHLIGHTS = [
+  { icon: Sparkles, text: "Ghi thu chi trong vài giây" },
+  { icon: Wallet, text: "Quản lý ví, ngân hàng, khoản nợ" },
+  { icon: PieChart, text: "Biết ngay tiền đi đâu mỗi tháng" },
+];
 
 export default function LoginPage() {
   const supabase = useSupabase();
@@ -19,27 +25,44 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-1 items-center justify-center bg-muted/30 p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="items-center text-center">
-          <div className="mb-2 flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
-            <Wallet className="size-6" />
-          </div>
-          <CardTitle className="text-xl">Wallio</CardTitle>
-          <CardDescription>Quản lý thu chi cá nhân của bạn</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button className="w-full" size="lg" onClick={handleGoogleLogin} disabled={loading}>
-            <svg viewBox="0 0 24 24" className="size-4">
-              <path
-                fill="currentColor"
-                d="M12.24 10.285V14.4h6.806c-.275 1.765-2.056 5.174-6.806 5.174-4.095 0-7.439-3.389-7.439-7.574s3.344-7.574 7.439-7.574c2.33 0 3.891.989 4.785 1.849l3.254-3.138C18.189 1.186 15.479 0 12.24 0c-6.635 0-12 5.365-12 12s5.365 12 12 12c6.926 0 11.52-4.869 11.52-11.726 0-.788-.085-1.39-.189-1.989H12.24z"
-              />
-            </svg>
-            Đăng nhập với Google
-          </Button>
-        </CardContent>
-      </Card>
+    <div className="flex min-h-screen flex-1 items-center justify-center p-4">
+      <div className="glass w-full max-w-sm rounded-3xl p-7 text-center">
+        <div className="brand-gradient mx-auto flex size-20 items-center justify-center rounded-3xl shadow-glow">
+          <Image src="/logo.svg" alt="Wallio" width={56} height={56} priority />
+        </div>
+
+        <h1 className="mt-5 text-2xl font-extrabold tracking-tight">Wallio</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Sổ thu chi cá nhân, gọn và vui</p>
+
+        <ul className="mt-6 flex flex-col gap-2.5 text-left">
+          {HIGHLIGHTS.map((item) => {
+            const Icon = item.icon;
+            return (
+              <li key={item.text} className="flex items-center gap-2.5">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-brand-500/14 text-brand-600">
+                  <Icon className="size-4" />
+                </span>
+                <span className="text-sm font-medium">{item.text}</span>
+              </li>
+            );
+          })}
+        </ul>
+
+        <Button
+          className="mt-7 w-full"
+          size="lg"
+          onClick={handleGoogleLogin}
+          disabled={loading}
+        >
+          <svg viewBox="0 0 24 24" className="size-4">
+            <path
+              fill="currentColor"
+              d="M12.24 10.285V14.4h6.806c-.275 1.765-2.056 5.174-6.806 5.174-4.095 0-7.439-3.389-7.439-7.574s3.344-7.574 7.439-7.574c2.33 0 3.891.989 4.785 1.849l3.254-3.138C18.189 1.186 15.479 0 12.24 0c-6.635 0-12 5.365-12 12s5.365 12 12 12c6.926 0 11.52-4.869 11.52-11.726 0-.788-.085-1.39-.189-1.989H12.24z"
+            />
+          </svg>
+          {loading ? "Đang chuyển hướng..." : "Đăng nhập với Google"}
+        </Button>
+      </div>
     </div>
   );
 }

@@ -1,11 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Tags, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
@@ -19,6 +17,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { CategoryForm, type CategoryFormValues } from "@/components/categories/category-form";
+import { PageHeader } from "@/components/layout/page-header";
+import { EmptyState } from "@/components/shared/empty-state";
+import { EntityIcon } from "@/components/shared/entity-icon";
 import { useAuth } from "@/lib/hooks/use-auth";
 import {
   useCategories,
@@ -26,6 +27,7 @@ import {
   useDeleteCategory,
   useUpdateCategory,
 } from "@/lib/hooks/use-categories";
+import { normalizeColor, withAlpha } from "@/lib/theme/palette";
 import type { Category, CategoryKind } from "@/lib/types/database.types";
 
 export default function CategoriesPage() {
@@ -99,16 +101,19 @@ export default function CategoriesPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Danh mục</h1>
-        <Button onClick={openCreate}>
-          <Plus className="size-4" />
-          Thêm danh mục
-        </Button>
-      </div>
+      <PageHeader
+        title="Danh mục"
+        subtitle="Gắn màu và biểu tượng để nhìn phát ra ngay"
+        action={
+          <Button size="sm" onClick={openCreate}>
+            <Plus className="size-4" />
+            Thêm
+          </Button>
+        }
+      />
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as CategoryKind)}>
-        <TabsList>
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="expense">Chi tiêu</TabsTrigger>
           <TabsTrigger value="income">Thu nhập</TabsTrigger>
         </TabsList>
@@ -117,30 +122,55 @@ export default function CategoriesPage() {
       {isLoading && <p className="text-muted-foreground">Đang tải...</p>}
 
       {!isLoading && filtered.length === 0 && (
-        <p className="text-muted-foreground">Chưa có danh mục nào.</p>
+        <EmptyState
+          icon={Tags}
+          title={`Chưa có danh mục ${tab === "income" ? "thu nhập" : "chi tiêu"}`}
+          description="Tạo vài danh mục quen thuộc như Ăn uống, Xăng xe, Lương..."
+          action={
+            <Button onClick={openCreate}>
+              <Plus className="size-4" />
+              Thêm danh mục
+            </Button>
+          }
+        />
       )}
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {filtered.map((category) => (
-          <Card key={category.id}>
-            <CardContent className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <span className="font-medium">{category.name}</span>
-                <Badge variant={category.kind === "income" ? "income" : "expense"}>
-                  {category.kind === "income" ? "Thu" : "Chi"}
-                </Badge>
-              </div>
-              <div className="flex gap-1">
-                <Button variant="ghost" size="icon" onClick={() => openEdit(category)}>
+      <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+        {filtered.map((category) => {
+          const color = normalizeColor(category.color);
+          return (
+            <div
+              key={category.id}
+              className="glass flex items-center gap-3 rounded-3xl p-3"
+              style={{
+                backgroundImage: `linear-gradient(135deg, ${withAlpha(color, 0.14)}, transparent 70%)`,
+              }}
+            >
+              <EntityIcon icon={category.icon} color={color} />
+              <span className="min-w-0 flex-1 truncate font-bold">{category.name}</span>
+              <div className="flex shrink-0 gap-0.5">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-8"
+                  aria-label="Sửa"
+                  onClick={() => openEdit(category)}
+                >
                   <Pencil className="size-4" />
                 </Button>
-                <Button variant="ghost" size="icon" onClick={() => setDeleting(category)}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-8 text-destructive"
+                  aria-label="Xoá"
+                  onClick={() => setDeleting(category)}
+                >
                   <Trash2 className="size-4" />
                 </Button>
               </div>
-            </CardContent>
-          </Card>
-        ))}
+            </div>
+          );
+        })}
       </div>
 
       <Dialog open={formOpen} onOpenChange={setFormOpen}>

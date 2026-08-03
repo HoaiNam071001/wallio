@@ -19,10 +19,26 @@ export interface TransactionFilters {
   limit?: number;
 }
 
+interface RelatedAccount {
+  id: string;
+  name: string;
+  type: string;
+  color: string | null;
+  icon: string | null;
+}
+
+interface RelatedCategory {
+  id: string;
+  name: string;
+  kind: string;
+  color: string | null;
+  icon: string | null;
+}
+
 export type TransactionWithRelations = Transaction & {
-  account: { id: string; name: string; type: string } | null;
-  to_account: { id: string; name: string; type: string } | null;
-  category: { id: string; name: string; kind: string } | null;
+  account: RelatedAccount | null;
+  to_account: RelatedAccount | null;
+  category: RelatedCategory | null;
 };
 
 export async function listTransactions(
@@ -33,9 +49,9 @@ export async function listTransactions(
     .from("transactions")
     .select(
       `*,
-      account:accounts!transactions_account_id_fkey(id,name,type),
-      to_account:accounts!transactions_to_account_id_fkey(id,name,type),
-      category:categories(id,name,kind)`,
+      account:accounts!transactions_account_id_fkey(id,name,type,color,icon),
+      to_account:accounts!transactions_to_account_id_fkey(id,name,type,color,icon),
+      category:categories(id,name,kind,color,icon)`,
     )
     .order("transaction_date", { ascending: false })
     .order("created_at", { ascending: false });
