@@ -12,10 +12,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EntityIcon } from "@/components/shared/entity-icon";
+import { AmountText, AmountTextForAccount } from "@/components/shared/amount-text";
 import { ACCOUNT_TYPE_META } from "@/components/accounts/account-type";
-import { formatCurrency } from "@/lib/utils";
+import type { AmountVisibilityScope } from "@/lib/hooks/use-amount-visibility";
 import type { AccountType } from "@/lib/types/database.types";
 import type { TransactionWithRelations } from "@/lib/queries/transactions";
+
+const FALLBACK_ACCOUNT = { type: "cash" as AccountType, unit: null as string | null };
 
 function dayLabel(date: string): string {
   const parsed = parseISO(date);
@@ -38,10 +41,14 @@ function visualsOf(t: TransactionWithRelations) {
 
 function TransactionRow({
   transaction: t,
+  scope,
+  onView,
   onEdit,
   onDelete,
 }: {
   transaction: TransactionWithRelations;
+  scope: AmountVisibilityScope;
+  onView?: (transaction: TransactionWithRelations) => void;
   onEdit?: (transaction: TransactionWithRelations) => void;
   onDelete?: (transaction: TransactionWithRelations) => void;
 }) {
@@ -57,29 +64,55 @@ function TransactionRow({
 
   const subtitle = t.type === "transfer" ? "Chuyển khoản" : (t.account?.name ?? "");
 
+  // Chuyển đổi hiện vật (vd Momo -> vàng) có 2 vế số khác nhau/khác đơn vị.
+  const isDualLeg = t.type === "transfer" && t.to_amount != null && t.to_amount !== t.amount;
+
   return (
     <div className="flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-accent/40">
-      {t.type === "transfer" ? (
-        <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-transfer/14 text-transfer">
-          <ArrowLeftRight className="size-5" />
-        </span>
-      ) : (
-        <EntityIcon icon={visuals.icon} color={visuals.color} />
-      )}
+      <button
+        type="button"
+        onClick={() => onView?.(t)}
+        className="flex min-w-0 flex-1 items-center gap-3 text-left"
+      >
+        {t.type === "transfer" ? (
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-transfer/14 text-transfer">
+            <ArrowLeftRight className="size-5" />
+          </span>
+        ) : (
+          <EntityIcon icon={visuals.icon} color={visuals.color} />
+        )}
 
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-bold">{title}</p>
-        <p className="truncate text-xs text-muted-foreground">
-          {subtitle}
-          {t.note ? ` · ${t.note}` : ""}
-        </p>
-      </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-bold">{title}</p>
+          <p className="truncate text-xs text-muted-foreground">
+            {subtitle}
+            {t.note ? ` · ${t.note}` : ""}
+          </p>
+        </div>
+      </button>
 
       <div className="flex shrink-0 items-center gap-1">
-        <span className={`text-sm font-extrabold tabular-nums ${amountClass}`}>
-          {sign}
-          {formatCurrency(t.amount)}
-        </span>
+        {isDualLeg ? (
+          <span className={`flex flex-col items-end ${amountClass}`}>
+            <AmountTextForAccount
+              amount={t.amount}
+              account={t.account ?? FALLBACK_ACCOUNT}
+              scope={scope}
+              className="text-[11px] font-semibold opacity-80"
+            />
+            <AmountTextForAccount
+              amount={t.to_amount!}
+              account={t.to_account ?? FALLBACK_ACCOUNT}
+              scope={scope}
+              className="text-sm font-extrabold"
+            />
+          </span>
+        ) : (
+          <span className={`flex items-center text-sm font-extrabold tabular-nums ${amountClass}`}>
+            {sign}
+            <AmountTextForAccount amount={t.amount} account={t.account ?? FALLBACK_ACCOUNT} scope={scope} />
+          </span>
+        )}
         {(onEdit || onDelete) && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -110,11 +143,15 @@ function TransactionRow({
 
 export function TransactionList({
   transactions,
+  scope,
+  onView,
   onEdit,
   onDelete,
   emptyLabel = "Chưa có khoản nào trong khoảng thời gian này.",
 }: {
   transactions: TransactionWithRelations[];
+  scope: AmountVisibilityScope;
+  onView?: (transaction: TransactionWithRelations) => void;
   onEdit?: (transaction: TransactionWithRelations) => void;
   onDelete?: (transaction: TransactionWithRelations) => void;
   emptyLabel?: string;
@@ -151,17 +188,24 @@ export function TransactionList({
               {dayLabel(group.date)}
             </span>
             <span
-              className={`text-xs font-bold tabular-nums ${
+              className={`flex items-center text-xs font-bold tabular-nums ${
                 group.total >= 0 ? "text-income" : "text-expense"
               }`}
             >
               {group.total >= 0 ? "+" : "-"}
-              {formatCurrency(Math.abs(group.total))}
+              <AmountText amount={Math.abs(group.total)} scope={scope} />
             </span>
           </div>
           <div className="divide-y divide-border/50 p-1">
             {group.items.map((t) => (
-              <TransactionRow key={t.id} transaction={t} onEdit={onEdit} onDelete={onDelete} />
+              <TransactionRow
+                key={t.id}
+                transaction={t}
+                scope={scope}
+                onView={onView}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
             ))}
           </div>
         </div>

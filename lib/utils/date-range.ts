@@ -37,10 +37,12 @@ export function toQueryDate(date: Date): string {
   return format(date, "yyyy-MM-dd");
 }
 
+// Thứ tự khai báo ở đây quyết định thứ tự hiển thị tab/chip ở Báo cáo và Sổ thu chi
+// (cả hai đều lặp qua Object.keys(...)) — đặt "Tuỳ chọn" lên đầu theo yêu cầu.
 export const DATE_RANGE_PRESET_LABELS: Record<DateRangePreset, string> = {
+  custom: "Tuỳ chọn",
   today: "Hôm nay",
   week: "Tuần này",
   month: "Tháng này",
   year: "Năm này",
-  custom: "Tuỳ chọn",
 };

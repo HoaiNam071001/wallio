@@ -85,7 +85,7 @@ export async function getAccountBalanceAsOf(
       supabase.from("accounts").select("initial_balance").eq("id", accountId).single(),
       supabase
         .from("transactions")
-        .select("type, amount, account_id, to_account_id")
+        .select("type, amount, to_amount, account_id, to_account_id")
         .lte("transaction_date", date)
         .or(`account_id.eq.${accountId},to_account_id.eq.${accountId}`),
     ]);
@@ -100,7 +100,9 @@ export async function getAccountBalanceAsOf(
       if (row.type === "income") balance += amount;
       else balance -= amount; // expense và transfer đi ra đều làm giảm số dư
     }
-    if (row.to_account_id === accountId && row.type === "transfer") balance += amount;
+    if (row.to_account_id === accountId && row.type === "transfer") {
+      balance += row.to_amount != null ? Number(row.to_amount) || 0 : amount;
+    }
   }
   return balance;
 }

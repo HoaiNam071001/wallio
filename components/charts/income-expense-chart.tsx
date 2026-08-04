@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
+import { AmountText } from "@/components/shared/amount-text";
 
 /**
  * So sánh thu / chi trong kỳ. Chỉ có hai giá trị nên dùng thanh tỉ lệ trực tiếp
@@ -38,9 +38,11 @@ export function IncomeExpenseChart({ income, expense }: { income: number; expens
                 <Icon className="size-4" />
               </span>
               <span className="text-sm font-semibold">{row.label}</span>
-              <span className="ml-auto text-sm font-extrabold tabular-nums">
-                {formatCurrency(row.value)}
-              </span>
+              <AmountText
+                amount={row.value}
+                scope="dashboard"
+                className="ml-auto text-sm font-extrabold tabular-nums"
+              />
             </div>
             <div className="h-2.5 overflow-hidden rounded-full bg-muted">
               <div
@@ -54,13 +56,13 @@ export function IncomeExpenseChart({ income, expense }: { income: number; expens
 
       <div className="flex items-center justify-between rounded-2xl bg-muted/60 px-3 py-2">
         <span className="text-sm font-semibold text-muted-foreground">Còn lại</span>
-        <span
+        <AmountText
+          amount={income - expense}
+          scope="dashboard"
           className={`text-base font-extrabold tabular-nums ${
             income - expense >= 0 ? "text-income" : "text-expense"
           }`}
-        >
-          {formatCurrency(income - expense)}
-        </span>
+        />
       </div>
     </div>
   );

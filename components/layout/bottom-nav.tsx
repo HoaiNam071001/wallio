@@ -9,7 +9,10 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t border-white/50 bg-white/80 backdrop-blur-xl md:hidden dark:border-white/10 dark:bg-[oklch(0.19_0.03_266)]/85">
+    <nav
+      style={{ background: "red" }}
+      className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t border-white/50 bg-white/80 backdrop-blur-xl md:hidden dark:border-white/10 dark:bg-[oklch(0.19_0.03_266)]/85"
+    >
       <div className="flex">
         {NAV_ITEMS.map((item) => {
           const active = pathname.startsWith(item.href);
@@ -19,7 +22,7 @@ export function BottomNav() {
               key={item.href}
               href={item.href}
               aria-current={active ? "page" : undefined}
-              className="flex flex-1 flex-col items-center gap-0.5 py-2"
+              className="flex min-w-0 flex-1 flex-col items-center gap-0.5 py-2"
             >
               <span
                 className={cn(
@@ -31,7 +34,7 @@ export function BottomNav() {
               </span>
               <span
                 className={cn(
-                  "text-[10px] font-bold",
+                  "w-full truncate text-center text-[10px] font-bold",
                   active ? "text-primary" : "text-muted-foreground",
                 )}
               >

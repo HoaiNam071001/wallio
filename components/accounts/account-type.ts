@@ -15,6 +15,12 @@ export const ACCOUNT_TYPE_META: Record<AccountType, AccountTypeMeta> = {
   bank: { label: "Ngân hàng", icon: "Landmark", color: "#3b82f6", hint: "Tài khoản ngân hàng" },
   lending: { label: "Cho mượn", icon: "HandCoins", color: "#f59e0b", hint: "Tiền đang cho mượn" },
   debt: { label: "Khoản nợ", icon: "Receipt", color: "#ef4444", hint: "Tiền đang nợ" },
+  in_kind: {
+    label: "Hiện vật",
+    icon: "Coins",
+    color: "#eab308",
+    hint: "Vàng, hiện vật không có giá cố định",
+  },
   other: { label: "Khác", icon: "Wallet", color: "#64748b", hint: "Loại khác" },
 };
 

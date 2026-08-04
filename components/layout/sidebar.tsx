@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { LogOut, UserCog } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NAV_ITEMS } from "@/components/layout/nav-items";
 import { BrandMark } from "@/components/layout/brand-mark";
@@ -49,7 +49,19 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="p-3">
+      <div className="flex flex-col gap-1 p-3">
+        <Link
+          href="/profile"
+          className={cn(
+            "flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-semibold transition-all",
+            pathname.startsWith("/profile")
+              ? "brand-gradient text-white shadow-glow"
+              : "text-muted-foreground hover:bg-white/70 hover:text-foreground dark:hover:bg-white/10",
+          )}
+        >
+          <UserCog className="size-4.5" />
+          Hồ sơ
+        </Link>
         <Button
           variant="ghost"
           className="w-full justify-start gap-3 text-muted-foreground"

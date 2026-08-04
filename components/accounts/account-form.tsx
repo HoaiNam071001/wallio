@@ -18,8 +18,9 @@ import type { Account, AccountType } from "@/lib/types/database.types";
 
 const accountFormSchema = z.object({
   name: z.string().min(1, "Nhập tên nguồn tiền"),
-  type: z.enum(["cash", "ewallet", "bank", "lending", "debt", "other"]),
+  type: z.enum(["cash", "ewallet", "bank", "lending", "debt", "in_kind", "other"]),
   initial_balance: z.number(),
+  unit: z.string().optional(),
   icon: z.string().nullable(),
   color: z.string().nullable(),
 });
@@ -50,6 +51,7 @@ export function AccountForm({
       name: defaultValues?.name ?? "",
       type: initialType,
       initial_balance: Number(defaultValues?.initial_balance ?? 0),
+      unit: defaultValues?.unit ?? "",
       icon: defaultValues?.icon ?? ACCOUNT_TYPE_META[initialType].icon,
       color: defaultValues?.color ?? ACCOUNT_TYPE_META[initialType].color,
     },
@@ -60,6 +62,7 @@ export function AccountForm({
   const color = watch("color");
   const name = watch("name");
   const initialBalance = watch("initial_balance");
+  const isInKind = type === "in_kind";
 
   // Khi tạo mới: đổi loại thì gợi ý luôn icon + màu tương ứng.
   useEffect(() => {
@@ -111,18 +114,28 @@ export function AccountForm({
         </div>
       </div>
 
+      {isInKind && (
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="unit">Đơn vị tính</Label>
+          <Input id="unit" placeholder="VD: chỉ, cây, cổ phiếu..." {...register("unit")} />
+        </div>
+      )}
+
       <div className="flex flex-col gap-2">
-        <Label htmlFor="initial_balance">Số dư ban đầu</Label>
+        <Label htmlFor="initial_balance">{isInKind ? "Số lượng ban đầu" : "Số dư ban đầu"}</Label>
         <CurrencyInput
           id="initial_balance"
           allowNegative
+          suffix={isInKind ? "" : "đ"}
           value={initialBalance}
           onValueChange={(next) => setValue("initial_balance", next ?? 0)}
         />
         <p className="text-xs text-muted-foreground">
           {type === "debt"
             ? "Khoản nợ: nhập số âm nếu bạn đang nợ (VD: -500.000)."
-            : "Số tiền đang có trước khi bắt đầu ghi chép."}
+            : isInKind
+              ? "Số lượng đang có trước khi bắt đầu ghi chép, không có giá VNĐ cố định."
+              : "Số tiền đang có trước khi bắt đầu ghi chép."}
         </p>
         {errors.initial_balance && (
           <p className="text-sm text-destructive">{errors.initial_balance.message}</p>

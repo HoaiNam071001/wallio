@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LogOut, User as UserIcon } from "lucide-react";
+import { LogOut, User as UserIcon, UserCog } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -48,6 +48,12 @@ export function Topbar() {
             <UserIcon className="size-4 text-muted-foreground" />
             <span className="max-w-[180px] truncate text-muted-foreground">{user?.email}</span>
           </div>
+          <DropdownMenuItem asChild>
+            <Link href="/profile">
+              <UserCog className="size-4" />
+              Hồ sơ
+            </Link>
+          </DropdownMenuItem>
           <DropdownMenuItem variant="destructive" onClick={handleSignOut}>
             <LogOut className="size-4" />
             Đăng xuất

@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
-import { ArrowDownLeft, ArrowUpRight, Plus } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
+import { ArrowDownLeft, ArrowUpRight, Eye, EyeOff, Plus } from "lucide-react";
+import { AmountText } from "@/components/shared/amount-text";
+import { useAmountVisibility } from "@/lib/hooks/use-amount-visibility";
 
 function greeting(date: Date): string {
   const hour = date.getHours();
@@ -28,6 +29,7 @@ export function TodayHero({
   loading?: boolean;
 }) {
   const today = new Date();
+  const [visible, toggle] = useAmountVisibility("transactions");
 
   return (
     <section className="brand-gradient relative overflow-hidden rounded-3xl p-5 text-white shadow-glow">
@@ -42,13 +44,23 @@ export function TodayHero({
             {format(today, "EEEE, dd MMMM yyyy", { locale: vi })}
           </p>
         </div>
-        <Link
-          href="/transactions/new"
-          className="flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1.5 text-xs font-bold backdrop-blur transition-transform active:scale-95"
-        >
-          <Plus className="size-3.5" />
-          Ghi ngay
-        </Link>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={toggle}
+            aria-label={visible ? "Ẩn số tiền" : "Hiện số tiền"}
+            className="flex size-8 items-center justify-center rounded-full bg-white/20 backdrop-blur transition-transform active:scale-95"
+          >
+            {visible ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+          </button>
+          <Link
+            href="/transactions/new"
+            className="flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1.5 text-xs font-bold backdrop-blur transition-transform active:scale-95"
+          >
+            <Plus className="size-3.5" />
+            Ghi ngay
+          </Link>
+        </div>
       </div>
 
       <div className="relative mt-4">
@@ -56,7 +68,7 @@ export function TodayHero({
           Đã chi hôm nay
         </p>
         <p className="text-4xl font-extrabold tabular-nums">
-          {loading ? "—" : formatCurrency(expense)}
+          {loading ? "—" : <AmountText amount={expense} scope="transactions" />}
         </p>
       </div>
 
@@ -67,7 +79,7 @@ export function TodayHero({
             Thu hôm nay
           </div>
           <p className="mt-0.5 text-base font-extrabold tabular-nums">
-            {loading ? "—" : formatCurrency(income)}
+            {loading ? "—" : <AmountText amount={income} scope="transactions" />}
           </p>
         </div>
         <div className="rounded-2xl bg-white/15 p-3 backdrop-blur">
@@ -76,7 +88,7 @@ export function TodayHero({
             Chênh lệch
           </div>
           <p className="mt-0.5 text-base font-extrabold tabular-nums">
-            {loading ? "—" : formatCurrency(income - expense)}
+            {loading ? "—" : <AmountText amount={income - expense} scope="transactions" />}
           </p>
         </div>
       </div>

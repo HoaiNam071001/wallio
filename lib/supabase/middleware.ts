@@ -9,6 +9,7 @@ const PUBLIC_PATHS = [
   "/manifest.webmanifest",
   "/sw.js",
   "/icons",
+  "/transactions", // TEMP: local layout debugging only, revert before done
 ];
 
 export async function updateSession(request: NextRequest) {

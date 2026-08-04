@@ -23,6 +23,7 @@ import {
   type TransactionFilterState,
 } from "@/components/transactions/transaction-filter";
 import { TransactionList } from "@/components/transactions/transaction-list";
+import { TransactionDetailDialog } from "@/components/transactions/transaction-detail-dialog";
 import { TodayHero } from "@/components/transactions/today-hero";
 import {
   TransactionForm,
@@ -30,13 +31,14 @@ import {
 } from "@/components/transactions/transaction-form";
 import { CategoryBreakdownChart } from "@/components/charts/category-breakdown-chart";
 import { EmptyState } from "@/components/shared/empty-state";
+import { AmountText } from "@/components/shared/amount-text";
 import {
   useTransactions,
   useUpdateTransaction,
   useDeleteTransaction,
 } from "@/lib/hooks/use-transactions";
 import { useCategoryBreakdown, usePeriodTotals } from "@/lib/hooks/use-summary";
-import { formatCurrency, getPresetRange, toQueryDate } from "@/lib/utils";
+import { getPresetRange, toQueryDate } from "@/lib/utils";
 import type { TransactionWithRelations } from "@/lib/queries/transactions";
 
 const TODAY = toQueryDate(new Date());
@@ -53,6 +55,7 @@ const DEFAULT_FILTER: TransactionFilterState = {
 export default function TransactionsPage() {
   const [filter, setFilter] = useState<TransactionFilterState>(DEFAULT_FILTER);
   const [breakdownKind, setBreakdownKind] = useState<"expense" | "income">("expense");
+  const [viewing, setViewing] = useState<TransactionWithRelations | null>(null);
   const [editing, setEditing] = useState<TransactionWithRelations | null>(null);
   const [deleting, setDeleting] = useState<TransactionWithRelations | null>(null);
 
@@ -88,6 +91,7 @@ export default function TransactionsPage() {
           ...values,
           category_id: values.category_id ?? null,
           to_account_id: values.to_account_id ?? null,
+          to_amount: values.to_amount ?? null,
         },
       },
       {
@@ -135,9 +139,11 @@ export default function TransactionsPage() {
           ].map((item) => (
             <div key={item.label} className="glass rounded-2xl px-3 py-2.5">
               <p className="text-[11px] font-semibold text-muted-foreground">{item.label}</p>
-              <p className={`truncate text-sm font-extrabold tabular-nums ${item.className}`}>
-                {formatCurrency(item.value)}
-              </p>
+              <AmountText
+                amount={item.value}
+                scope="transactions"
+                className={`block truncate text-sm font-extrabold tabular-nums ${item.className}`}
+              />
             </div>
           ))}
         </div>
@@ -162,7 +168,7 @@ export default function TransactionsPage() {
           </Tabs>
         </CardHeader>
         <CardContent>
-          <CategoryBreakdownChart data={breakdown ?? []} />
+          <CategoryBreakdownChart data={breakdown ?? []} scope="transactions" />
         </CardContent>
       </Card>
 
@@ -195,10 +201,27 @@ export default function TransactionsPage() {
       ) : (
         <TransactionList
           transactions={transactions ?? []}
+          scope="transactions"
+          onView={setViewing}
           onEdit={setEditing}
           onDelete={setDeleting}
         />
       )}
+
+      <TransactionDetailDialog
+        transaction={viewing}
+        scope="transactions"
+        open={!!viewing}
+        onOpenChange={(open) => !open && setViewing(null)}
+        onEdit={() => {
+          setEditing(viewing);
+          setViewing(null);
+        }}
+        onDelete={() => {
+          setDeleting(viewing);
+          setViewing(null);
+        }}
+      />
 
       <Dialog open={!!editing} onOpenChange={(open) => !open && setEditing(null)}>
         <DialogContent>

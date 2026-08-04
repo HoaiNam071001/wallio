@@ -3,6 +3,8 @@
 import { useMemo } from "react";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { EntityIcon } from "@/components/shared/entity-icon";
+import { AmountText } from "@/components/shared/amount-text";
+import { useAmountVisibility, type AmountVisibilityScope } from "@/lib/hooks/use-amount-visibility";
 import { formatCurrency } from "@/lib/utils";
 import { colorForKey } from "@/lib/theme/palette";
 import type { CategoryBreakdownItem } from "@/lib/queries/summary";
@@ -13,12 +15,12 @@ interface Slice extends CategoryBreakdownItem {
   percent: number;
 }
 
-function TooltipCard({ slice }: { slice: Slice }) {
+function TooltipCard({ slice, visible }: { slice: Slice; visible: boolean }) {
   return (
     <div className="glass rounded-2xl px-3 py-2 text-xs">
       <p className="font-bold">{slice.categoryName}</p>
       <p className="text-muted-foreground">
-        {formatCurrency(slice.total)} · {slice.percent.toFixed(1)}%
+        {visible ? formatCurrency(slice.total) : "••••••"} · {slice.percent.toFixed(1)}%
       </p>
     </div>
   );
@@ -30,11 +32,14 @@ function TooltipCard({ slice }: { slice: Slice }) {
  */
 export function CategoryBreakdownChart({
   data,
+  scope,
   emptyLabel = "Chưa có dữ liệu trong khoảng thời gian này.",
 }: {
   data: CategoryBreakdownItem[];
+  scope: AmountVisibilityScope;
   emptyLabel?: string;
 }) {
+  const [visible] = useAmountVisibility(scope);
   const { slices, total } = useMemo(() => {
     const sum = data.reduce((acc, item) => acc + item.total, 0);
     const sorted = [...data].sort((a, b) => b.total - a.total);
@@ -79,7 +84,7 @@ export function CategoryBreakdownChart({
             <Tooltip
               content={({ active, payload }) =>
                 active && payload?.length ? (
-                  <TooltipCard slice={payload[0].payload as Slice} />
+                  <TooltipCard slice={payload[0].payload as Slice} visible={visible} />
                 ) : null
               }
             />
@@ -89,9 +94,11 @@ export function CategoryBreakdownChart({
         {/* Số tổng đặt giữa donut */}
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-[11px] font-semibold text-muted-foreground">Tổng</span>
-          <span className="px-6 text-center text-sm leading-tight font-extrabold tabular-nums">
-            {formatCurrency(total)}
-          </span>
+          <AmountText
+            amount={total}
+            scope={scope}
+            className="px-6 text-center text-sm leading-tight font-extrabold tabular-nums"
+          />
         </div>
       </div>
 
@@ -108,9 +115,11 @@ export function CategoryBreakdownChart({
             <span className="min-w-0 flex-1 truncate text-sm font-semibold">
               {slice.categoryName}
             </span>
-            <span className="shrink-0 text-right text-sm font-bold tabular-nums">
-              {formatCurrency(slice.total)}
-            </span>
+            <AmountText
+              amount={slice.total}
+              scope={scope}
+              className="shrink-0 text-right text-sm font-bold tabular-nums"
+            />
             <span className="w-11 shrink-0 text-right text-xs font-semibold text-muted-foreground tabular-nums">
               {slice.percent.toFixed(0)}%
             </span>

@@ -9,11 +9,11 @@ import { DateField } from "@/components/ui/date-field";
 import { CategoryBreakdownChart } from "@/components/charts/category-breakdown-chart";
 import { AccountBreakdownChart } from "@/components/charts/account-breakdown-chart";
 import { PageHeader } from "@/components/layout/page-header";
+import { AmountText } from "@/components/shared/amount-text";
 import { useAccountBreakdown, useCategoryBreakdown, usePeriodTotals } from "@/lib/hooks/use-summary";
 import { useTransactions } from "@/lib/hooks/use-transactions";
 import {
   DATE_RANGE_PRESET_LABELS,
-  formatCurrency,
   getPresetRange,
   toQueryDate,
   type DateRangePreset,
@@ -84,6 +84,7 @@ export default function ReportsPage() {
       <PageHeader
         title="Báo cáo"
         subtitle="Tiền của bạn đã đi đâu"
+        amountScope="reports"
         action={
           <Button variant="outline" size="sm" onClick={handleExport}>
             <Download className="size-4" />
@@ -123,9 +124,11 @@ export default function ReportsPage() {
           ].map((item) => (
             <div key={item.label} className="glass rounded-2xl px-3 py-2.5">
               <p className="text-[11px] font-semibold text-muted-foreground">{item.label}</p>
-              <p className={`truncate text-sm font-extrabold tabular-nums ${item.className}`}>
-                {formatCurrency(item.value)}
-              </p>
+              <AmountText
+                amount={item.value}
+                scope="reports"
+                className={`block truncate text-sm font-extrabold tabular-nums ${item.className}`}
+              />
             </div>
           ))}
         </div>
@@ -146,7 +149,7 @@ export default function ReportsPage() {
           </Tabs>
         </CardHeader>
         <CardContent>
-          <CategoryBreakdownChart data={categoryBreakdown ?? []} />
+          <CategoryBreakdownChart data={categoryBreakdown ?? []} scope="reports" />
         </CardContent>
       </Card>
 
@@ -155,7 +158,7 @@ export default function ReportsPage() {
           <CardTitle className="text-base">Theo nguồn tiền</CardTitle>
         </CardHeader>
         <CardContent>
-          <AccountBreakdownChart data={accountBreakdown ?? []} />
+          <AccountBreakdownChart data={accountBreakdown ?? []} scope="reports" />
         </CardContent>
       </Card>
     </div>

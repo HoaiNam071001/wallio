@@ -2,10 +2,8 @@
 
 import * as React from "react";
 import {
+  addDays,
   addMonths,
-  eachDayOfInterval,
-  endOfMonth,
-  endOfWeek,
   format,
   isSameDay,
   isSameMonth,
@@ -36,10 +34,10 @@ export function Calendar({
   const selected = value ? parseISO(value) : undefined;
   const [month, setMonth] = React.useState(() => selected ?? new Date());
 
-  const days = eachDayOfInterval({
-    start: startOfWeek(startOfMonth(month), { weekStartsOn: 1 }),
-    end: endOfWeek(endOfMonth(month), { weekStartsOn: 1 }),
-  });
+  // Luôn đúng 6 tuần (42 ô) để chiều cao lịch không nhảy khi chuyển tháng —
+  // có tháng chỉ cần 5 hàng, có tháng cần 6, nếu để tự nhiên sẽ làm popover đổi cao.
+  const gridStart = startOfWeek(startOfMonth(month), { weekStartsOn: 1 });
+  const days = Array.from({ length: 42 }, (_, i) => addDays(gridStart, i));
 
   const max = maxDate ? parseISO(maxDate) : undefined;
   const min = minDate ? parseISO(minDate) : undefined;

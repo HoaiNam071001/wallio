@@ -10,8 +10,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EntityIcon } from "@/components/shared/entity-icon";
+import { AmountTextForAccount } from "@/components/shared/amount-text";
 import { ACCOUNT_TYPE_META } from "@/components/accounts/account-type";
-import { formatCurrency } from "@/lib/utils";
 import { normalizeColor, withAlpha } from "@/lib/theme/palette";
 import type { AccountWithBalance } from "@/lib/types/database.types";
 
@@ -84,9 +84,9 @@ export function AccountCard({
         {meta.label}
       </p>
 
-      <p className={`mt-2 text-xl font-extrabold tabular-nums ${isDebt ? "text-expense" : ""}`}>
+      <p className={`mt-2 flex items-center text-xl font-extrabold tabular-nums ${isDebt ? "text-expense" : ""}`}>
         {isDebt && displayBalance !== 0 ? "-" : ""}
-        {formatCurrency(displayBalance)}
+        <AmountTextForAccount amount={displayBalance} account={account} scope="accounts" />
       </p>
 
       {/* Nhắc cân đối khi lâu ngày không ghi — số dư lúc đó dễ lệch thực tế */}

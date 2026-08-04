@@ -7,6 +7,7 @@ import { CalendarDays } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsHandheld } from "@/lib/hooks/use-is-handheld";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Calendar } from "@/components/ui/calendar";
 
 type DateFieldProps = Omit<React.ComponentProps<"input">, "value" | "onChange" | "type" | "size"> & {
@@ -15,16 +16,12 @@ type DateFieldProps = Omit<React.ComponentProps<"input">, "value" | "onChange" |
 };
 
 /**
- * Ô chọn ngày, hiển thị dạng đã format (03/08/2026).
- *
- * Trên desktop (chuột): input[type=date] gốc chỉ mở lịch khi bấm trúng icon nhỏ ở rìa —
- * bấm chỗ khác trong ô (nơi người dùng hay bấm) không có phản hồi gì, dễ hiểu lầm là lỗi.
- * Nên desktop dùng lịch tự vẽ trong popover, bấm đâu trên ô cũng mở được.
- *
- * Trên di động (cảm ứng): input native hoạt động tốt — chạm vào là mở thẳng bộ chọn ngày
- * toàn màn hình của hệ điều hành, quen thuộc và mượt hơn lịch tự vẽ nên vẫn giữ nguyên.
+ * Ô chọn ngày, hiển thị dạng đã format (03/08/2026), dùng chung một lịch tự vẽ
+ * (`Calendar`) trên cả desktop và di động để giao diện nhất quán:
+ * - Desktop (chuột): lịch mở trong popover, bấm đâu trên ô cũng mở được.
+ * - Di động (cảm ứng): lịch mở trong modal toàn màn hình, dễ chạm hơn popover.
  */
-export function DateField({ value, onChange, className, id, max, min, ...props }: DateFieldProps) {
+export function DateField({ value, onChange, className, id, max, min }: DateFieldProps) {
   const isHandheld = useIsHandheld();
   const [open, setOpen] = React.useState(false);
 
@@ -42,46 +39,51 @@ export function DateField({ value, onChange, className, id, max, min, ...props }
     </div>
   );
 
-  if (!isHandheld) {
+  const calendar = (
+    <Calendar
+      value={value}
+      maxDate={max as string | undefined}
+      minDate={min as string | undefined}
+      onSelect={(next) => {
+        onChange(next);
+        setOpen(false);
+      }}
+    />
+  );
+
+  if (isHandheld) {
     return (
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <button
-            type="button"
-            id={id}
-            className="w-full cursor-pointer rounded-full outline-none focus-visible:ring-4 focus-visible:ring-brand-500/15"
-          >
-            {pill}
-          </button>
-        </PopoverTrigger>
-        <PopoverContent align="start">
-          <Calendar
-            value={value}
-            maxDate={max as string | undefined}
-            minDate={min as string | undefined}
-            onSelect={(next) => {
-              onChange(next);
-              setOpen(false);
-            }}
-          />
-        </PopoverContent>
-      </Popover>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <button
+          type="button"
+          id={id}
+          onClick={() => setOpen(true)}
+          className="w-full cursor-pointer rounded-full outline-none focus-visible:ring-4 focus-visible:ring-brand-500/15"
+        >
+          {pill}
+        </button>
+        <DialogContent className="w-auto max-w-[calc(100%-2rem)] p-4">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Chọn ngày</DialogTitle>
+          </DialogHeader>
+          {calendar}
+        </DialogContent>
+      </Dialog>
     );
   }
 
   return (
-    <div className={cn("relative", !value && "text-muted-foreground")}>
-      {pill}
-      <input
-        {...props}
-        id={id}
-        type="date"
-        value={value}
-        max={max}
-        min={min}
-        onChange={(event) => onChange(event.target.value)}
-        className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-      />
-    </div>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          id={id}
+          className="w-full cursor-pointer rounded-full outline-none focus-visible:ring-4 focus-visible:ring-brand-500/15"
+        >
+          {pill}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="start">{calendar}</PopoverContent>
+    </Popover>
   );
 }

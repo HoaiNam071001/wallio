@@ -2,7 +2,7 @@
 // Regenerate with `supabase gen types typescript --project-id <ref> > lib/types/database.types.ts`
 // once the Supabase CLI is linked to your project.
 
-export type AccountType = "cash" | "ewallet" | "bank" | "lending" | "debt" | "other";
+export type AccountType = "cash" | "ewallet" | "bank" | "lending" | "debt" | "in_kind" | "other";
 export type CategoryKind = "income" | "expense";
 export type TransactionType = "income" | "expense" | "transfer";
 
@@ -19,6 +19,7 @@ export interface Database {
           is_active: boolean;
           icon: string | null;
           color: string | null;
+          unit: string | null;
           created_at: string;
         };
         Insert: {
@@ -30,6 +31,7 @@ export interface Database {
           is_active?: boolean;
           icon?: string | null;
           color?: string | null;
+          unit?: string | null;
           created_at?: string;
         };
         Update: {
@@ -41,7 +43,35 @@ export interface Database {
           is_active?: boolean;
           icon?: string | null;
           color?: string | null;
+          unit?: string | null;
           created_at?: string;
+        };
+        Relationships: [];
+      };
+      profiles: {
+        Row: {
+          id: string;
+          display_name: string | null;
+          birth_year: number | null;
+          pin_hash: string | null;
+          pin_set_at: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          display_name?: string | null;
+          birth_year?: number | null;
+          pin_hash?: string | null;
+          pin_set_at?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          display_name?: string | null;
+          birth_year?: number | null;
+          pin_hash?: string | null;
+          pin_set_at?: string | null;
+          updated_at?: string;
         };
         Relationships: [];
       };
@@ -81,6 +111,7 @@ export interface Database {
           user_id: string;
           type: TransactionType;
           amount: number;
+          to_amount: number | null;
           account_id: string;
           to_account_id: string | null;
           category_id: string | null;
@@ -93,6 +124,7 @@ export interface Database {
           user_id: string;
           type: TransactionType;
           amount: number;
+          to_amount?: number | null;
           account_id: string;
           to_account_id?: string | null;
           category_id?: string | null;
@@ -105,6 +137,7 @@ export interface Database {
           user_id?: string;
           type?: TransactionType;
           amount?: number;
+          to_amount?: number | null;
           account_id?: string;
           to_account_id?: string | null;
           category_id?: string | null;
@@ -171,6 +204,10 @@ export type TransactionInsert = Database["public"]["Tables"]["transactions"]["In
 export type TransactionUpdate = Database["public"]["Tables"]["transactions"]["Update"];
 
 export type AccountBalance = Database["public"]["Views"]["account_balances"]["Row"];
+
+export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+export type ProfileInsert = Database["public"]["Tables"]["profiles"]["Insert"];
+export type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
 
 /** Bản ghi account đầy đủ (kèm icon/color/initial_balance) ghép với số dư hiện tại. */
 export type AccountWithBalance = Account & {

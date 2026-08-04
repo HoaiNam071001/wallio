@@ -25,6 +25,7 @@ interface RelatedAccount {
   type: string;
   color: string | null;
   icon: string | null;
+  unit: string | null;
 }
 
 interface RelatedCategory {
@@ -49,8 +50,8 @@ export async function listTransactions(
     .from("transactions")
     .select(
       `*,
-      account:accounts!transactions_account_id_fkey(id,name,type,color,icon),
-      to_account:accounts!transactions_to_account_id_fkey(id,name,type,color,icon),
+      account:accounts!transactions_account_id_fkey(id,name,type,color,icon,unit),
+      to_account:accounts!transactions_to_account_id_fkey(id,name,type,color,icon,unit),
       category:categories(id,name,kind,color,icon)`,
     )
     .order("transaction_date", { ascending: false })

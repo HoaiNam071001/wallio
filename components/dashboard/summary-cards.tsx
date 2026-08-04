@@ -1,5 +1,5 @@
 import { HandCoins, Landmark, Receipt, Wallet } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
+import { AmountText } from "@/components/shared/amount-text";
 import type { NetWorthSummary } from "@/lib/queries/summary";
 
 export function SummaryCards({ summary }: { summary: NetWorthSummary }) {
@@ -38,7 +38,11 @@ export function SummaryCards({ summary }: { summary: NetWorthSummary }) {
             </span>
             <div>
               <p className="text-xs font-semibold text-muted-foreground">{item.label}</p>
-              <p className="text-lg font-extrabold tabular-nums">{formatCurrency(item.value)}</p>
+              <AmountText
+                amount={item.value}
+                scope="dashboard"
+                className="text-lg font-extrabold tabular-nums"
+              />
             </div>
           </div>
         );

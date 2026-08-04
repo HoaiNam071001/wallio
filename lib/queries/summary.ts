@@ -118,6 +118,7 @@ export interface AccountBreakdownItem {
   color: string | null;
   icon: string | null;
   type: string;
+  unit: string | null;
   balance: number;
 }
 
@@ -129,6 +130,7 @@ export async function getAccountBreakdown(supabase: Client): Promise<AccountBrea
     color: a.color,
     icon: a.icon,
     type: a.type,
+    unit: a.unit,
     balance: a.current_balance,
   }));
 }

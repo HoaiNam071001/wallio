@@ -25,6 +25,7 @@ import { AccountForm, type AccountFormValues } from "@/components/accounts/accou
 import { BalanceAdjustDialog } from "@/components/accounts/balance-adjust-dialog";
 import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
+import { AmountText } from "@/components/shared/amount-text";
 import { useAuth } from "@/lib/hooks/use-auth";
 import {
   useAccountsWithBalance,
@@ -32,7 +33,6 @@ import {
   useDeleteAccount,
   useUpdateAccount,
 } from "@/lib/hooks/use-accounts";
-import { formatCurrency } from "@/lib/utils";
 import type { AccountWithBalance } from "@/lib/types/database.types";
 
 const LIQUID_TYPES = new Set(["cash", "ewallet", "bank"]);
@@ -113,7 +113,12 @@ export default function AccountsPage() {
     <div className="flex flex-col gap-4">
       <PageHeader
         title="Nguồn tiền"
-        subtitle={`Tiền khả dụng: ${formatCurrency(total)}`}
+        subtitle={
+          <span className="flex items-center gap-1">
+            Tiền khả dụng: <AmountText amount={total} scope="accounts" />
+          </span>
+        }
+        amountScope="accounts"
         action={
           <Button onClick={openCreate} size="sm">
             <Plus className="size-4" />
