@@ -44,7 +44,7 @@ export const en: Dictionary = {
     bank: { label: "Bank", hint: "Bank account" },
     lending: { label: "Lending", hint: "Money you've lent out" },
     debt: { label: "Debt", hint: "Money you owe" },
-    in_kind: { label: "In-kind", hint: "Gold or goods without a fixed price" },
+    in_kind: { label: "Other currency", hint: "USD, crypto, gold... unit other than your base currency" },
     other: { label: "Other", hint: "Other type" },
   },
 
@@ -113,7 +113,7 @@ export const en: Dictionary = {
       subtitle: "Your financial picture",
       incomeExpense: "Income / Expense",
       balanceByAccount: "Balance by account",
-      inKind: "In-kind",
+      inKind: "Other currency",
       recent: "Recent",
       viewAll: "View all",
       emptyRecent: "No entries recorded yet.",

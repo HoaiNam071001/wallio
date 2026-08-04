@@ -42,7 +42,7 @@ export const vi = {
     bank: { label: "Ngân hàng", hint: "Tài khoản ngân hàng" },
     lending: { label: "Cho mượn", hint: "Tiền đang cho mượn" },
     debt: { label: "Khoản nợ", hint: "Tiền đang nợ" },
-    in_kind: { label: "Hiện vật", hint: "Vàng, hiện vật không có giá cố định" },
+    in_kind: { label: "Tiền tệ khác", hint: "Đô la, tiền ảo, vàng... đơn vị khác VNĐ" },
     other: { label: "Khác", hint: "Loại khác" },
   },
 
@@ -111,7 +111,7 @@ export const vi = {
       subtitle: "Bức tranh tài chính của bạn",
       incomeExpense: "Thu / Chi",
       balanceByAccount: "Số dư theo nguồn tiền",
-      inKind: "Hiện vật",
+      inKind: "Tiền tệ khác",
       recent: "Gần đây",
       viewAll: "Xem tất cả",
       emptyRecent: "Chưa có khoản nào được ghi.",
