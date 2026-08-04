@@ -77,12 +77,12 @@ export function ReportsTab() {
               className: totals.net >= 0 ? "text-income" : "text-expense",
             },
           ].map((item) => (
-            <div key={item.label} className="glass rounded-2xl px-3 py-2.5">
-              <p className="text-[11px] font-semibold text-muted-foreground">{item.label}</p>
+            <div key={item.label} className="glass min-w-0 rounded-2xl px-2.5 py-2.5">
+              <p className="truncate text-[11px] font-semibold text-muted-foreground">{item.label}</p>
               <AmountText
                 amount={item.value}
                 scope="reports"
-                className={`block truncate text-sm font-extrabold tabular-nums ${item.className}`}
+                className={`block text-xs font-extrabold tabular-nums sm:text-sm ${item.className}`}
               />
             </div>
           ))}

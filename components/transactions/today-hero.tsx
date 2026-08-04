@@ -64,21 +64,21 @@ export function TodayHero({
       </div>
 
       <div className="relative mt-2.5 grid grid-cols-2 gap-2">
-        <div className="flex items-center justify-between gap-1.5 rounded-xl bg-white/15 px-2.5 py-1.5 backdrop-blur">
+        <div className="min-w-0 rounded-xl bg-white/15 px-2.5 py-1.5 backdrop-blur">
           <span className="flex items-center gap-1 text-[10px] font-semibold text-white/80">
             <ArrowDownLeft className="size-3 shrink-0" />
-            {t("transactions.todayHero.incomeToday")}
+            <span className="truncate">{t("transactions.todayHero.incomeToday")}</span>
           </span>
-          <span className="shrink-0 text-xs font-bold tabular-nums">
+          <span className="block text-xs font-bold tabular-nums">
             {loading ? "—" : <AmountText amount={income} scope="transactions" />}
           </span>
         </div>
-        <div className="flex items-center justify-between gap-1.5 rounded-xl bg-white/15 px-2.5 py-1.5 backdrop-blur">
+        <div className="min-w-0 rounded-xl bg-white/15 px-2.5 py-1.5 backdrop-blur">
           <span className="flex items-center gap-1 text-[10px] font-semibold text-white/80">
             <ArrowUpRight className="size-3 shrink-0" />
-            {t("transactions.todayHero.difference")}
+            <span className="truncate">{t("transactions.todayHero.difference")}</span>
           </span>
-          <span className="shrink-0 text-xs font-bold tabular-nums">
+          <span className="block text-xs font-bold tabular-nums">
             {loading ? "—" : <AmountText amount={income - expense} scope="transactions" />}
           </span>
         </div>
