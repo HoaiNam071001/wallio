@@ -39,15 +39,21 @@ const transactionFormSchema = z
     message: "chooseToAccount" satisfies ValidationCode,
     path: ["to_account_id"],
   })
-  .refine((data) => data.type !== "transfer" || data.to_account_id !== data.account_id, {
-    message: "accountsMustDiffer" satisfies ValidationCode,
-    path: ["to_account_id"],
-  });
+  .refine(
+    (data) =>
+      data.type !== "transfer" || data.to_account_id !== data.account_id,
+    {
+      message: "accountsMustDiffer" satisfies ValidationCode,
+      path: ["to_account_id"],
+    },
+  );
 
 export type TransactionFormValues = z.infer<typeof transactionFormSchema>;
 
 function validationMessage(t: Dictionary, code?: string) {
-  return code ? t.transactions.form.validation[code as ValidationCode] : undefined;
+  return code
+    ? t.transactions.form.validation[code as ValidationCode]
+    : undefined;
 }
 
 /** Gợi ý nhập nhanh cho mobile. */
@@ -67,8 +73,18 @@ export function TransactionForm({
   const { data: accounts } = useAccountsWithBalance();
 
   const TYPE_OPTIONS = [
-    { value: "expense" as const, label: t.transactions.form.typeExpense, icon: ArrowUpRight, color: "var(--expense)" },
-    { value: "income" as const, label: t.transactions.form.typeIncome, icon: ArrowDownLeft, color: "var(--income)" },
+    {
+      value: "expense" as const,
+      label: t.transactions.form.typeExpense,
+      icon: ArrowUpRight,
+      color: "var(--expense)",
+    },
+    {
+      value: "income" as const,
+      label: t.transactions.form.typeIncome,
+      icon: ArrowDownLeft,
+      color: "var(--income)",
+    },
     {
       value: "transfer" as const,
       label: t.transactions.form.typeTransfer,
@@ -79,7 +95,10 @@ export function TransactionForm({
 
   const DATE_SHORTCUTS = [
     { label: t.common.today, value: () => format(new Date(), "yyyy-MM-dd") },
-    { label: t.common.yesterday, value: () => format(subDays(new Date(), 1), "yyyy-MM-dd") },
+    {
+      label: t.common.yesterday,
+      value: () => format(subDays(new Date(), 1), "yyyy-MM-dd"),
+    },
   ];
 
   const {
@@ -94,12 +113,15 @@ export function TransactionForm({
     defaultValues: {
       type: defaultValues?.type ?? "expense",
       amount: defaultValues?.amount ? Number(defaultValues.amount) : undefined,
-      to_amount: defaultValues?.to_amount ? Number(defaultValues.to_amount) : undefined,
+      to_amount: defaultValues?.to_amount
+        ? Number(defaultValues.to_amount)
+        : undefined,
       account_id: defaultValues?.account_id ?? "",
       to_account_id: defaultValues?.to_account_id ?? undefined,
       category_id: defaultValues?.category_id ?? undefined,
       note: defaultValues?.note ?? "",
-      transaction_date: defaultValues?.transaction_date ?? format(new Date(), "yyyy-MM-dd"),
+      transaction_date:
+        defaultValues?.transaction_date ?? format(new Date(), "yyyy-MM-dd"),
     },
   });
 
@@ -124,8 +146,10 @@ export function TransactionForm({
     !!fromAccount &&
     !!toAccount &&
     (fromAccount.type === "in_kind" || toAccount.type === "in_kind");
-  const fromUnit = fromAccount?.type === "in_kind" ? (fromAccount.unit?.trim() || "SL") : "đ";
-  const toUnit = toAccount?.type === "in_kind" ? (toAccount.unit?.trim() || "SL") : "đ";
+  const fromUnit =
+    fromAccount?.type === "in_kind" ? fromAccount.unit?.trim() || "SL" : "đ";
+  const toUnit =
+    toAccount?.type === "in_kind" ? toAccount.unit?.trim() || "SL" : "đ";
 
   // Chỉ reset khi TYPE thực sự đổi (không phải lần mount đầu) — nếu không, sửa một
   // giao dịch có sẵn sẽ bị xoá mất category_id/to_account_id đang hợp lệ ngay khi mở form.
@@ -154,14 +178,19 @@ export function TransactionForm({
 
   function handleFormSubmit(values: TransactionFormValues) {
     if (isDualAmount && !values.to_amount) {
-      setError("to_amount", { message: "enterReceivedAmount" satisfies ValidationCode });
+      setError("to_amount", {
+        message: "enterReceivedAmount" satisfies ValidationCode,
+      });
       return;
     }
     onSubmit(values);
   }
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col gap-5">
+    <form
+      onSubmit={handleSubmit(handleFormSubmit)}
+      className="flex flex-col gap-5"
+    >
       {/* Chọn loại giao dịch */}
       <div className="flex gap-2">
         {TYPE_OPTIONS.map((option) => {
@@ -181,7 +210,9 @@ export function TransactionForm({
               style={active ? { backgroundColor: option.color } : undefined}
             >
               <Icon className="size-5 shrink-0" />
-              <span className="w-full truncate text-center">{option.label}</span>
+              <span className="w-full truncate text-center">
+                {option.label}
+              </span>
             </button>
           );
         })}
@@ -190,9 +221,14 @@ export function TransactionForm({
       {/* Số tiền */}
       <div
         className="rounded-3xl p-4"
-        style={{ backgroundColor: `color-mix(in oklab, ${activeType.color} 10%, transparent)` }}
+        style={{
+          backgroundColor: `color-mix(in oklab, ${activeType.color} 10%, transparent)`,
+        }}
       >
-        <Label htmlFor="amount" className="text-xs font-bold tracking-wide uppercase opacity-70">
+        <Label
+          htmlFor="amount"
+          className="text-xs font-bold tracking-wide uppercase opacity-70"
+        >
           {isDualAmount
             ? t.transactions.form.amountWithAccount(fromAccount?.name ?? "")
             : t.transactions.form.amountLabel}
@@ -204,7 +240,9 @@ export function TransactionForm({
           suffix={fromUnit}
           value={amount}
           onValueChange={(next) =>
-            setValue("amount", next as number, { shouldValidate: !!errors.amount })
+            setValue("amount", next as number, {
+              shouldValidate: !!errors.amount,
+            })
           }
           className="mt-1 h-14 border-0 bg-transparent px-4 text-3xl font-extrabold focus-visible:ring-0 md:text-3xl"
           style={{ color: activeType.color }}
@@ -243,7 +281,9 @@ export function TransactionForm({
               suffix={toUnit}
               value={toAmount}
               onValueChange={(next) =>
-                setValue("to_amount", next as number, { shouldValidate: !!errors.to_amount })
+                setValue("to_amount", next as number, {
+                  shouldValidate: !!errors.to_amount,
+                })
               }
               className="mt-1 h-12 border-0 bg-transparent px-0 text-2xl font-extrabold focus-visible:ring-0"
               style={{ color: activeType.color }}
@@ -278,12 +318,18 @@ export function TransactionForm({
                   <button
                     key={category.id}
                     type="button"
-                    onClick={() => setValue("category_id", active ? undefined : category.id)}
+                    onClick={() =>
+                      setValue("category_id", active ? undefined : category.id)
+                    }
                     className={cn(
                       "flex min-w-0 flex-col items-center gap-1 rounded-2xl border p-2 transition-all active:scale-95",
                       active ? "border-transparent" : "border-transparent",
                     )}
-                    style={active ? { backgroundColor: withAlpha(color, 0.14) } : undefined}
+                    style={
+                      active
+                        ? { backgroundColor: withAlpha(color, 0.14) }
+                        : undefined
+                    }
                   >
                     <EntityIcon
                       icon={category.icon}
@@ -308,16 +354,24 @@ export function TransactionForm({
       )}
 
       {/* Nguồn tiền */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div
+        className={`grid gap-4 ${type === "transfer" ? "grid-cols-2" : "grid-cols-1"}`}
+      >
         <div className="flex min-w-0 flex-col gap-2">
-          <Label>{type === "transfer" ? t.transactions.form.fromAccount : t.transactions.form.account}</Label>
+          <Label>
+            {type === "transfer"
+              ? t.transactions.form.fromAccount
+              : t.transactions.form.account}
+          </Label>
           <AccountSelect
             value={accountId}
             onChange={(v) => setValue("account_id", v)}
             excludeTypes={type !== "transfer" ? ["in_kind"] : undefined}
           />
           {errors.account_id && (
-            <p className="text-sm text-destructive">{validationMessage(t, errors.account_id.message)}</p>
+            <p className="text-sm text-destructive">
+              {validationMessage(t, errors.account_id.message)}
+            </p>
           )}
         </div>
 
@@ -346,8 +400,9 @@ export function TransactionForm({
             <DateField
               id="transaction_date"
               value={transactionDate}
-              onChange={(next) => setValue("transaction_date", next, { shouldValidate: true })}
-              className="w-40"
+              onChange={(next) =>
+                setValue("transaction_date", next, { shouldValidate: true })
+              }
             />
             {DATE_SHORTCUTS.map((shortcut) => {
               const target = shortcut.value();
@@ -355,7 +410,11 @@ export function TransactionForm({
                 <button
                   key={shortcut.label}
                   type="button"
-                  onClick={() => setValue("transaction_date", target, { shouldValidate: true })}
+                  onClick={() =>
+                    setValue("transaction_date", target, {
+                      shouldValidate: true,
+                    })
+                  }
                   className={cn(
                     "rounded-full border px-3 py-1.5 text-xs font-bold transition-all active:scale-95",
                     transactionDate === target
@@ -377,7 +436,11 @@ export function TransactionForm({
 
         <div className="flex min-w-0 flex-col gap-2">
           <Label htmlFor="note">{t.transactions.form.note}</Label>
-          <Textarea id="note" placeholder={t.transactions.form.notePlaceholder} {...register("note")} />
+          <Textarea
+            id="note"
+            placeholder={t.transactions.form.notePlaceholder}
+            {...register("note")}
+          />
         </div>
       </div>
 

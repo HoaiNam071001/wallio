@@ -52,12 +52,12 @@ export function AccountSelect({
                 iconClassName="size-4"
               />
               <span className="min-w-0 flex-1 truncate">{account.name}</span>
-              <AmountTextForAccount
+              {/* <AmountTextForAccount
                 amount={account.current_balance}
                 account={account}
                 scope="transactions"
                 className="shrink-0 text-xs font-semibold text-muted-foreground tabular-nums"
-              />
+              /> */}
             </SelectItem>
           );
         })}
