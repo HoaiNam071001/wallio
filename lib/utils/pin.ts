@@ -34,3 +34,24 @@ export function markPinUnlocked(): void {
 export function clearPinUnlocked(): void {
   window.sessionStorage.removeItem(PIN_UNLOCK_KEY);
 }
+
+/**
+ * Đánh dấu "quên mật khẩu" trước khi sign-out + đăng nhập lại Google. Dùng localStorage
+ * (không phải sessionStorage) vì redirect OAuth có thể mất session storage trên một số
+ * trình duyệt di động. Cờ này được PinGate đọc lại sau khi đăng nhập xong để hiện form
+ * đặt mật khẩu mới thay vì màn hình nhập mã cũ.
+ */
+const PIN_RESET_KEY = "wallio:pin-reset-requested";
+
+export function isPinResetRequested(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.localStorage.getItem(PIN_RESET_KEY) === "1";
+}
+
+export function markPinResetRequested(): void {
+  window.localStorage.setItem(PIN_RESET_KEY, "1");
+}
+
+export function clearPinResetRequested(): void {
+  window.localStorage.removeItem(PIN_RESET_KEY);
+}

@@ -72,6 +72,9 @@ export const vi = {
       checking: "Đang kiểm tra...",
       unlock: "Mở khoá",
       forgot: "Quên mật khẩu?",
+      resetTitle: "Đặt mật khẩu mới",
+      resetSubtitle: "Bạn đã đăng nhập lại thành công, hãy đặt mật khẩu 6 số mới",
+      resetSubmit: "Đặt mật khẩu mới",
     },
     pinReminder: {
       title: "Bạn chưa đặt mật khẩu 6 số",
