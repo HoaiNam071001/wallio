@@ -72,7 +72,7 @@ export function CurrencyInput({
           setText(parsed === undefined ? "" : formatAmount(parsed));
           onBlur?.(event);
         }}
-        className={cn("pr-9 font-semibold tabular-nums", className)}
+        className={cn("pr-9 font-semibold tabular-nums px-4", className)}
       />
       <span className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-sm font-semibold text-muted-foreground">
         {suffix}
