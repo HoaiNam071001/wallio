@@ -6,6 +6,7 @@ import { vi } from "date-fns/locale";
 import { ArrowDownLeft, ArrowUpRight, Eye, EyeOff, Plus } from "lucide-react";
 import { AmountText } from "@/components/shared/amount-text";
 import { useAmountVisibility } from "@/lib/hooks/use-amount-visibility";
+import { ROUTES } from "@/lib/constants/routes";
 
 function greeting(date: Date): string {
   const hour = date.getHours();
@@ -44,7 +45,7 @@ export function TodayHero({
             {format(today, "EEEE, dd MMMM yyyy", { locale: vi })}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col items-end gap-2">
           <button
             type="button"
             onClick={toggle}
@@ -54,7 +55,7 @@ export function TodayHero({
             {visible ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
           </button>
           <Link
-            href="/transactions/new"
+            href={ROUTES.newTransaction}
             className="flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1.5 text-xs font-bold backdrop-blur transition-transform active:scale-95"
           >
             <Plus className="size-3.5" />

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useProfile } from "@/lib/hooks/use-profile";
 import { toQueryDate } from "@/lib/utils";
+import { ROUTES } from "@/lib/constants/routes";
 
 const STORAGE_KEY = "wallio:pin-reminder-last-shown";
 
@@ -48,7 +49,7 @@ export function PinReminderModal() {
           <Button
             onClick={() => {
               dismiss();
-              router.push("/profile");
+              router.push(ROUTES.profile);
             }}
             className="sm:flex-1"
           >

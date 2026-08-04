@@ -9,6 +9,7 @@ import { BrandMark } from "@/components/layout/brand-mark";
 import { Button } from "@/components/ui/button";
 import { useSupabase } from "@/lib/hooks/use-supabase";
 import { clearPinUnlocked } from "@/lib/utils/pin";
+import { ROUTES } from "@/lib/constants/routes";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -18,7 +19,7 @@ export function Sidebar() {
   async function handleSignOut() {
     clearPinUnlocked();
     await supabase.auth.signOut();
-    router.replace("/login");
+    router.replace(ROUTES.login);
     router.refresh();
   }
 
@@ -53,10 +54,10 @@ export function Sidebar() {
 
       <div className="flex flex-col gap-1 p-3">
         <Link
-          href="/profile"
+          href={ROUTES.profile}
           className={cn(
             "flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-semibold transition-all",
-            pathname.startsWith("/profile")
+            pathname.startsWith(ROUTES.profile)
               ? "brand-gradient text-white shadow-glow"
               : "text-muted-foreground hover:bg-white/70 hover:text-foreground dark:hover:bg-white/10",
           )}

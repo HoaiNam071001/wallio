@@ -9,6 +9,7 @@ import { useProfile } from "@/lib/hooks/use-profile";
 import { useSupabase } from "@/lib/hooks/use-supabase";
 import { clearPinUnlocked, hashPin, isPinUnlockedInSession, isValidPin, markPinUnlocked } from "@/lib/utils/pin";
 import { cn } from "@/lib/utils";
+import { ROUTES } from "@/lib/constants/routes";
 
 /**
  * Khoá toàn màn hình sau khi đã đăng nhập Google, nếu người dùng đã đặt PIN 6 số.
@@ -48,7 +49,7 @@ export function PinGate({ children }: { children: React.ReactNode }) {
   async function handleForgot() {
     clearPinUnlocked();
     await supabase.auth.signOut();
-    router.replace("/login");
+    router.replace(ROUTES.login);
   }
 
   return (

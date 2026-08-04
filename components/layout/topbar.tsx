@@ -14,6 +14,7 @@ import { BrandMark } from "@/components/layout/brand-mark";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { useSupabase } from "@/lib/hooks/use-supabase";
 import { clearPinUnlocked } from "@/lib/utils/pin";
+import { ROUTES } from "@/lib/constants/routes";
 
 export function Topbar() {
   const { user } = useAuth();
@@ -23,7 +24,7 @@ export function Topbar() {
   async function handleSignOut() {
     clearPinUnlocked();
     await supabase.auth.signOut();
-    router.replace("/login");
+    router.replace(ROUTES.login);
     router.refresh();
   }
 
@@ -31,7 +32,7 @@ export function Topbar() {
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-white/40 bg-white/60 px-4 backdrop-blur-xl md:justify-end dark:border-white/10 dark:bg-white/5">
-      <Link href="/transactions" className="flex items-center gap-2 md:hidden">
+      <Link href={ROUTES.transactions} className="flex items-center gap-2 md:hidden">
         <BrandMark size={32} />
         <span className="text-lg font-extrabold tracking-tight">Wallio</span>
       </Link>
@@ -51,7 +52,7 @@ export function Topbar() {
             <span className="max-w-[180px] truncate text-muted-foreground">{user?.email}</span>
           </div>
           <DropdownMenuItem asChild>
-            <Link href="/profile">
+            <Link href={ROUTES.profile}>
               <UserCog className="size-4" />
               Hồ sơ
             </Link>

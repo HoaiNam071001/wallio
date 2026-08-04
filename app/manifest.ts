@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { ROUTES } from "@/lib/constants/routes";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -6,7 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: "Wallio",
     description: "Ghi chép thu chi hằng ngày, quản lý nguồn tiền và xem báo cáo trong vài chạm.",
     id: "/",
-    start_url: "/transactions",
+    start_url: ROUTES.transactions,
     scope: "/",
     display: "standalone",
     orientation: "portrait",
@@ -20,8 +21,8 @@ export default function manifest(): MetadataRoute.Manifest {
       { src: "/icons/maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
     shortcuts: [
-      { name: "Thêm giao dịch", short_name: "Thêm", url: "/transactions/new" },
-      { name: "Tổng quan", short_name: "Tổng quan", url: "/dashboard" },
+      { name: "Thêm giao dịch", short_name: "Thêm", url: ROUTES.newTransaction },
+      { name: "Tổng quan", short_name: "Tổng quan", url: ROUTES.dashboard },
     ],
   };
 }

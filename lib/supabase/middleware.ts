@@ -1,15 +1,16 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "@/lib/types/database.types";
+import { ROUTES } from "@/lib/constants/routes";
 
 const PUBLIC_PATHS = [
-  "/login",
-  "/auth/callback",
-  "/offline",
+  ROUTES.login,
+  ROUTES.authCallback,
+  ROUTES.offline,
   "/manifest.webmanifest",
   "/sw.js",
   "/icons",
-  "/transactions", // TEMP: local layout debugging only, revert before done
+  ROUTES.transactions, // TEMP: local layout debugging only, revert before done
 ];
 
 export async function updateSession(request: NextRequest) {
@@ -42,13 +43,13 @@ export async function updateSession(request: NextRequest) {
 
   if (!user && !isPublicPath) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/login";
+    redirectUrl.pathname = ROUTES.login;
     return NextResponse.redirect(redirectUrl);
   }
 
-  if (user && request.nextUrl.pathname === "/login") {
+  if (user && request.nextUrl.pathname === ROUTES.login) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/transactions";
+    redirectUrl.pathname = ROUTES.transactions;
     return NextResponse.redirect(redirectUrl);
   }
 

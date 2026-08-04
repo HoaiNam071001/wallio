@@ -14,6 +14,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { EntityIcon } from "@/components/shared/entity-icon";
 import { AmountTextForAccount } from "@/components/shared/amount-text";
 import { ACCOUNT_TYPE_META } from "@/components/accounts/account-type";
+import { ROUTES } from "@/lib/constants/routes";
 import {
   useAccountBreakdown,
   useNetWorthSummary,
@@ -115,7 +116,7 @@ export default function DashboardPage() {
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold">Gần đây</h2>
         <Link
-          href="/transactions"
+          href={ROUTES.transactions}
           className="flex items-center gap-0.5 text-sm font-semibold text-primary"
         >
           Xem tất cả
@@ -139,7 +140,7 @@ export default function DashboardPage() {
         scope="dashboard"
         open={!!viewing}
         onOpenChange={(open) => !open && setViewing(null)}
-        editHref="/transactions"
+        editHref={ROUTES.transactions}
       />
     </div>
   );

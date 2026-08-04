@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Sparkles, PieChart, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSupabase } from "@/lib/hooks/use-supabase";
+import { ROUTES } from "@/lib/constants/routes";
 
 const HIGHLIGHTS = [
   { icon: Sparkles, text: "Ghi thu chi trong vài giây" },
@@ -20,7 +21,7 @@ export default function LoginPage() {
     setLoading(true);
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: `${window.location.origin}${ROUTES.authCallback}` },
     });
   }
 

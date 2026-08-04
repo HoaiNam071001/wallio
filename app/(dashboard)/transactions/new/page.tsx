@@ -11,6 +11,7 @@ import {
 } from "@/components/transactions/transaction-form";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { useCreateTransaction } from "@/lib/hooks/use-transactions";
+import { ROUTES } from "@/lib/constants/routes";
 
 export default function NewTransactionPage() {
   const router = useRouter();
@@ -31,7 +32,7 @@ export default function NewTransactionPage() {
       {
         onSuccess: () => {
           toast.success("Đã lưu vào sổ 🎉");
-          router.push("/transactions");
+          router.push(ROUTES.transactions);
         },
         onError: () => toast.error("Có lỗi xảy ra, thử lại sau"),
       },

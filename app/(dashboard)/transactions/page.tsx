@@ -25,6 +25,7 @@ import {
 import { TransactionList } from "@/components/transactions/transaction-list";
 import { TransactionDetailDialog } from "@/components/transactions/transaction-detail-dialog";
 import { TodayHero } from "@/components/transactions/today-hero";
+import { ROUTES } from "@/lib/constants/routes";
 import {
   TransactionForm,
   type TransactionFormValues,
@@ -175,7 +176,7 @@ export default function TransactionsPage() {
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold">Các khoản đã ghi</h2>
         <Button size="sm" asChild>
-          <Link href="/transactions/new">
+          <Link href={ROUTES.newTransaction}>
             <Plus className="size-4" />
             Ghi khoản mới
           </Link>
@@ -191,7 +192,7 @@ export default function TransactionsPage() {
           description="Ghi lại khoản chi đầu tiên — chỉ mất vài giây thôi."
           action={
             <Button asChild>
-              <Link href="/transactions/new">
+              <Link href={ROUTES.newTransaction}>
                 <Plus className="size-4" />
                 Ghi khoản mới
               </Link>
