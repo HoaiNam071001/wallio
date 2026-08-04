@@ -3,6 +3,24 @@
 > File này dùng làm bối cảnh (context) cho Claude Code khi scaffold dự án.
 > Đưa file này vào project, sau đó có thể yêu cầu Claude Code: "Đọc PROJECT_SPEC.md và scaffold toàn bộ project theo đúng spec này."
 
+## ⚠️ Đồng bộ với tài liệu mobile (docs/mobile-app/)
+
+Thư mục [docs/mobile-app/](docs/mobile-app/) chứa tài liệu mô tả lại app hiện tại (schema DB, business logic,
+từng màn hình) làm cơ sở build bản React Native/Flutter. Đây là **bản chụp lại trạng thái thực tế của code**,
+không phải spec cố định — khi có thay đổi ở web app làm lệch với các file đó, **phải cập nhật lại file tương ứng
+trong `docs/mobile-app/`** trong cùng lúc, cụ thể:
+
+- Sửa schema Postgres (bảng/cột/view/RLS/migration mới) → cập nhật [docs/mobile-app/DATA_MODEL.md](docs/mobile-app/DATA_MODEL.md)
+- Đổi flow đăng nhập, PIN gate, theme, i18n, điều hướng/nav → [docs/mobile-app/PHASE_1_FOUNDATION.md](docs/mobile-app/PHASE_1_FOUNDATION.md)
+- Đổi CRUD/logic Accounts, Categories, cân đối số dư → [docs/mobile-app/PHASE_2_ACCOUNTS_CATEGORIES.md](docs/mobile-app/PHASE_2_ACCOUNTS_CATEGORIES.md)
+- Đổi form/list giao dịch, transfer, quick-add → [docs/mobile-app/PHASE_3_TRANSACTIONS.md](docs/mobile-app/PHASE_3_TRANSACTIONS.md)
+- Đổi dashboard/báo cáo, công thức summary, chart, export → [docs/mobile-app/PHASE_4_DASHBOARD_REPORTS.md](docs/mobile-app/PHASE_4_DASHBOARD_REPORTS.md)
+- Đổi Profile, preferences, offline/PWA → [docs/mobile-app/PHASE_5_SETTINGS_POLISH.md](docs/mobile-app/PHASE_5_SETTINGS_POLISH.md)
+- Thêm tính năng hoàn toàn mới → thêm mục tương ứng vào README.md và phase phù hợp nhất, hoặc tạo phase mới nếu không khớp phase nào có sẵn
+
+Nếu một task đang làm thay đổi các phần trên, hãy cập nhật file `docs/mobile-app/*.md` liên quan như một phần
+của task đó, không cần đợi user nhắc lại.
+
 ## 1. Mục tiêu
 
 Web app quản lý thu chi cá nhân, responsive (mobile + desktop), có:
