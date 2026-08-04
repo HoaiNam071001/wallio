@@ -10,7 +10,6 @@ export function BottomNav() {
 
   return (
     <nav
-      style={{ background: "red" }}
       className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t border-white/50 bg-white/80 backdrop-blur-xl md:hidden dark:border-white/10 dark:bg-[oklch(0.19_0.03_266)]/85"
     >
       <div className="flex">
