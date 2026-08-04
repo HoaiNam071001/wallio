@@ -69,7 +69,7 @@ export function Sidebar() {
         </Link>
         <Button
           variant="ghost"
-          className="w-full justify-start gap-3 text-muted-foreground"
+          className="w-full justify-start gap-3 text-muted-foreground mt-6"
           onClick={handleSignOut}
         >
           <LogOut className="size-4" />
