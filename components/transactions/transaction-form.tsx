@@ -206,7 +206,7 @@ export function TransactionForm({
           onValueChange={(next) =>
             setValue("amount", next as number, { shouldValidate: !!errors.amount })
           }
-          className="mt-1 h-14 border-0 bg-transparent px-0 text-3xl font-extrabold focus-visible:ring-0 md:text-3xl"
+          className="mt-1 h-14 border-0 bg-transparent px-4 text-3xl font-extrabold focus-visible:ring-0 md:text-3xl"
           style={{ color: activeType.color }}
         />
         {/* {fromAccount?.type !== "in_kind" && (
