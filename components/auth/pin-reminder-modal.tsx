@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useProfile } from "@/lib/hooks/use-profile";
 import { toQueryDate } from "@/lib/utils";
-import { useTranslation } from "@/lib/i18n/use-translation";
+import { useT } from "@/lib/i18n/use-t";
 import { ROUTES } from "@/lib/constants/routes";
 
 const STORAGE_KEY = "wallio:pin-reminder-last-shown";
@@ -19,7 +19,7 @@ function shownToday(): boolean {
 
 export function PinReminderModal() {
   const { data: profile, isLoading } = useProfile();
-  const { t } = useTranslation();
+  const { t } = useT();
   const router = useRouter();
   // Chỉ cần nhớ việc "đã bấm để tắt" trong phiên này — điều kiện hiện hay không được
   // tính lại mỗi lần render từ profile + localStorage, không cần đồng bộ qua effect.
@@ -39,12 +39,12 @@ export function PinReminderModal() {
           <div className="mx-auto flex size-14 items-center justify-center rounded-3xl bg-amber-500/15 text-amber-600 dark:text-amber-400">
             <ShieldAlert className="size-6" />
           </div>
-          <DialogTitle>{t.auth.pinReminder.title}</DialogTitle>
+          <DialogTitle>{t("auth.pinReminder.title")}</DialogTitle>
         </DialogHeader>
-        <p className="text-sm text-muted-foreground">{t.auth.pinReminder.description}</p>
+        <p className="text-sm text-muted-foreground">{t("auth.pinReminder.description")}</p>
         <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
           <Button variant="outline" onClick={dismiss} className="sm:flex-1">
-            {t.auth.pinReminder.later}
+            {t("auth.pinReminder.later")}
           </Button>
           <Button
             onClick={() => {
@@ -53,7 +53,7 @@ export function PinReminderModal() {
             }}
             className="sm:flex-1"
           >
-            {t.auth.pinReminder.setNow}
+            {t("auth.pinReminder.setNow")}
           </Button>
         </div>
       </DialogContent>

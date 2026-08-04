@@ -1,13 +1,14 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EntityIcon } from "@/components/shared/entity-icon";
 import { AmountText } from "@/components/shared/amount-text";
 import { useAmountVisibility, type AmountVisibilityScope } from "@/lib/hooks/use-amount-visibility";
 import { formatCurrency } from "@/lib/utils";
 import { colorForKey } from "@/lib/theme/palette";
-import { useTranslation } from "@/lib/i18n/use-translation";
+import { useT } from "@/lib/i18n/use-t";
 import type { CategoryBreakdownItem } from "@/lib/queries/summary";
 
 interface Slice extends CategoryBreakdownItem {
@@ -27,6 +28,27 @@ function TooltipCard({ slice, visible }: { slice: Slice; visible: boolean }) {
   );
 }
 
+function BreakdownList({ slices, scope }: { slices: Slice[]; scope: AmountVisibilityScope }) {
+  return (
+    <ul className="hide-scrollbar flex max-h-72 min-w-0 flex-col gap-1.5 overflow-y-auto">
+      {slices.map((slice) => (
+        <li key={slice.key} className="flex items-center gap-2.5">
+          <EntityIcon icon={slice.icon} color={slice.fill} className="size-8 rounded-xl" iconClassName="size-4" />
+          <span className="min-w-0 flex-1 truncate text-sm font-semibold">{slice.categoryName}</span>
+          <AmountText
+            amount={slice.total}
+            scope={scope}
+            className="shrink-0 text-right text-sm font-bold tabular-nums"
+          />
+          <span className="w-11 shrink-0 text-right text-xs font-semibold text-muted-foreground tabular-nums">
+            {slice.percent.toFixed(0)}%
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 /**
  * Donut phần trăm theo danh mục. Màu bám theo danh mục (do người dùng chọn),
  * không theo thứ hạng — lọc bớt mục không làm đổi màu các mục còn lại.
@@ -35,13 +57,17 @@ export function CategoryBreakdownChart({
   data,
   scope,
   emptyLabel,
+  variant = "pie",
 }: {
   data: CategoryBreakdownItem[];
   scope: AmountVisibilityScope;
   emptyLabel?: string;
+  /** "bar" = danh sách thanh ngang; "flat" = 1 thanh dẹt chia màu theo tỉ lệ, bấm mở modal chi tiết; "pie" là donut cũ. */
+  variant?: "pie" | "bar" | "flat";
 }) {
-  const { t } = useTranslation();
+  const { t } = useT();
   const [visible] = useAmountVisibility(scope);
+  const [detailOpen, setDetailOpen] = useState(false);
   const { slices, total } = useMemo(() => {
     const sum = data.reduce((acc, item) => acc + item.total, 0);
     const sorted = [...data].sort((a, b) => b.total - a.total);
@@ -62,8 +88,80 @@ export function CategoryBreakdownChart({
   if (slices.length === 0) {
     return (
       <p className="py-6 text-center text-sm text-muted-foreground">
-        {emptyLabel ?? t.charts.categoryBreakdown.empty}
+        {emptyLabel ?? t("charts.categoryBreakdown.empty")}
       </p>
+    );
+  }
+
+  if (variant === "flat") {
+    return (
+      <>
+        <button
+          type="button"
+          onClick={() => setDetailOpen(true)}
+          className="flex w-full flex-col items-center gap-2 rounded-2xl py-1 transition-opacity active:opacity-70"
+        >
+          <div className="flex h-3 w-full overflow-hidden rounded-full">
+            {slices.map((slice) => (
+              <div
+                key={slice.key}
+                style={{ width: `${slice.percent}%`, backgroundColor: slice.fill }}
+                className="h-full first:rounded-l-full last:rounded-r-full"
+              />
+            ))}
+          </div>
+          <AmountText
+            amount={total}
+            scope={scope}
+            className="text-lg font-extrabold tabular-nums"
+          />
+        </button>
+
+        <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t("charts.categoryBreakdown.total")}</DialogTitle>
+            </DialogHeader>
+            <BreakdownList slices={slices} scope={scope} />
+          </DialogContent>
+        </Dialog>
+      </>
+    );
+  }
+
+  if (variant === "bar") {
+    return (
+      <ul className="flex flex-col gap-3">
+        {slices.map((slice) => (
+          <li key={slice.key} className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-2">
+              <EntityIcon
+                icon={slice.icon}
+                color={slice.fill}
+                className="size-8 rounded-xl"
+                iconClassName="size-4"
+              />
+              <span className="min-w-0 flex-1 truncate text-sm font-semibold">
+                {slice.categoryName}
+              </span>
+              <AmountText
+                amount={slice.total}
+                scope={scope}
+                className="shrink-0 text-sm font-bold tabular-nums"
+              />
+              <span className="w-10 shrink-0 text-right text-xs font-semibold text-muted-foreground tabular-nums">
+                {slice.percent.toFixed(0)}%
+              </span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full"
+                style={{ width: `${slice.percent}%`, backgroundColor: slice.fill }}
+              />
+            </div>
+          </li>
+        ))}
+      </ul>
     );
   }
 
@@ -99,7 +197,7 @@ export function CategoryBreakdownChart({
 
         {/* Số tổng đặt giữa donut */}
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-[11px] font-semibold text-muted-foreground">{t.charts.categoryBreakdown.total}</span>
+          <span className="text-[11px] font-semibold text-muted-foreground">{t("charts.categoryBreakdown.total")}</span>
           <AmountText
             amount={total}
             scope={scope}
@@ -109,29 +207,7 @@ export function CategoryBreakdownChart({
       </div>
 
       {/* Chú giải kiêm bảng số liệu */}
-      <ul className="hide-scrollbar flex max-h-52 min-w-0 flex-1 flex-col gap-1.5 overflow-y-auto">
-        {slices.map((slice) => (
-          <li key={slice.key} className="flex items-center gap-2.5">
-            <EntityIcon
-              icon={slice.icon}
-              color={slice.fill}
-              className="size-8 rounded-xl"
-              iconClassName="size-4"
-            />
-            <span className="min-w-0 flex-1 truncate text-sm font-semibold">
-              {slice.categoryName}
-            </span>
-            <AmountText
-              amount={slice.total}
-              scope={scope}
-              className="shrink-0 text-right text-sm font-bold tabular-nums"
-            />
-            <span className="w-11 shrink-0 text-right text-xs font-semibold text-muted-foreground tabular-nums">
-              {slice.percent.toFixed(0)}%
-            </span>
-          </li>
-        ))}
-      </ul>
+      <BreakdownList slices={slices} scope={scope} />
     </div>
   );
 }

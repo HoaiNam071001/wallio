@@ -11,13 +11,13 @@ import {
 } from "@/components/transactions/transaction-form";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { useCreateTransaction } from "@/lib/hooks/use-transactions";
-import { useTranslation } from "@/lib/i18n/use-translation";
+import { useT } from "@/lib/i18n/use-t";
 import { ROUTES } from "@/lib/constants/routes";
 
 export default function NewTransactionPage() {
   const router = useRouter();
   const { user } = useAuth();
-  const { t } = useTranslation();
+  const { t } = useT();
   const createTransaction = useCreateTransaction();
 
   function handleSubmit(values: TransactionFormValues) {
@@ -33,10 +33,10 @@ export default function NewTransactionPage() {
       },
       {
         onSuccess: () => {
-          toast.success(t.transactions.new.toastSaved);
+          toast.success(t("transactions.new.toastSaved"));
           router.push(ROUTES.transactions);
         },
-        onError: () => toast.error(t.common.genericError),
+        onError: () => toast.error(t("common.genericError")),
       },
     );
   }
@@ -44,10 +44,10 @@ export default function NewTransactionPage() {
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-4">
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" aria-label={t.transactions.new.backAria} onClick={() => router.back()}>
+        <Button variant="ghost" size="icon" aria-label={t("transactions.new.backAria")} onClick={() => router.back()}>
           <ArrowLeft className="size-4" />
         </Button>
-        <h1 className="text-xl font-extrabold">{t.transactions.new.title}</h1>
+        <h1 className="text-xl font-extrabold">{t("transactions.new.title")}</h1>
       </div>
 
       <div className="glass rounded-3xl p-4">

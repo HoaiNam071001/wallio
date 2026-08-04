@@ -8,7 +8,7 @@ import { NAV_ITEMS } from "@/components/layout/nav-items";
 import { BrandMark } from "@/components/layout/brand-mark";
 import { Button } from "@/components/ui/button";
 import { useSupabase } from "@/lib/hooks/use-supabase";
-import { useTranslation } from "@/lib/i18n/use-translation";
+import { useT } from "@/lib/i18n/use-t";
 import { clearPinUnlocked } from "@/lib/utils/pin";
 import { ROUTES } from "@/lib/constants/routes";
 
@@ -16,7 +16,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const supabase = useSupabase();
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t } = useT();
 
   async function handleSignOut() {
     clearPinUnlocked();
@@ -48,7 +48,7 @@ export function Sidebar() {
               )}
             >
               <Icon className="size-4.5" />
-              {t.nav[item.navKey].label}
+              {t(`nav.${item.navKey}.label`)}
             </Link>
           );
         })}
@@ -65,7 +65,7 @@ export function Sidebar() {
           )}
         >
           <UserCog className="size-4.5" />
-          {t.layout.profile}
+          {t("layout.profile")}
         </Link>
         <Button
           variant="ghost"
@@ -73,7 +73,7 @@ export function Sidebar() {
           onClick={handleSignOut}
         >
           <LogOut className="size-4" />
-          {t.layout.signOut}
+          {t("layout.signOut")}
         </Button>
       </div>
     </aside>

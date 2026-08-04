@@ -4,11 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { MOBILE_NAV_ITEMS } from "@/components/layout/nav-items";
-import { useTranslation } from "@/lib/i18n/use-translation";
+import { useT } from "@/lib/i18n/use-t";
 
 export function BottomNav() {
   const pathname = usePathname();
-  const { t } = useTranslation();
+  const { t } = useT();
 
   return (
     <nav
@@ -39,7 +39,7 @@ export function BottomNav() {
                   active ? "text-primary" : "text-muted-foreground",
                 )}
               >
-                {t.nav[item.navKey].shortLabel}
+                {t(`nav.${item.navKey}.shortLabel`)}
               </span>
             </Link>
           );

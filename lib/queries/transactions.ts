@@ -17,6 +17,7 @@ export interface TransactionFilters {
   type?: TransactionType;
   search?: string;
   limit?: number;
+  offset?: number;
 }
 
 interface RelatedAccount {
@@ -64,7 +65,11 @@ export async function listTransactions(
   if (filters.categoryId) query = query.eq("category_id", filters.categoryId);
   if (filters.type) query = query.eq("type", filters.type);
   if (filters.search) query = query.ilike("note", `%${filters.search}%`);
-  if (filters.limit) query = query.limit(filters.limit);
+  if (filters.limit && filters.offset !== undefined) {
+    query = query.range(filters.offset, filters.offset + filters.limit - 1);
+  } else if (filters.limit) {
+    query = query.limit(filters.limit);
+  }
 
   const { data, error } = await query;
   if (error) throw error;
@@ -76,6 +81,18 @@ export async function createTransaction(
   input: TransactionInsert,
 ): Promise<Transaction> {
   const { data, error } = await supabase.from("transactions").insert(input).select().single();
+
+  if (error) throw error;
+  return data;
+}
+
+/** Tạo nhiều giao dịch cùng lúc — dùng khi nhập CSV, một round-trip thay vì N lần insert đơn. */
+export async function bulkCreateTransactions(
+  supabase: Client,
+  inputs: TransactionInsert[],
+): Promise<Transaction[]> {
+  if (inputs.length === 0) return [];
+  const { data, error } = await supabase.from("transactions").insert(inputs).select();
 
   if (error) throw error;
   return data;

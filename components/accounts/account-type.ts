@@ -1,6 +1,6 @@
+import type { TFunction } from "i18next";
 import type { AccountType } from "@/lib/types/database.types";
 import type { IconName } from "@/lib/theme/icons";
-import type { Dictionary } from "@/lib/i18n/dictionaries/vi";
 
 export interface AccountTypeMeta {
   /** Icon + màu mặc định khi người dùng chưa tự chọn. */
@@ -19,10 +19,10 @@ export const ACCOUNT_TYPE_META: Record<AccountType, AccountTypeMeta> = {
   other: { icon: "Wallet", color: "#64748b" },
 };
 
-export function accountTypeOptions(t: Dictionary) {
+export function accountTypeOptions(t: TFunction) {
   return (Object.keys(ACCOUNT_TYPE_META) as AccountType[]).map((value) => ({
     value,
     ...ACCOUNT_TYPE_META[value],
-    ...t.accountType[value],
+    ...(t(`accountType.${value}`, { returnObjects: true }) as { label: string; hint: string }),
   }));
 }

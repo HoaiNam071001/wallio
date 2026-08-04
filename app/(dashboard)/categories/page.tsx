@@ -28,11 +28,11 @@ import {
   useUpdateCategory,
 } from "@/lib/hooks/use-categories";
 import { normalizeColor, withAlpha } from "@/lib/theme/palette";
-import { useTranslation } from "@/lib/i18n/use-translation";
+import { useT } from "@/lib/i18n/use-t";
 import type { Category, CategoryKind } from "@/lib/types/database.types";
 
 export default function CategoriesPage() {
-  const { t } = useTranslation();
+  const { t } = useT();
   const { user } = useAuth();
   const { data: categories, isLoading } = useCategories();
   const createCategory = useCreateCategory();
@@ -65,10 +65,10 @@ export default function CategoriesPage() {
         { id: editing.id, input: values },
         {
           onSuccess: () => {
-            toast.success(t.categories.page.toastUpdated);
+            toast.success(t("categories.page.toastUpdated"));
             setFormOpen(false);
           },
-          onError: () => toast.error(t.common.genericError),
+          onError: () => toast.error(t("common.genericError")),
         },
       );
       return;
@@ -79,10 +79,10 @@ export default function CategoriesPage() {
       { ...values, user_id: user.id },
       {
         onSuccess: () => {
-          toast.success(t.categories.page.toastAdded);
+          toast.success(t("categories.page.toastAdded"));
           setFormOpen(false);
         },
-        onError: () => toast.error(t.common.genericError),
+        onError: () => toast.error(t("common.genericError")),
       },
     );
   }
@@ -91,11 +91,11 @@ export default function CategoriesPage() {
     if (!deleting) return;
     deleteCategory.mutate(deleting.id, {
       onSuccess: () => {
-        toast.success(t.categories.page.toastDeleted);
+        toast.success(t("categories.page.toastDeleted"));
         setDeleting(null);
       },
       onError: () => {
-        toast.error(t.categories.page.toastDeleteError);
+        toast.error(t("categories.page.toastDeleteError"));
         setDeleting(null);
       },
     });
@@ -104,36 +104,37 @@ export default function CategoriesPage() {
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
-        title={t.categories.page.title}
-        subtitle={t.categories.page.subtitle}
+        title={t("categories.page.title")}
+        subtitle={t("categories.page.subtitle")}
         action={
           <Button size="sm" onClick={openCreate}>
             <Plus className="size-4" />
-            {t.common.add}
+            {t("common.add")}
           </Button>
         }
       />
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as CategoryKind)}>
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="expense">{t.categories.page.tabExpense}</TabsTrigger>
-          <TabsTrigger value="income">{t.categories.page.tabIncome}</TabsTrigger>
+          <TabsTrigger value="expense">{t("categories.page.tabExpense")}</TabsTrigger>
+          <TabsTrigger value="income">{t("categories.page.tabIncome")}</TabsTrigger>
         </TabsList>
       </Tabs>
 
-      {isLoading && <p className="text-muted-foreground">{t.common.loading}</p>}
+      {isLoading && <p className="text-muted-foreground">{t("common.loading")}</p>}
 
       {!isLoading && filtered.length === 0 && (
         <EmptyState
           icon={Tags}
-          title={t.categories.page.emptyTitle(
-            tab === "income" ? t.transactions.form.kindIncomeLower : t.transactions.form.kindExpenseLower,
-          )}
-          description={t.categories.page.emptyDescription}
+          title={t("categories.page.emptyTitle", {
+            kind:
+              tab === "income" ? t("transactions.form.kindIncomeLower") : t("transactions.form.kindExpenseLower"),
+          })}
+          description={t("categories.page.emptyDescription")}
           action={
             <Button onClick={openCreate}>
               <Plus className="size-4" />
-              {t.categories.page.addCategory}
+              {t("categories.page.addCategory")}
             </Button>
           }
         />
@@ -157,7 +158,7 @@ export default function CategoriesPage() {
                   variant="ghost"
                   size="icon"
                   className="size-8"
-                  aria-label={t.common.edit}
+                  aria-label={t("common.edit")}
                   onClick={() => openEdit(category)}
                 >
                   <Pencil className="size-4" />
@@ -166,7 +167,7 @@ export default function CategoriesPage() {
                   variant="ghost"
                   size="icon"
                   className="size-8 text-destructive"
-                  aria-label={t.common.delete}
+                  aria-label={t("common.delete")}
                   onClick={() => setDeleting(category)}
                 >
                   <Trash2 className="size-4" />
@@ -180,7 +181,7 @@ export default function CategoriesPage() {
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editing ? t.categories.page.editTitle : t.categories.page.addTitle}</DialogTitle>
+            <DialogTitle>{editing ? t("categories.page.editTitle") : t("categories.page.addTitle")}</DialogTitle>
           </DialogHeader>
           <CategoryForm
             defaultValues={editing ?? { kind: tab }}
@@ -193,12 +194,12 @@ export default function CategoriesPage() {
       <AlertDialog open={!!deleting} onOpenChange={(open) => !open && setDeleting(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t.categories.page.deleteTitle(deleting?.name ?? "")}</AlertDialogTitle>
-            <AlertDialogDescription>{t.categories.page.deleteDescription}</AlertDialogDescription>
+            <AlertDialogTitle>{t("categories.page.deleteTitle", { name: deleting?.name ?? "" })}</AlertDialogTitle>
+            <AlertDialogDescription>{t("categories.page.deleteDescription")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>{t.common.delete}</AlertDialogAction>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>{t("common.delete")}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -1,21 +1,21 @@
 import { HandCoins, Landmark, Receipt, Wallet } from "lucide-react";
 import { AmountText } from "@/components/shared/amount-text";
-import { useTranslation } from "@/lib/i18n/use-translation";
+import { useT } from "@/lib/i18n/use-t";
 import type { NetWorthSummary } from "@/lib/queries/summary";
 
 export function SummaryCards({ summary }: { summary: NetWorthSummary }) {
-  const { t } = useTranslation();
+  const { t } = useT();
   const items = [
     {
-      label: t.dashboard.summaryCards.netWorth,
+      label: t("dashboard.summaryCards.netWorth"),
       value: summary.netWorth,
       icon: Wallet,
       color: "#3b82f6",
       wide: true,
     },
-    { label: t.dashboard.summaryCards.available, value: summary.availableCash, icon: Landmark, color: "#10b981" },
-    { label: t.dashboard.summaryCards.lending, value: summary.lending, icon: HandCoins, color: "#f59e0b" },
-    { label: t.dashboard.summaryCards.debt, value: summary.debt, icon: Receipt, color: "#ef4444" },
+    { label: t("dashboard.summaryCards.available"), value: summary.availableCash, icon: Landmark, color: "#10b981" },
+    { label: t("dashboard.summaryCards.lending"), value: summary.lending, icon: HandCoins, color: "#f59e0b" },
+    { label: t("dashboard.summaryCards.debt"), value: summary.debt, icon: Receipt, color: "#ef4444" },
   ];
 
   return (

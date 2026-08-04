@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSupabase } from "@/lib/hooks/use-supabase";
 import {
   createTransaction,
@@ -22,6 +22,24 @@ export function useTransactions(filters: TransactionFilters = {}) {
   return useQuery({
     queryKey: ["transactions", filters],
     queryFn: () => listTransactions(supabase, filters),
+  });
+}
+
+const INFINITE_PAGE_SIZE = 20;
+
+/** Danh sách giao dịch phân trang kiểu "Xem thêm" — dùng cho sổ thu chi thay vì tải hết một lần. */
+export function useInfiniteTransactions(
+  filters: Omit<TransactionFilters, "limit" | "offset"> = {},
+  pageSize: number = INFINITE_PAGE_SIZE,
+) {
+  const supabase = useSupabase();
+  return useInfiniteQuery({
+    queryKey: ["transactions", "infinite", filters, pageSize],
+    queryFn: ({ pageParam }) =>
+      listTransactions(supabase, { ...filters, limit: pageSize, offset: pageParam }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.length < pageSize ? undefined : allPages.length * pageSize,
   });
 }
 

@@ -14,19 +14,19 @@ import {
 import { EntityIcon } from "@/components/shared/entity-icon";
 import { AmountText, AmountTextForAccount } from "@/components/shared/amount-text";
 import { ACCOUNT_TYPE_META } from "@/components/accounts/account-type";
-import { useTranslation } from "@/lib/i18n/use-translation";
-import type { Dictionary } from "@/lib/i18n/dictionaries/vi";
+import { useT } from "@/lib/i18n/use-t";
+import type { TFunction } from "i18next";
 import type { AmountVisibilityScope } from "@/lib/hooks/use-amount-visibility";
-import type { Locale } from "@/lib/i18n/locale-store";
+import type { Locale } from "@/lib/i18n";
 import type { AccountType } from "@/lib/types/database.types";
 import type { TransactionWithRelations } from "@/lib/queries/transactions";
 
 const FALLBACK_ACCOUNT = { type: "cash" as AccountType, unit: null as string | null };
 
-function dayLabel(t: Dictionary, locale: Locale, date: string): string {
+function dayLabel(t: TFunction, locale: Locale, date: string): string {
   const parsed = parseISO(date);
-  if (isToday(parsed)) return t.common.today;
-  if (isYesterday(parsed)) return t.common.yesterday;
+  if (isToday(parsed)) return t("common.today");
+  if (isYesterday(parsed)) return t("common.yesterday");
   return format(parsed, "EEEE, dd/MM", { locale: locale === "en" ? enUS : vi });
 }
 
@@ -55,7 +55,7 @@ function TransactionRow({
   onEdit?: (transaction: TransactionWithRelations) => void;
   onDelete?: (transaction: TransactionWithRelations) => void;
 }) {
-  const { t: tr } = useTranslation();
+  const { t: tr } = useT();
   const visuals = visualsOf(t);
   const amountClass =
     t.type === "income" ? "text-income" : t.type === "expense" ? "text-expense" : "text-transfer";
@@ -64,26 +64,26 @@ function TransactionRow({
   const title =
     t.type === "transfer"
       ? `${t.account?.name ?? "?"} → ${t.to_account?.name ?? "?"}`
-      : (t.category?.name ?? tr.common.uncategorized);
+      : (t.category?.name ?? tr("common.uncategorized"));
 
-  const subtitle = t.type === "transfer" ? tr.common.transfer : (t.account?.name ?? "");
+  const subtitle = t.type === "transfer" ? tr("common.transfer") : (t.account?.name ?? "");
 
   // Chuyển đổi hiện vật (vd Momo -> vàng) có 2 vế số khác nhau/khác đơn vị.
   const isDualLeg = t.type === "transfer" && t.to_amount != null && t.to_amount !== t.amount;
 
   return (
-    <div className="flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-accent/40">
+    <div className="flex items-center gap-2.5 px-3 py-2 transition-colors hover:bg-accent/40">
       <button
         type="button"
         onClick={() => onView?.(t)}
-        className="flex min-w-0 flex-1 items-center gap-3 text-left"
+        className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
       >
         {t.type === "transfer" ? (
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-transfer/14 text-transfer">
-            <ArrowLeftRight className="size-5" />
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-transfer/14 text-transfer">
+            <ArrowLeftRight className="size-4" />
           </span>
         ) : (
-          <EntityIcon icon={visuals.icon} color={visuals.color} />
+          <EntityIcon icon={visuals.icon} color={visuals.color} className="size-9 rounded-xl" iconClassName="size-4" />
         )}
 
         <div className="min-w-0 flex-1">
@@ -120,7 +120,7 @@ function TransactionRow({
         {(onEdit || onDelete) && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="size-8">
+              <Button variant="ghost" size="icon" className="size-7">
                 <MoreVertical className="size-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -128,13 +128,13 @@ function TransactionRow({
               {onEdit && (
                 <DropdownMenuItem onClick={() => onEdit(t)}>
                   <Pencil className="size-4" />
-                  {tr.common.edit}
+                  {tr("common.edit")}
                 </DropdownMenuItem>
               )}
               {onDelete && (
                 <DropdownMenuItem variant="destructive" onClick={() => onDelete(t)}>
                   <Trash2 className="size-4" />
-                  {tr.common.delete}
+                  {tr("common.delete")}
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
@@ -160,7 +160,7 @@ export function TransactionList({
   onDelete?: (transaction: TransactionWithRelations) => void;
   emptyLabel?: string;
 }) {
-  const { t, locale } = useTranslation();
+  const { t, locale } = useT();
   // Gom theo ngày để danh sách dễ quét mắt hơn một bảng phẳng.
   const groups = useMemo(() => {
     const byDate = new Map<string, TransactionWithRelations[]>();
@@ -183,7 +183,7 @@ export function TransactionList({
   if (transactions.length === 0) {
     return (
       <p className="py-6 text-center text-sm text-muted-foreground">
-        {emptyLabel ?? t.transactions.list.empty}
+        {emptyLabel ?? t("transactions.list.empty")}
       </p>
     );
   }

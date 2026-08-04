@@ -2,24 +2,24 @@
 
 import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
 import { AmountText } from "@/components/shared/amount-text";
-import { useTranslation } from "@/lib/i18n/use-translation";
+import { useT } from "@/lib/i18n/use-t";
 
 /**
  * So sánh thu / chi trong kỳ. Chỉ có hai giá trị nên dùng thanh tỉ lệ trực tiếp
  * (kèm nhãn số) thay vì biểu đồ cột — dễ đọc hơn trên màn hình hẹp.
  */
 export function IncomeExpenseChart({ income, expense }: { income: number; expense: number }) {
-  const { t } = useTranslation();
+  const { t } = useT();
   const max = Math.max(income, expense, 1);
   const rows = [
     {
-      label: t.charts.incomeExpense.income,
+      label: t("charts.incomeExpense.income"),
       value: income,
       icon: ArrowDownLeft,
       color: "var(--income)",
     },
     {
-      label: t.charts.incomeExpense.expense,
+      label: t("charts.incomeExpense.expense"),
       value: expense,
       icon: ArrowUpRight,
       color: "var(--expense)",
@@ -57,7 +57,7 @@ export function IncomeExpenseChart({ income, expense }: { income: number; expens
       })}
 
       <div className="flex items-center justify-between rounded-2xl bg-muted/60 px-3 py-2">
-        <span className="text-sm font-semibold text-muted-foreground">{t.charts.incomeExpense.remaining}</span>
+        <span className="text-sm font-semibold text-muted-foreground">{t("charts.incomeExpense.remaining")}</span>
         <AmountText
           amount={income - expense}
           scope="dashboard"

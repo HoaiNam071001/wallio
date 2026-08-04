@@ -17,12 +17,18 @@ import { useCategories } from "@/lib/hooks/use-categories";
 import { useAccountsWithBalance } from "@/lib/hooks/use-accounts";
 import { cn, formatAmount } from "@/lib/utils";
 import { normalizeColor, withAlpha } from "@/lib/theme/palette";
-import { useTranslation } from "@/lib/i18n/use-translation";
-import type { Dictionary } from "@/lib/i18n/dictionaries/vi";
+import { useT } from "@/lib/i18n/use-t";
+import type { TFunction } from "i18next";
 import type { Transaction, TransactionType } from "@/lib/types/database.types";
 
-/** Zod message chỉ giữ mã lỗi — nội dung hiển thị lấy từ t.transactions.form.validation[code]. */
-type ValidationCode = keyof Dictionary["transactions"]["form"]["validation"];
+/** Zod message chỉ giữ mã lỗi — nội dung hiển thị lấy từ t(`transactions.form.validation.${code}`). */
+type ValidationCode =
+  | "amountPositive"
+  | "chooseAccount"
+  | "chooseToAccount"
+  | "accountsMustDiffer"
+  | "chooseDate"
+  | "enterReceivedAmount";
 
 const transactionFormSchema = z
   .object({
@@ -50,10 +56,8 @@ const transactionFormSchema = z
 
 export type TransactionFormValues = z.infer<typeof transactionFormSchema>;
 
-function validationMessage(t: Dictionary, code?: string) {
-  return code
-    ? t.transactions.form.validation[code as ValidationCode]
-    : undefined;
+function validationMessage(t: TFunction, code?: string) {
+  return code ? t(`transactions.form.validation.${code as ValidationCode}`) : undefined;
 }
 
 /** Gợi ý nhập nhanh cho mobile. */
@@ -68,35 +72,35 @@ export function TransactionForm({
   onSubmit: (values: TransactionFormValues) => void;
   submitting?: boolean;
 }) {
-  const { t } = useTranslation();
+  const { t } = useT();
   const { data: categories } = useCategories();
   const { data: accounts } = useAccountsWithBalance();
 
   const TYPE_OPTIONS = [
     {
       value: "expense" as const,
-      label: t.transactions.form.typeExpense,
+      label: t("transactions.form.typeExpense"),
       icon: ArrowUpRight,
       color: "var(--expense)",
     },
     {
       value: "income" as const,
-      label: t.transactions.form.typeIncome,
+      label: t("transactions.form.typeIncome"),
       icon: ArrowDownLeft,
       color: "var(--income)",
     },
     {
       value: "transfer" as const,
-      label: t.transactions.form.typeTransfer,
+      label: t("transactions.form.typeTransfer"),
       icon: ArrowLeftRight,
       color: "var(--transfer)",
     },
   ];
 
   const DATE_SHORTCUTS = [
-    { label: t.common.today, value: () => format(new Date(), "yyyy-MM-dd") },
+    { label: t("common.today"), value: () => format(new Date(), "yyyy-MM-dd") },
     {
-      label: t.common.yesterday,
+      label: t("common.yesterday"),
       value: () => format(subDays(new Date(), 1), "yyyy-MM-dd"),
     },
   ];
@@ -230,8 +234,8 @@ export function TransactionForm({
           className="text-xs font-bold tracking-wide uppercase opacity-70"
         >
           {isDualAmount
-            ? t.transactions.form.amountWithAccount(fromAccount?.name ?? "")
-            : t.transactions.form.amountLabel}
+            ? t("transactions.form.amountWithAccount", { account: fromAccount?.name ?? "" })
+            : t("transactions.form.amountLabel")}
         </Label>
         <CurrencyInput
           id="amount"
@@ -273,7 +277,7 @@ export function TransactionForm({
               htmlFor="to_amount"
               className="text-xs font-bold tracking-wide uppercase opacity-70"
             >
-              {t.transactions.form.receivedWithAccount(toAccount?.name ?? "")}
+              {t("transactions.form.receivedWithAccount", { account: toAccount?.name ?? "" })}
             </Label>
             <CurrencyInput
               id="to_amount"
@@ -300,14 +304,15 @@ export function TransactionForm({
       {/* Danh mục dạng chip */}
       {type !== "transfer" && (
         <div className="flex flex-col gap-2">
-          <Label>{t.transactions.form.category}</Label>
+          <Label>{t("transactions.form.category")}</Label>
           {relevantCategories.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              {t.transactions.form.noCategoryOf(
-                type === "income"
-                  ? t.transactions.form.kindIncomeLower
-                  : t.transactions.form.kindExpenseLower,
-              )}
+              {t("transactions.form.noCategoryOf", {
+                kind:
+                  type === "income"
+                    ? t("transactions.form.kindIncomeLower")
+                    : t("transactions.form.kindExpenseLower"),
+              })}
             </p>
           ) : (
             <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
@@ -360,8 +365,8 @@ export function TransactionForm({
         <div className="flex min-w-0 flex-col gap-2">
           <Label>
             {type === "transfer"
-              ? t.transactions.form.fromAccount
-              : t.transactions.form.account}
+              ? t("transactions.form.fromAccount")
+              : t("transactions.form.account")}
           </Label>
           <AccountSelect
             value={accountId}
@@ -377,11 +382,11 @@ export function TransactionForm({
 
         {type === "transfer" && (
           <div className="flex min-w-0 flex-col gap-2">
-            <Label>{t.transactions.form.toAccount}</Label>
+            <Label>{t("transactions.form.toAccount")}</Label>
             <AccountSelect
               value={toAccountId}
               onChange={(v) => setValue("to_account_id", v)}
-              placeholder={t.transactions.form.toAccountPlaceholder}
+              placeholder={t("transactions.form.toAccountPlaceholder")}
               excludeId={accountId}
             />
             {errors.to_account_id && (
@@ -395,7 +400,7 @@ export function TransactionForm({
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex min-w-0 flex-col gap-2">
-          <Label htmlFor="transaction_date">{t.transactions.form.date}</Label>
+          <Label htmlFor="transaction_date">{t("transactions.form.date")}</Label>
           <div className="flex flex-wrap items-center gap-2">
             <DateField
               id="transaction_date"
@@ -435,17 +440,17 @@ export function TransactionForm({
         </div>
 
         <div className="flex min-w-0 flex-col gap-2">
-          <Label htmlFor="note">{t.transactions.form.note}</Label>
+          <Label htmlFor="note">{t("transactions.form.note")}</Label>
           <Textarea
             id="note"
-            placeholder={t.transactions.form.notePlaceholder}
+            placeholder={t("transactions.form.notePlaceholder")}
             {...register("note")}
           />
         </div>
       </div>
 
       <Button type="submit" size="lg" disabled={submitting}>
-        {submitting ? t.common.saving : t.transactions.form.submit}
+        {submitting ? t("common.saving") : t("transactions.form.submit")}
       </Button>
     </form>
   );

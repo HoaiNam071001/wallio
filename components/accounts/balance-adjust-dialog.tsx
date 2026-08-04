@@ -20,7 +20,7 @@ import { EntityIcon } from "@/components/shared/entity-icon";
 import { ACCOUNT_TYPE_META } from "@/components/accounts/account-type";
 import { useAccountBalanceAsOf, useAdjustBalance } from "@/lib/hooks/use-accounts";
 import { useAuth } from "@/lib/hooks/use-auth";
-import { useTranslation } from "@/lib/i18n/use-translation";
+import { useT } from "@/lib/i18n/use-t";
 import { formatCurrency } from "@/lib/utils";
 import type { AccountWithBalance } from "@/lib/types/database.types";
 
@@ -55,7 +55,7 @@ function AdjustForm({
   onDone: () => void;
 }) {
   const { user } = useAuth();
-  const { t } = useTranslation();
+  const { t } = useT();
   const adjust = useAdjustBalance();
 
   const [date, setDate] = useState(() => format(new Date(), "yyyy-MM-dd"));
@@ -79,12 +79,14 @@ function AdjustForm({
         onSuccess: (result) => {
           toast.success(
             result.difference === 0
-              ? t.accounts.balanceAdjust.toastMatched
-              : t.accounts.balanceAdjust.toastAdjusted(formatCurrency(Math.abs(result.difference))),
+              ? t("accounts.balanceAdjust.toastMatched")
+              : t("accounts.balanceAdjust.toastAdjusted", {
+                  amount: formatCurrency(Math.abs(result.difference)),
+                }),
           );
           onDone();
         },
-        onError: () => toast.error(t.common.genericError),
+        onError: () => toast.error(t("common.genericError")),
       },
     );
   }
@@ -94,9 +96,9 @@ function AdjustForm({
       <DialogHeader>
         <DialogTitle className="flex items-center gap-2">
           <Scale className="size-5 text-brand-600" />
-          {t.accounts.balanceAdjust.title}
+          {t("accounts.balanceAdjust.title")}
         </DialogTitle>
-        <DialogDescription>{t.accounts.balanceAdjust.description}</DialogDescription>
+        <DialogDescription>{t("accounts.balanceAdjust.description")}</DialogDescription>
       </DialogHeader>
 
       <div className="flex items-center gap-3 rounded-2xl bg-muted/50 p-3">
@@ -108,18 +110,18 @@ function AdjustForm({
         />
         <div className="min-w-0">
           <p className="truncate font-bold">{account.name}</p>
-          <p className="text-xs text-muted-foreground">{t.accountType[account.type].label}</p>
+          <p className="text-xs text-muted-foreground">{t(`accountType.${account.type}.label`)}</p>
         </div>
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label>{t.accounts.balanceAdjust.adjustOnDate}</Label>
+        <Label>{t("accounts.balanceAdjust.adjustOnDate")}</Label>
         <DateField value={date} onChange={setDate} max={format(new Date(), "yyyy-MM-dd")} />
       </div>
 
       <div className="flex items-center justify-between rounded-2xl border border-border/70 px-4 py-3">
         <span className="text-sm font-semibold text-muted-foreground">
-          {t.accounts.balanceAdjust.calculating}
+          {t("accounts.balanceAdjust.calculating")}
         </span>
         <span className="text-sm font-extrabold tabular-nums">
           {isLoading || expected === undefined ? "..." : formatCurrency(expected)}
@@ -127,7 +129,7 @@ function AdjustForm({
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="actual">{t.accounts.balanceAdjust.actualAmount}</Label>
+        <Label htmlFor="actual">{t("accounts.balanceAdjust.actualAmount")}</Label>
         <CurrencyInput
           id="actual"
           allowNegative
@@ -156,18 +158,20 @@ function AdjustForm({
         )}
         <span className="text-sm font-semibold">
           {difference === 0
-            ? t.accounts.balanceAdjust.matched
+            ? t("accounts.balanceAdjust.matched")
             : difference > 0
-              ? t.accounts.balanceAdjust.addIncome(formatCurrency(difference))
-              : t.accounts.balanceAdjust.addExpense(formatCurrency(Math.abs(difference)))}
+              ? t("accounts.balanceAdjust.addIncome", { amount: formatCurrency(difference) })
+              : t("accounts.balanceAdjust.addExpense", {
+                  amount: formatCurrency(Math.abs(difference)),
+                })}
         </span>
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="adjust-note">{t.transactions.form.note}</Label>
+        <Label htmlFor="adjust-note">{t("transactions.form.note")}</Label>
         <Input
           id="adjust-note"
-          placeholder={t.accounts.balanceAdjust.notePlaceholder}
+          placeholder={t("accounts.balanceAdjust.notePlaceholder")}
           value={note}
           onChange={(event) => setNote(event.target.value)}
         />
@@ -178,7 +182,7 @@ function AdjustForm({
         onClick={handleSubmit}
         disabled={adjust.isPending || actual === undefined || isLoading}
       >
-        {adjust.isPending ? t.common.saving : t.accounts.balanceAdjust.submit}
+        {adjust.isPending ? t("common.saving") : t("accounts.balanceAdjust.submit")}
       </Button>
     </>
   );

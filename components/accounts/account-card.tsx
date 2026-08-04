@@ -13,20 +13,20 @@ import { EntityIcon } from "@/components/shared/entity-icon";
 import { AmountTextForAccount } from "@/components/shared/amount-text";
 import { ACCOUNT_TYPE_META } from "@/components/accounts/account-type";
 import { normalizeColor, withAlpha } from "@/lib/theme/palette";
-import { useTranslation } from "@/lib/i18n/use-translation";
-import type { Dictionary } from "@/lib/i18n/dictionaries/vi";
+import { useT } from "@/lib/i18n/use-t";
+import type { TFunction } from "i18next";
 import type { AccountWithBalance } from "@/lib/types/database.types";
 
 /** Quá ngần này ngày không ghi gì thì số dư nhiều khả năng đã lệch thực tế. */
 const STALE_AFTER_DAYS = 7;
 
-function activityLabel(t: Dictionary, lastDate: string | null): { text: string; stale: boolean } {
-  if (!lastDate) return { text: t.accounts.card.noActivity, stale: true };
+function activityLabel(t: TFunction, lastDate: string | null): { text: string; stale: boolean } {
+  if (!lastDate) return { text: t("accounts.card.noActivity"), stale: true };
 
   const days = differenceInCalendarDays(new Date(), parseISO(lastDate));
-  if (days <= 0) return { text: t.accounts.card.activityToday, stale: false };
-  if (days === 1) return { text: t.accounts.card.activityYesterday, stale: false };
-  return { text: t.accounts.card.activityDaysAgo(days), stale: days > STALE_AFTER_DAYS };
+  if (days <= 0) return { text: t("accounts.card.activityToday"), stale: false };
+  if (days === 1) return { text: t("accounts.card.activityYesterday"), stale: false };
+  return { text: t("accounts.card.activityDaysAgo", { days }), stale: days > STALE_AFTER_DAYS };
 }
 
 export function AccountCard({
@@ -40,7 +40,7 @@ export function AccountCard({
   onDelete: () => void;
   onAdjust: () => void;
 }) {
-  const { t } = useTranslation();
+  const { t } = useT();
   const meta = ACCOUNT_TYPE_META[account.type];
   const color = normalizeColor(account.color ?? meta.color);
   const isDebt = account.type === "debt";
@@ -68,15 +68,15 @@ export function AccountCard({
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={onAdjust}>
               <Scale className="size-4" />
-              {t.accounts.card.adjustBalance}
+              {t("accounts.card.adjustBalance")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={onEdit}>
               <Pencil className="size-4" />
-              {t.common.edit}
+              {t("common.edit")}
             </DropdownMenuItem>
             <DropdownMenuItem variant="destructive" onClick={onDelete}>
               <Trash2 className="size-4" />
-              {t.common.delete}
+              {t("common.delete")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -84,7 +84,7 @@ export function AccountCard({
 
       <p className="mt-3 truncate font-bold">{account.name}</p>
       <p className="text-xs font-medium" style={{ color }}>
-        {t.accountType[account.type].label}
+        {t(`accountType.${account.type}.label`)}
       </p>
 
       <p className={`mt-2 flex items-center text-xl font-extrabold tabular-nums ${isDebt ? "text-expense" : ""}`}>
@@ -100,7 +100,7 @@ export function AccountCard({
           className="mt-2 flex w-full items-center gap-1.5 rounded-full bg-amber-500/15 px-3 py-1.5 text-[11px] font-bold text-amber-700 transition-transform active:scale-95 dark:text-amber-300"
         >
           <Scale className="size-3.5 shrink-0" />
-          <span className="truncate">{t.accounts.card.rebalanceSuffix(activity.text)}</span>
+          <span className="truncate">{t("accounts.card.rebalanceSuffix", { text: activity.text })}</span>
         </button>
       ) : (
         <p className="mt-2 text-[11px] font-medium text-muted-foreground">{activity.text}</p>

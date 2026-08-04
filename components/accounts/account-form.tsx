@@ -14,7 +14,7 @@ import { EntityIcon } from "@/components/shared/entity-icon";
 import { ACCOUNT_TYPE_META, accountTypeOptions } from "@/components/accounts/account-type";
 import { ACCOUNT_ICON_NAMES, getIcon } from "@/lib/theme/icons";
 import { cn } from "@/lib/utils";
-import { useTranslation } from "@/lib/i18n/use-translation";
+import { useT } from "@/lib/i18n/use-t";
 import type { Account, AccountType } from "@/lib/types/database.types";
 
 const accountFormSchema = z.object({
@@ -37,7 +37,7 @@ export function AccountForm({
   onSubmit: (values: AccountFormValues) => void;
   submitting?: boolean;
 }) {
-  const { t } = useTranslation();
+  const { t } = useT();
   const isEditing = !!defaultValues?.id;
   const initialType = defaultValues?.type ?? "cash";
 
@@ -78,21 +78,21 @@ export function AccountForm({
       <div className="flex items-center gap-3 rounded-2xl bg-muted/50 p-3">
         <EntityIcon icon={icon} color={color} className="size-12" iconClassName="size-6" />
         <div className="min-w-0">
-          <p className="truncate font-bold">{name || t.accounts.form.newAccountName}</p>
-          <p className="text-xs text-muted-foreground">{t.accountType[type].hint}</p>
+          <p className="truncate font-bold">{name || t("accounts.form.newAccountName")}</p>
+          <p className="text-xs text-muted-foreground">{t(`accountType.${type}.hint`)}</p>
         </div>
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="name">{t.accounts.form.nameLabel}</Label>
-        <Input id="name" placeholder={t.accounts.form.namePlaceholder} {...register("name")} />
+        <Label htmlFor="name">{t("accounts.form.nameLabel")}</Label>
+        <Input id="name" placeholder={t("accounts.form.namePlaceholder")} {...register("name")} />
         {errors.name && (
-          <p className="text-sm text-destructive">{t.accounts.form.validation.nameRequired}</p>
+          <p className="text-sm text-destructive">{t("accounts.form.validation.nameRequired")}</p>
         )}
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label>{t.accounts.form.typeLabel}</Label>
+        <Label>{t("accounts.form.typeLabel")}</Label>
         <div className="grid grid-cols-3 gap-2">
           {accountTypeOptions(t).map((option) => {
             const OptionIcon = getIcon(option.icon);
@@ -120,14 +120,14 @@ export function AccountForm({
 
       {isInKind && (
         <div className="flex flex-col gap-2">
-          <Label htmlFor="unit">{t.accounts.form.unitLabel}</Label>
-          <Input id="unit" placeholder={t.accounts.form.unitPlaceholder} {...register("unit")} />
+          <Label htmlFor="unit">{t("accounts.form.unitLabel")}</Label>
+          <Input id="unit" placeholder={t("accounts.form.unitPlaceholder")} {...register("unit")} />
         </div>
       )}
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="initial_balance">
-          {isInKind ? t.accounts.form.initialQuantityLabel : t.accounts.form.initialBalanceLabel}
+          {isInKind ? t("accounts.form.initialQuantityLabel") : t("accounts.form.initialBalanceLabel")}
         </Label>
         <CurrencyInput
           id="initial_balance"
@@ -138,10 +138,10 @@ export function AccountForm({
         />
         <p className="text-xs text-muted-foreground">
           {type === "debt"
-            ? t.accounts.form.hintDebt
+            ? t("accounts.form.hintDebt")
             : isInKind
-              ? t.accounts.form.hintInKind
-              : t.accounts.form.hintDefault}
+              ? t("accounts.form.hintInKind")
+              : t("accounts.form.hintDefault")}
         </p>
         {errors.initial_balance && (
           <p className="text-sm text-destructive">{errors.initial_balance.message}</p>
@@ -149,12 +149,12 @@ export function AccountForm({
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label>{t.accounts.form.colorLabel}</Label>
+        <Label>{t("accounts.form.colorLabel")}</Label>
         <ColorPicker value={color} onChange={(next) => setValue("color", next)} />
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label>{t.accounts.form.iconLabel}</Label>
+        <Label>{t("accounts.form.iconLabel")}</Label>
         <IconPicker
           value={icon}
           color={color}
@@ -164,7 +164,7 @@ export function AccountForm({
       </div>
 
       <Button type="submit" size="lg" disabled={submitting} className="mt-1">
-        {submitting ? t.common.saving : t.common.save}
+        {submitting ? t("common.saving") : t("common.save")}
       </Button>
     </form>
   );

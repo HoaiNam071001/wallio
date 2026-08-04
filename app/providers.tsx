@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { I18nextProvider } from "react-i18next";
 import { ThemeEffect } from "@/components/shared/theme-effect";
+import { I18nBootstrap } from "@/components/shared/i18n-bootstrap";
+import i18n from "@/lib/i18n";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -19,8 +22,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeEffect />
-      {children}
+      <I18nextProvider i18n={i18n}>
+        <ThemeEffect />
+        <I18nBootstrap />
+        {children}
+      </I18nextProvider>
     </QueryClientProvider>
   );
 }

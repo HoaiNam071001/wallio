@@ -5,15 +5,15 @@ import { vi, enUS } from "date-fns/locale";
 import { ArrowDownLeft, ArrowUpRight, Eye, EyeOff } from "lucide-react";
 import { AmountText } from "@/components/shared/amount-text";
 import { useAmountVisibility } from "@/lib/hooks/use-amount-visibility";
-import { useTranslation } from "@/lib/i18n/use-translation";
-import type { Dictionary } from "@/lib/i18n/dictionaries/vi";
+import { useT } from "@/lib/i18n/use-t";
+import type { TFunction } from "i18next";
 
-function greeting(t: Dictionary, date: Date): string {
+function greeting(t: TFunction, date: Date): string {
   const hour = date.getHours();
-  if (hour < 11) return t.transactions.todayHero.greetingMorning;
-  if (hour < 14) return t.transactions.todayHero.greetingNoon;
-  if (hour < 18) return t.transactions.todayHero.greetingAfternoon;
-  return t.transactions.todayHero.greetingEvening;
+  if (hour < 11) return t("transactions.todayHero.greetingMorning");
+  if (hour < 14) return t("transactions.todayHero.greetingNoon");
+  if (hour < 18) return t("transactions.todayHero.greetingAfternoon");
+  return t("transactions.todayHero.greetingEvening");
 }
 
 /**
@@ -31,60 +31,56 @@ export function TodayHero({
 }) {
   const today = new Date();
   const [visible, toggle] = useAmountVisibility("transactions");
-  const { t, locale } = useTranslation();
+  const { t, locale } = useT();
 
   return (
-    <section className="brand-gradient relative overflow-hidden rounded-3xl p-5 text-white shadow-glow">
+    <section className="brand-gradient relative overflow-hidden rounded-3xl p-4 text-white shadow-glow">
       {/* Đốm sáng trang trí */}
       <div className="pointer-events-none absolute -top-16 -right-10 size-44 rounded-full bg-white/15 blur-2xl" />
       <div className="pointer-events-none absolute -bottom-20 -left-12 size-48 rounded-full bg-white/10 blur-2xl" />
 
-      <div className="relative flex items-start justify-between gap-3">
-        <div>
-          <p className="text-sm font-medium text-white/80">{greeting(t, today)} 👋</p>
-          <p className="text-xs text-white/70">
-            {format(today, "EEEE, dd MMMM yyyy", { locale: locale === "en" ? enUS : vi })}
-          </p>
-        </div>
-        <div className="flex flex-col items-end gap-2">
-          <button
-            type="button"
-            onClick={toggle}
-            aria-label={visible ? t.common.hideAmount : t.common.showAmount}
-            className="flex size-8 items-center justify-center rounded-full bg-white/20 backdrop-blur transition-transform active:scale-95"
-          >
-            {visible ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
-          </button>
-        </div>
+      <div className="relative flex items-center justify-between gap-3">
+        <p className="min-w-0 truncate text-xs font-medium text-white/80">
+          {greeting(t, today)} 👋 ·{" "}
+          {format(today, "EEEE, dd/MM", { locale: locale === "en" ? enUS : vi })}
+        </p>
+        <button
+          type="button"
+          onClick={toggle}
+          aria-label={visible ? t("common.hideAmount") : t("common.showAmount")}
+          className="flex size-7 shrink-0 items-center justify-center rounded-full bg-white/20 backdrop-blur transition-transform active:scale-95"
+        >
+          {visible ? <Eye className="size-3.5" /> : <EyeOff className="size-3.5" />}
+        </button>
       </div>
 
-      <div className="relative mt-4">
-        <p className="text-xs font-semibold tracking-wide text-white/75 uppercase">
-          {t.transactions.todayHero.spentToday}
+      <div className="relative mt-2.5">
+        <p className="text-[10px] font-semibold tracking-wide text-white/75 uppercase">
+          {t("transactions.todayHero.spentToday")}
         </p>
-        <p className="text-4xl font-extrabold tabular-nums">
+        <p className="text-3xl leading-tight font-extrabold tabular-nums">
           {loading ? "—" : <AmountText amount={expense} scope="transactions" />}
         </p>
       </div>
 
-      <div className="relative mt-4 grid grid-cols-2 gap-2">
-        <div className="rounded-2xl bg-white/15 p-3 backdrop-blur">
-          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-white/80">
-            <ArrowDownLeft className="size-3.5" />
-            {t.transactions.todayHero.incomeToday}
-          </div>
-          <p className="mt-0.5 text-base font-extrabold tabular-nums">
+      <div className="relative mt-2.5 grid grid-cols-2 gap-2">
+        <div className="flex items-center justify-between gap-1.5 rounded-xl bg-white/15 px-2.5 py-1.5 backdrop-blur">
+          <span className="flex items-center gap-1 text-[10px] font-semibold text-white/80">
+            <ArrowDownLeft className="size-3 shrink-0" />
+            {t("transactions.todayHero.incomeToday")}
+          </span>
+          <span className="shrink-0 text-xs font-bold tabular-nums">
             {loading ? "—" : <AmountText amount={income} scope="transactions" />}
-          </p>
+          </span>
         </div>
-        <div className="rounded-2xl bg-white/15 p-3 backdrop-blur">
-          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-white/80">
-            <ArrowUpRight className="size-3.5" />
-            {t.transactions.todayHero.difference}
-          </div>
-          <p className="mt-0.5 text-base font-extrabold tabular-nums">
+        <div className="flex items-center justify-between gap-1.5 rounded-xl bg-white/15 px-2.5 py-1.5 backdrop-blur">
+          <span className="flex items-center gap-1 text-[10px] font-semibold text-white/80">
+            <ArrowUpRight className="size-3 shrink-0" />
+            {t("transactions.todayHero.difference")}
+          </span>
+          <span className="shrink-0 text-xs font-bold tabular-nums">
             {loading ? "—" : <AmountText amount={income - expense} scope="transactions" />}
-          </p>
+          </span>
         </div>
       </div>
     </section>

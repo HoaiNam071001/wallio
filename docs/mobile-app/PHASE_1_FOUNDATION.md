@@ -92,10 +92,27 @@ gán màu riêng dùng hash ổn định theo `id` (không theo thứ hạng/ind
 
 ## 1.6 i18n (vi/en)
 
-Port 2 dictionary `lib/i18n/dictionaries/vi.ts` và `en.ts` (~400 dòng mỗi file, cấu trúc namespace theo màn hình:
-`auth`, `nav`, `dashboard`, `transactions`, `accounts`, `categories`, `reports`, `profile`, `accountType`,
-`dateRangePreset`, `common`...). Mặc định `vi`, chọn lưu local, không theo ngôn ngữ hệ thống tự động (giữ hành vi
-hiện tại: `getServerSnapshot` trả `"vi"`). Toàn bộ text UI đi qua dictionary — không hardcode chuỗi.
+Web dùng **react-i18next** (không phải dictionary tự chế nữa). Resource JSON tại `lib/i18n/resources/vi.json` và
+`en.json` (~cùng cấu trúc namespace theo màn hình như trước: `auth`, `nav`, `dashboard`, `transactions`, `accounts`,
+`categories`, `reports`, `profile`, `accountType`, `dateRangePreset`, `common`...), key nested truy cập qua
+`t("namespace.sub.key")`, biến nội suy qua cú pháp `{{var}}` (vd `t("accounts.card.activityDaysAgo", { days })`),
+mảng (vd `calendar.weekdays`) đọc qua `t(key, { returnObjects: true }) as string[]`.
+
+Hai cách dùng trong component (`"use client"`):
+- **`<I18n k="a.b.c" vars={{...}} />`** (`lib/i18n/I18n.tsx`) — component render thẳng chuỗi đã dịch, dùng cho phần
+  lớn text JSX thuần, không cần gọi hook riêng ở nơi gọi.
+  Ưu tiên dùng.
+- **`useT()`** (`lib/i18n/use-t.ts`) — hook trả `{ t, locale, setLocale }`, dùng khi cần `t` dạng hàm gọi được:
+  thuộc tính (`aria-label`, `placeholder`), toast, mảng build từ nhiều key, hoặc truyền `t: TFunction` (từ package
+  `i18next`) vào một hàm helper thuần ngoài component.
+
+Khởi tạo i18next tại `lib/i18n/index.ts`: `lng` luôn hardcode `"vi"` lúc init (khớp `<html lang="vi">` render từ
+server) — locale thật lưu trong localStorage được áp lại sau mount bởi `I18nBootstrap`
+(`components/shared/i18n-bootstrap.tsx`, mount trong `app/providers.tsx` cùng `I18nextProvider`), để tránh
+hydration mismatch. Đổi `i18n.changeLanguage()` tự ghi lại localStorage key `wallio:locale` (không đổi so với
+trước) qua listener `languageChanged`. Mặc định `vi`, chọn lưu local, không theo ngôn ngữ hệ thống tự động — hành
+vi y hệt bản cũ. `app/layout.tsx` vẫn giữ script bootstrap set `document.documentElement.lang` trước khi
+hydrate để tránh nháy ngôn ngữ. Toàn bộ text UI đi qua i18next — không hardcode chuỗi.
 
 ## 1.7 Icon & màu cho account/category
 

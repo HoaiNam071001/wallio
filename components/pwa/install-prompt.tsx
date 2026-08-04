@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Download, X } from "lucide-react";
 import { useIsHandheld } from "@/lib/hooks/use-is-handheld";
-import { useTranslation } from "@/lib/i18n/use-translation";
+import { useT } from "@/lib/i18n/use-t";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -15,7 +15,7 @@ const DISMISS_KEY = "wallio:install-dismissed";
 export function InstallPrompt() {
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
   const isHandheld = useIsHandheld();
-  const { t } = useTranslation();
+  const { t } = useT();
 
   useEffect(() => {
     if (localStorage.getItem(DISMISS_KEY) === "1") return;
@@ -52,16 +52,16 @@ export function InstallPrompt() {
         <Download className="size-5" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold">{t.pwa.installPrompt.title}</p>
-        <p className="text-xs text-white/80">{t.pwa.installPrompt.description}</p>
+        <p className="text-sm font-semibold">{t("pwa.installPrompt.title")}</p>
+        <p className="text-xs text-white/80">{t("pwa.installPrompt.description")}</p>
       </div>
       <button
         onClick={install}
         className="shrink-0 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-brand-700"
       >
-        {t.pwa.installPrompt.install}
+        {t("pwa.installPrompt.install")}
       </button>
-      <button onClick={dismiss} aria-label={t.pwa.installPrompt.close} className="shrink-0 rounded-full p-1 text-white/70">
+      <button onClick={dismiss} aria-label={t("pwa.installPrompt.close")} className="shrink-0 rounded-full p-1 text-white/70">
         <X className="size-4" />
       </button>
     </div>

@@ -1,0 +1,427 @@
+{
+  "common": {
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "loading": "Loading...",
+    "genericError": "Something went wrong, please try again",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "transfer": "Transfer",
+    "uncategorized": "Uncategorized",
+    "hideAmount": "Hide amount",
+    "showAmount": "Show amount",
+    "close": "Close",
+    "chooseDate": "Choose date"
+  },
+
+  "calendar": {
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "prevYear": "Previous year",
+    "nextYear": "Next year",
+    "prevDecade": "Previous years",
+    "nextDecade": "Next years",
+    "weekdays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+  },
+
+  "nav": {
+    "transactions": { "label": "Transactions", "shortLabel": "Log" },
+    "accounts": { "label": "Accounts", "shortLabel": "Wallet" },
+    "categories": { "label": "Categories", "shortLabel": "Categories" },
+    "dashboard": { "label": "Overview", "shortLabel": "Overview" },
+    "profile": { "label": "Profile", "shortLabel": "Me" }
+  },
+
+  "accountType": {
+    "cash": { "label": "Cash", "hint": "Money in your wallet" },
+    "ewallet": { "label": "E-wallet", "hint": "Momo, ShopeePay..." },
+    "bank": { "label": "Bank", "hint": "Bank account" },
+    "lending": { "label": "Lending", "hint": "Money you've lent out" },
+    "debt": { "label": "Debt", "hint": "Money you owe" },
+    "in_kind": { "label": "Other currency", "hint": "USD, crypto, gold... unit other than your base currency" },
+    "other": { "label": "Other", "hint": "Other type" }
+  },
+
+  "dateRangePreset": {
+    "custom": "Custom",
+    "today": "Today",
+    "week": "This week",
+    "month": "This month",
+    "year": "This year"
+  },
+
+  "dateRangeFilter": {
+    "sheetTitle": "Choose a time range",
+    "fromDate": "From {{date}}",
+    "toDate": "To {{date}}",
+    "apply": "Apply"
+  },
+
+  "layout": {
+    "profile": "Profile",
+    "signOut": "Sign out",
+    "newEntry": "New entry"
+  },
+
+  "auth": {
+    "login": {
+      "highlight1": "Log income and expenses in seconds",
+      "highlight2": "Manage wallets, banks, and debts",
+      "highlight3": "Know where your money went every month",
+      "tagline": "Personal finance tracking, simple and fun",
+      "redirecting": "Redirecting...",
+      "signInGoogle": "Sign in with Google"
+    },
+    "pinGate": {
+      "title": "Enter your passcode",
+      "subtitle": "Enter your 6-digit code to unlock Wallio",
+      "wrongPin": "Wrong passcode, try again.",
+      "resetTitle": "Set a new passcode",
+      "resetSubtitle": "You're signed in again — set a new 6-digit passcode",
+      "resetSubmit": "Set new passcode",
+      "checking": "Checking...",
+      "unlock": "Unlock",
+      "forgot": "Forgot your passcode?"
+    },
+    "pinReminder": {
+      "title": "You haven't set a 6-digit passcode",
+      "description": "Set a 6-digit passcode to lock the app whenever it's opened, keeping your finance data more secure.",
+      "later": "Later",
+      "setNow": "Set it now"
+    }
+  },
+
+  "pwa": {
+    "installPrompt": {
+      "title": "Install Wallio",
+      "description": "Opens fast like an app, works even on a weak connection.",
+      "install": "Install",
+      "close": "Close"
+    }
+  },
+
+  "offline": {
+    "metaTitle": "Offline — Wallio",
+    "title": "You're offline",
+    "description": "Looks like you've lost connection. Check your network and try again — your saved data is still safe."
+  },
+
+  "dashboard": {
+    "page": {
+      "title": "Overview",
+      "subtitle": "Your financial picture",
+      "incomeExpense": "Income / Expense",
+      "balanceByAccount": "Balance by account",
+      "inKind": "Other currency",
+      "recent": "Recent",
+      "viewAll": "View all",
+      "emptyRecent": "No entries recorded yet."
+    },
+    "tabs": {
+      "overview": "Overview",
+      "reports": "Reports"
+    },
+    "summaryCards": {
+      "netWorth": "Net worth",
+      "available": "Available",
+      "lending": "Lending out",
+      "debt": "Total debt"
+    }
+  },
+
+  "reports": {
+    "page": {
+      "title": "Reports",
+      "subtitle": "Where your money went",
+      "byCategory": "By category",
+      "byAccount": "By account",
+      "income": "Income",
+      "expense": "Expense",
+      "net": "Net",
+      "csvHeader": ["Date", "Type", "Amount", "Account", "Category", "Note"],
+      "csvFilenamePrefix": "transactions",
+      "exportCsv": "Export CSV",
+      "importCsv": "Import CSV"
+    },
+    "import": {
+      "dialogTitle": "Review import data",
+      "dialogDescription": "Choose which accounts and transactions to import into your account.",
+      "accountsSection": "Accounts",
+      "transactionsSection": "Transactions",
+      "mapToExisting": "Map to an existing account",
+      "createNew": "Create new",
+      "skip": "Skip",
+      "sourceBalance": "Source balance",
+      "resultingBalance": "After import",
+      "excludedByAccount": "Excluded — account not selected",
+      "unresolvedWarning": "Couldn't resolve account/category — this row is skipped",
+      "invalidFile": "Invalid file, or not a Wallio export",
+      "selectedSummary": "{{accounts}} accounts, {{transactions}} transactions selected",
+      "submit": "Import data",
+      "importing": "Importing...",
+      "toastSuccess": "Imported {{count}} transactions",
+      "toastError": "Import failed",
+      "chooseFile": "Choose CSV file"
+    }
+  },
+
+  "charts": {
+    "categoryBreakdown": {
+      "total": "Total",
+      "empty": "No data for this period."
+    },
+    "incomeExpense": {
+      "income": "Income",
+      "expense": "Expense",
+      "remaining": "Remaining"
+    },
+    "accountBreakdown": {
+      "empty": "No accounts yet."
+    },
+    "typeToggle": {
+      "pie": "Pie chart",
+      "bar": "Bar chart",
+      "flat": "Flat chart"
+    }
+  },
+
+  "transactions": {
+    "page": {
+      "categoryBreakdownTitle": "Breakdown by category",
+      "income": "Income",
+      "expense": "Expense",
+      "remaining": "Remaining",
+      "recorded": "Recorded entries",
+      "newEntry": "New entry",
+      "emptyTitle": "No entries yet",
+      "emptyDescription": "Record your first expense — it only takes a few seconds.",
+      "editTitle": "Edit entry",
+      "deleteTitle": "Delete this entry?",
+      "deleteDescription": "This action cannot be undone.",
+      "toastUpdated": "Transaction updated",
+      "toastDeleted": "Transaction deleted",
+      "loadMore": "Load more",
+      "loadingMore": "Loading..."
+    },
+    "new": {
+      "backAria": "Back",
+      "title": "New entry",
+      "toastSaved": "Saved 🎉"
+    },
+    "form": {
+      "validation": {
+        "amountPositive": "Amount must be greater than 0",
+        "chooseAccount": "Choose an account",
+        "chooseToAccount": "Choose a destination account",
+        "accountsMustDiffer": "Source and destination accounts must differ",
+        "chooseDate": "Choose a date",
+        "enterReceivedAmount": "Enter the amount received"
+      },
+      "typeExpense": "Expense",
+      "typeIncome": "Income",
+      "typeTransfer": "Transfer",
+      "kindExpenseLower": "expense",
+      "kindIncomeLower": "income",
+      "amountLabel": "Amount",
+      "amountWithAccount": "Amount — {{account}}",
+      "receivedWithAccount": "Received — {{account}}",
+      "category": "Category",
+      "noCategoryOf": "No {{kind}} categories yet — create one under Categories.",
+      "fromAccount": "From account",
+      "account": "Account",
+      "toAccount": "To account",
+      "toAccountPlaceholder": "Choose destination account",
+      "date": "Date",
+      "note": "Note",
+      "notePlaceholder": "Note (optional)",
+      "submit": "Save transaction"
+    },
+    "todayHero": {
+      "greetingMorning": "Good morning",
+      "greetingNoon": "Good midday",
+      "greetingAfternoon": "Good afternoon",
+      "greetingEvening": "Good evening",
+      "recordNow": "Record now",
+      "spentToday": "Spent today",
+      "incomeToday": "Income today",
+      "difference": "Difference"
+    },
+    "list": {
+      "empty": "No entries in this period."
+    },
+    "detail": {
+      "title": "Transaction details",
+      "date": "Date",
+      "fromAccount": "From account",
+      "toAccount": "To account",
+      "account": "Account",
+      "note": "Note",
+      "editInTransactions": "Edit in Transactions"
+    },
+    "filter": {
+      "filterAria": "Filter",
+      "allAccounts": "All accounts",
+      "allCategories": "All categories",
+      "searchPlaceholder": "Search by note...",
+      "clearFilters": "Clear filters"
+    }
+  },
+
+  "accounts": {
+    "page": {
+      "title": "Accounts",
+      "availableCash": "Available cash",
+      "emptyTitle": "No accounts yet",
+      "emptyDescription": "Add a wallet, bank account, or debt to start tracking.",
+      "addAccount": "Add account",
+      "editTitle": "Edit account",
+      "addTitle": "Add account",
+      "deleteTitle": "Delete account \"{{name}}\"?",
+      "deleteDescription": "This action cannot be undone. Accounts with related transactions can't be deleted.",
+      "toastUpdated": "Account updated",
+      "toastAdded": "Account added",
+      "toastDeleted": "Account deleted",
+      "toastDeleteError": "Couldn't delete — it may still have related transactions"
+    },
+    "form": {
+      "validation": { "nameRequired": "Enter an account name" },
+      "newAccountName": "New account",
+      "nameLabel": "Account name",
+      "namePlaceholder": "e.g. Momo, Cash, Vietcombank...",
+      "typeLabel": "Type",
+      "unitLabel": "Unit",
+      "unitPlaceholder": "e.g. tael, share, ounce...",
+      "initialBalanceLabel": "Initial balance",
+      "initialQuantityLabel": "Initial quantity",
+      "hintDebt": "Debt: enter a negative number if you owe money (e.g. -500,000).",
+      "hintInKind": "Quantity you already have before tracking starts — no fixed VND price.",
+      "hintDefault": "Amount you already have before tracking starts.",
+      "colorLabel": "Color",
+      "iconLabel": "Icon"
+    },
+    "card": {
+      "noActivity": "No transactions yet",
+      "activityToday": "Recorded today",
+      "activityYesterday": "Recorded yesterday",
+      "activityDaysAgo": "Last recorded {{days}} days ago",
+      "rebalanceSuffix": "{{text}} · rebalance",
+      "adjustBalance": "Adjust balance"
+    },
+    "select": {
+      "defaultPlaceholder": "Choose an account"
+    },
+    "balanceAdjust": {
+      "title": "Adjust balance",
+      "description": "Enter the amount you actually have. Wallio will record a difference entry on the date you choose — past transactions stay unchanged.",
+      "adjustOnDate": "Adjust as of",
+      "calculating": "Wallio calculates",
+      "actualAmount": "Actual amount",
+      "notePlaceholder": "e.g. forgot to log some breakfast expenses",
+      "matched": "Already matched — nothing to record",
+      "addIncome": "Record an income of {{amount}}",
+      "addExpense": "Record an expense of {{amount}}",
+      "toastMatched": "Balance already matches, no adjustment needed",
+      "toastAdjusted": "Adjusted by {{amount}}",
+      "submit": "Adjust"
+    }
+  },
+
+  "categories": {
+    "page": {
+      "title": "Categories",
+      "subtitle": "Add colors and icons to spot them at a glance",
+      "tabExpense": "Expense",
+      "tabIncome": "Income",
+      "emptyTitle": "No {{kind}} categories yet",
+      "emptyDescription": "Create a few familiar categories like Food, Fuel, Salary...",
+      "addCategory": "Add category",
+      "editTitle": "Edit category",
+      "addTitle": "Add category",
+      "deleteTitle": "Delete category \"{{name}}\"?",
+      "deleteDescription": "Transactions using this category will move to \"Uncategorized\".",
+      "toastUpdated": "Category updated",
+      "toastAdded": "Category added",
+      "toastDeleted": "Category deleted",
+      "toastDeleteError": "Couldn't delete category"
+    },
+    "form": {
+      "validation": { "nameRequired": "Enter a category name" },
+      "newCategoryName": "New category",
+      "kindIncome": "Income category",
+      "kindExpense": "Expense category",
+      "nameLabel": "Category name",
+      "namePlaceholder": "e.g. Food, Salary, Fuel...",
+      "typeLabel": "Type",
+      "typeExpense": "Expense",
+      "typeIncome": "Income",
+      "colorLabel": "Color",
+      "iconLabel": "Icon"
+    }
+  },
+
+  "profile": {
+    "page": { "title": "Profile" },
+    "tabs": {
+      "wallet": "Wallet",
+      "user": "Account"
+    },
+    "header": {
+      "signOut": "Sign out"
+    },
+    "preferences": {
+      "title": "Preferences"
+    },
+    "accountsWidget": {
+      "title": "Accounts",
+      "viewAll": "View all",
+      "empty": "No accounts yet"
+    },
+    "categoriesWidget": {
+      "title": "Categories",
+      "viewAll": "View all",
+      "empty": "No categories yet"
+    },
+    "info": {
+      "title": "Personal info",
+      "nameLabel": "Display name",
+      "namePlaceholder": "Your name",
+      "birthDateLabel": "Date of birth",
+      "save": "Save profile",
+      "toastSaved": "Profile saved"
+    },
+    "pin": {
+      "title": "Security",
+      "hasPinBadge": "6-digit passcode set",
+      "newPinLabel": "New passcode",
+      "pinLabel": "6-digit passcode",
+      "confirmLabel": "Confirm passcode",
+      "errorLength": "Passcode must be exactly 6 digits",
+      "errorMismatch": "The two passcodes don't match",
+      "changePin": "Change passcode",
+      "setPin": "Set passcode",
+      "toastChanged": "Passcode changed",
+      "toastSet": "Passcode set"
+    },
+    "amountVisibility": {
+      "title": "Show/hide amounts",
+      "showAll": "Show all",
+      "hideAll": "Hide all"
+    },
+    "appearance": {
+      "title": "Appearance",
+      "themeLabel": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "language": {
+      "title": "Language",
+      "vi": "Vietnamese",
+      "en": "English"
+    }
+  }
+}

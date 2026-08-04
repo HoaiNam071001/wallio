@@ -9,7 +9,7 @@ Port từ `lib/queries/transactions.ts`:
 
 ```ts
 listTransactions(filters?: {
-  startDate?, endDate?, accountId?, categoryId?, type?, search?, limit?
+  startDate?, endDate?, accountId?, categoryId?, type?, search?, limit?, offset?
 }): TransactionWithRelations[]
 ```
 
@@ -20,6 +20,11 @@ listTransactions(filters?: {
 - `search`: `ilike` trên `note`.
 - Sort mặc định: `transaction_date desc, created_at desc`.
 - `createTransaction` / `updateTransaction` / `deleteTransaction`: CRUD chuẩn.
+- **Phân trang**: khi cả `limit` và `offset` có mặt, dùng `.range(offset, offset+limit-1)` thay vì `.limit()`
+  (offset-based, không phải keyset/cursor — chấp nhận được vì app single-user). Hook `useInfiniteTransactions`
+  (`lib/hooks/use-transactions.ts`) bọc bằng TanStack `useInfiniteQuery`, `pageSize` mặc định 20,
+  `getNextPageParam` dừng khi trang cuối trả về ít hơn `pageSize`. Hook `useTransactions` (không phân trang) vẫn
+  giữ nguyên cho các nơi cần tải trọn (Overview's "gần đây" `limit:6`, Reports' xuất CSV toàn bộ range).
 
 ## 3.2 Màn hình danh sách (Transactions tab / "Sổ")
 
@@ -29,13 +34,24 @@ Bố cục theo thứ tự (port `today-hero.tsx` + `transaction-filter.tsx` + `
    NAY** (không phải tổng tài sản — quyết định UX có chủ đích, xem comment gốc). Gồm: lời chào theo giờ trong
    ngày (sáng <11h / trưa <14h / chiều <18h / tối), ngày hiện tại theo locale, số tiền đã chi hôm nay (to, nổi
    bật), 2 ô nhỏ: thu hôm nay + chênh lệch (thu-chi). Có nút mắt để ẩn/hiện số tiền riêng cho scope này.
-2. **Bộ lọc**: preset ngày (Hôm nay/Tuần/Tháng/Năm/Tuỳ chọn — thứ tự hiển thị: Tuỳ chọn trước tiên, xem
-   `DATE_RANGE_PRESET_ORDER`), filter theo account, category, loại giao dịch, search theo note.
-3. **Danh sách giao dịch**, nhóm theo ngày là hợp lý (web hiện list phẳng sort theo ngày, nhưng nhóm theo ngày là
-   cải tiến UX tự nhiên cho mobile). Mỗi dòng: icon category (hoặc icon "chuyển khoản" nếu type=transfer), tên
-   category/mô tả transfer (`"Momo → Tiền mặt"`), note rút gọn, số tiền màu theo loại (xanh income / đỏ expense /
-   xanh dương-tím transfer), định dạng theo đơn vị account (dùng `formatAccountAmount`, không phải luôn VNĐ).
-4. Tap vào 1 dòng → dialog/bottom-sheet chi tiết (`TransactionDetailDialog`) với nút Sửa/Xoá.
+2. **Bộ lọc**: một nút gọn mở bottom sheet chọn khoảng thời gian (xem PHASE_1/`DateRangeFilter` —
+   `components/shared/date-range-filter.tsx`, dùng chung cho cả 3 trang có filter ngày), cộng thêm nút mở rộng
+   filter theo account/category/search theo note (`TransactionFilterBar`).
+3. **Card "Cơ cấu theo danh mục"** gộp chung tổng thu/chi/còn lại của kỳ đang xem (3 ô nhỏ) + chart cơ cấu theo
+   danh mục vào **một card duy nhất** (trước đây là 2 khối tách rời, chiếm nhiều chỗ hơn cần thiết) — có toggle
+   Tab thu/chi và toggle loại chart (tròn/ngang, xem `CategoryBreakdownChart`'s `variant` prop và
+   `useChartType` hook, `lib/hooks/use-chart-type.ts`). **Mặc định chart dạng ngang** ("bar" — thanh ngang có
+   nhãn %, gọn hơn donut), lựa chọn lưu riêng theo từng trang (`wallio:chartType:transactions` /
+   `wallio:chartType:reports`) qua localStorage, chọn 1 lần là nhớ mãi.
+4. **Danh sách giao dịch**, nhóm theo ngày là hợp lý (web hiện list phẳng sort theo ngày, nhưng nhóm theo ngày là
+   cải tiến UX tự nhiên cho mobile). Mỗi dòng compact (icon 36px, padding vừa phải — không dùng icon 44px như
+   card giới thiệu): icon category (hoặc icon "chuyển khoản" nếu type=transfer), tên category/mô tả transfer
+   (`"Momo → Tiền mặt"`), note rút gọn, số tiền màu theo loại (xanh income / đỏ expense / xanh dương-tím
+   transfer), định dạng theo đơn vị account (dùng `formatAccountAmount`, không phải luôn VNĐ).
+   **Phân trang kiểu "Xem thêm"**: tải 20 giao dịch/trang qua `useInfiniteTransactions`, nút "Xem thêm" ở cuối
+   danh sách gọi `fetchNextPage()` — chọn nút bấm rõ ràng thay vì infinite-scroll tự động (không cần
+   IntersectionObserver, tránh tải dư khi cuộn nhanh).
+5. Tap vào 1 dòng → dialog/bottom-sheet chi tiết (`TransactionDetailDialog`) với nút Sửa/Xoá.
 
 ## 3.3 Màn hình Thêm/Sửa giao dịch — quan trọng nhất
 
@@ -105,3 +121,5 @@ bước trung gian).
 - [ ] Xoá giao dịch, số dư account cập nhật lại đúng
 - [ ] Filter theo ngày/account/category/loại/search hoạt động đúng, đặc biệt filter theo account phải bắt được cả 2 vế của transfer
 - [ ] FAB "+" hoạt động ở mọi màn, ẩn đúng khi đang ở màn thêm mới
+- [ ] "Xem thêm" tải đúng trang tiếp theo, không trùng/thiếu giao dịch khi filter thay đổi
+- [ ] Toggle chart tròn/ngang ở card cơ cấu theo danh mục, chọn xong load lại app vẫn nhớ lựa chọn

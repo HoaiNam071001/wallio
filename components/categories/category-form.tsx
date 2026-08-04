@@ -13,7 +13,7 @@ import { EntityIcon } from "@/components/shared/entity-icon";
 import { CATEGORY_ICON_NAMES } from "@/lib/theme/icons";
 import { DEFAULT_COLOR } from "@/lib/theme/palette";
 import { cn } from "@/lib/utils";
-import { useTranslation } from "@/lib/i18n/use-translation";
+import { useT } from "@/lib/i18n/use-t";
 import type { Category, CategoryKind } from "@/lib/types/database.types";
 
 const categoryFormSchema = z.object({
@@ -34,10 +34,10 @@ export function CategoryForm({
   onSubmit: (values: CategoryFormValues) => void;
   submitting?: boolean;
 }) {
-  const { t } = useTranslation();
+  const { t } = useT();
   const KIND_OPTIONS = [
-    { value: "expense" as const, label: t.categories.form.typeExpense, icon: ArrowUpRight, className: "bg-expense" },
-    { value: "income" as const, label: t.categories.form.typeIncome, icon: ArrowDownLeft, className: "bg-income" },
+    { value: "expense" as const, label: t("categories.form.typeExpense"), icon: ArrowUpRight, className: "bg-expense" },
+    { value: "income" as const, label: t("categories.form.typeIncome"), icon: ArrowDownLeft, className: "bg-income" },
   ];
 
   const {
@@ -66,23 +66,23 @@ export function CategoryForm({
       <div className="flex items-center gap-3 rounded-2xl bg-muted/50 p-3">
         <EntityIcon icon={icon} color={color} className="size-12" iconClassName="size-6" />
         <div className="min-w-0">
-          <p className="truncate font-bold">{name || t.categories.form.newCategoryName}</p>
+          <p className="truncate font-bold">{name || t("categories.form.newCategoryName")}</p>
           <p className="text-xs text-muted-foreground">
-            {kind === "income" ? t.categories.form.kindIncome : t.categories.form.kindExpense}
+            {kind === "income" ? t("categories.form.kindIncome") : t("categories.form.kindExpense")}
           </p>
         </div>
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="name">{t.categories.form.nameLabel}</Label>
-        <Input id="name" placeholder={t.categories.form.namePlaceholder} {...register("name")} />
+        <Label htmlFor="name">{t("categories.form.nameLabel")}</Label>
+        <Input id="name" placeholder={t("categories.form.namePlaceholder")} {...register("name")} />
         {errors.name && (
-          <p className="text-sm text-destructive">{t.categories.form.validation.nameRequired}</p>
+          <p className="text-sm text-destructive">{t("categories.form.validation.nameRequired")}</p>
         )}
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label>{t.categories.form.typeLabel}</Label>
+        <Label>{t("categories.form.typeLabel")}</Label>
         <div className="grid grid-cols-2 gap-2">
           {KIND_OPTIONS.map((option) => {
             const Icon = option.icon;
@@ -108,12 +108,12 @@ export function CategoryForm({
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label>{t.categories.form.colorLabel}</Label>
+        <Label>{t("categories.form.colorLabel")}</Label>
         <ColorPicker value={color} onChange={(next) => setValue("color", next)} />
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label>{t.categories.form.iconLabel}</Label>
+        <Label>{t("categories.form.iconLabel")}</Label>
         <IconPicker
           value={icon}
           color={color}
@@ -123,7 +123,7 @@ export function CategoryForm({
       </div>
 
       <Button type="submit" size="lg" disabled={submitting} className="mt-1">
-        {submitting ? t.common.saving : t.common.save}
+        {submitting ? t("common.saving") : t("common.save")}
       </Button>
     </form>
   );

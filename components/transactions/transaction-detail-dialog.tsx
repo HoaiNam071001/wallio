@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { EntityIcon } from "@/components/shared/entity-icon";
 import { AmountTextForAccount } from "@/components/shared/amount-text";
 import { ACCOUNT_TYPE_META } from "@/components/accounts/account-type";
-import { useTranslation } from "@/lib/i18n/use-translation";
+import { useT } from "@/lib/i18n/use-t";
 import type { AmountVisibilityScope } from "@/lib/hooks/use-amount-visibility";
 import type { AccountType } from "@/lib/types/database.types";
 import type { TransactionWithRelations } from "@/lib/queries/transactions";
@@ -35,7 +35,7 @@ export function TransactionDetailDialog({
   /** Dùng khi màn hình hiện tại không có sẵn form sửa (vd Dashboard) — điều hướng sang nơi có. */
   editHref?: string;
 }) {
-  const { t: tr, locale } = useTranslation();
+  const { t: tr, locale } = useT();
   if (!t) return null;
 
   const isTransfer = t.type === "transfer";
@@ -48,7 +48,7 @@ export function TransactionDetailDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{tr.transactions.detail.title}</DialogTitle>
+          <DialogTitle>{tr("transactions.detail.title")}</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col items-center gap-1 py-2 text-center">
@@ -65,7 +65,7 @@ export function TransactionDetailDialog({
             />
           )}
           <p className="mt-2 text-lg font-extrabold">
-            {isTransfer ? tr.common.transfer : (t.category?.name ?? tr.common.uncategorized)}
+            {isTransfer ? tr("common.transfer") : (t.category?.name ?? tr("common.uncategorized"))}
           </p>
 
           {isDualLeg ? (
@@ -93,20 +93,20 @@ export function TransactionDetailDialog({
 
         <dl className="flex flex-col gap-2 rounded-2xl bg-muted/50 p-4 text-sm">
           <Row
-            label={tr.transactions.detail.date}
+            label={tr("transactions.detail.date")}
             value={format(parseISO(t.transaction_date), "EEEE, dd/MM/yyyy", {
               locale: locale === "en" ? enUS : vi,
             })}
           />
           {isTransfer ? (
             <>
-              <Row label={tr.transactions.detail.fromAccount} value={t.account?.name ?? "—"} />
-              <Row label={tr.transactions.detail.toAccount} value={t.to_account?.name ?? "—"} />
+              <Row label={tr("transactions.detail.fromAccount")} value={t.account?.name ?? "—"} />
+              <Row label={tr("transactions.detail.toAccount")} value={t.to_account?.name ?? "—"} />
             </>
           ) : (
-            <Row label={tr.transactions.detail.account} value={t.account?.name ?? "—"} />
+            <Row label={tr("transactions.detail.account")} value={t.account?.name ?? "—"} />
           )}
-          {t.note && <Row label={tr.transactions.detail.note} value={t.note} />}
+          {t.note && <Row label={tr("transactions.detail.note")} value={t.note} />}
         </dl>
 
         {(onEdit || onDelete || editHref) && (
@@ -115,20 +115,20 @@ export function TransactionDetailDialog({
               <Button variant="outline" className="flex-1" asChild>
                 <Link href={editHref}>
                   <Pencil className="size-4" />
-                  {tr.transactions.detail.editInTransactions}
+                  {tr("transactions.detail.editInTransactions")}
                 </Link>
               </Button>
             )}
             {onEdit && (
               <Button variant="outline" className="flex-1" onClick={onEdit}>
                 <Pencil className="size-4" />
-                {tr.common.edit}
+                {tr("common.edit")}
               </Button>
             )}
             {onDelete && (
               <Button variant="destructive" className="flex-1" onClick={onDelete}>
                 <Trash2 className="size-4" />
-                {tr.common.delete}
+                {tr("common.delete")}
               </Button>
             )}
           </div>

@@ -20,6 +20,18 @@ export async function createCategory(supabase: Client, input: CategoryInsert): P
   return data;
 }
 
+/** Tạo nhiều category cùng lúc — dùng khi nhập CSV cho các category chưa khớp category có sẵn. */
+export async function bulkCreateCategories(
+  supabase: Client,
+  inputs: CategoryInsert[],
+): Promise<Category[]> {
+  if (inputs.length === 0) return [];
+  const { data, error } = await supabase.from("categories").insert(inputs).select();
+
+  if (error) throw error;
+  return data;
+}
+
 export async function updateCategory(
   supabase: Client,
   id: string,

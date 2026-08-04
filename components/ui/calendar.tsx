@@ -24,7 +24,7 @@ import {
 import { vi, enUS, type Locale } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useTranslation } from "@/lib/i18n/use-translation";
+import { useT } from "@/lib/i18n/use-t";
 
 type View = "day" | "month" | "year";
 
@@ -40,31 +40,39 @@ export function Calendar({
   onSelect,
   maxDate,
   minDate,
+  cursor: controlledCursor,
+  onCursorChange,
 }: {
   value?: string;
   onSelect: (date: string) => void;
   maxDate?: string;
   minDate?: string;
+  /** Cho phép nơi gọi điều khiển tháng/năm đang hiển thị (vd nút "nhảy" đến ngày cụ thể) —
+   * bỏ trống thì Calendar tự quản lý cursor như trước (uncontrolled). */
+  cursor?: Date;
+  onCursorChange?: (date: Date) => void;
 }) {
-  const { t, locale } = useTranslation();
+  const { t, locale } = useT();
   const dateLocale = locale === "en" ? enUS : vi;
   const selected = value ? parseISO(value) : undefined;
-  const [cursor, setCursor] = React.useState(() => selected ?? new Date());
+  const [internalCursor, setInternalCursor] = React.useState(() => selected ?? new Date());
+  const cursor = controlledCursor ?? internalCursor;
+  const setCursor = onCursorChange ?? setInternalCursor;
   const [view, setView] = React.useState<View>("day");
 
   const max = maxDate ? parseISO(maxDate) : undefined;
   const min = minDate ? parseISO(minDate) : undefined;
 
   const goPrev = () => {
-    if (view === "day") setCursor((d) => subMonths(d, 1));
-    else if (view === "month") setCursor((d) => subYears(d, 1));
-    else setCursor((d) => subYears(d, YEARS_PER_PAGE));
+    if (view === "day") setCursor(subMonths(cursor, 1));
+    else if (view === "month") setCursor(subYears(cursor, 1));
+    else setCursor(subYears(cursor, YEARS_PER_PAGE));
   };
 
   const goNext = () => {
-    if (view === "day") setCursor((d) => addMonths(d, 1));
-    else if (view === "month") setCursor((d) => addYears(d, 1));
-    else setCursor((d) => addYears(d, YEARS_PER_PAGE));
+    if (view === "day") setCursor(addMonths(cursor, 1));
+    else if (view === "month") setCursor(addYears(cursor, 1));
+    else setCursor(addYears(cursor, YEARS_PER_PAGE));
   };
 
   const yearsPageStart = cursor.getFullYear() - (cursor.getFullYear() % YEARS_PER_PAGE);
@@ -78,9 +86,9 @@ export function Calendar({
         : `${years[0]} - ${years[years.length - 1]}`;
 
   const prevAriaLabel =
-    view === "day" ? t.calendar.prevMonth : view === "month" ? t.calendar.prevYear : t.calendar.prevDecade;
+    view === "day" ? t("calendar.prevMonth") : view === "month" ? t("calendar.prevYear") : t("calendar.prevDecade");
   const nextAriaLabel =
-    view === "day" ? t.calendar.nextMonth : view === "month" ? t.calendar.nextYear : t.calendar.nextDecade;
+    view === "day" ? t("calendar.nextMonth") : view === "month" ? t("calendar.nextYear") : t("calendar.nextDecade");
 
   return (
     <div className="w-64">
@@ -156,7 +164,8 @@ function DayGrid({
   max?: Date;
   onSelect: (date: string) => void;
 }) {
-  const { t } = useTranslation();
+  const { t } = useT();
+  const weekdays = t("calendar.weekdays", { returnObjects: true }) as string[];
 
   // Luôn đúng 6 tuần (42 ô) để chiều cao lịch không nhảy khi chuyển tháng —
   // có tháng chỉ cần 5 hàng, có tháng cần 6, nếu để tự nhiên sẽ làm popover đổi cao.
@@ -166,7 +175,7 @@ function DayGrid({
   return (
     <>
       <div className="grid grid-cols-7 px-1 pb-1 text-center text-[11px] font-bold text-muted-foreground">
-        {t.calendar.weekdays.map((d) => (
+        {weekdays.map((d) => (
           <span key={d}>{d}</span>
         ))}
       </div>

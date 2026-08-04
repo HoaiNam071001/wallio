@@ -35,8 +35,8 @@ import { useSupabase } from "@/lib/hooks/use-supabase";
 import { useProfile, useUpsertProfile } from "@/lib/hooks/use-profile";
 import { setAllAmountVisibility } from "@/lib/hooks/use-amount-visibility";
 import { useTheme, type Theme } from "@/lib/hooks/use-theme";
-import { useTranslation } from "@/lib/i18n/use-translation";
-import type { Locale } from "@/lib/i18n/locale-store";
+import { useT } from "@/lib/i18n/use-t";
+import type { Locale } from "@/lib/i18n";
 import { clearPinUnlocked, hashPin, isValidPin } from "@/lib/utils/pin";
 import { normalizeColor } from "@/lib/theme/palette";
 import { cn, toQueryDate } from "@/lib/utils";
@@ -54,19 +54,19 @@ export default function ProfilePage() {
   const { user } = useAuth();
   const { data: profile } = useProfile();
   const upsertProfile = useUpsertProfile();
-  const { t } = useTranslation();
+  const { t } = useT();
   const [tab, setTab] = useState<ProfileTab>("wallet");
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHeader title={t.profile.page.title} />
+      <PageHeader title={t("profile.page.title")} />
 
       <ProfileHeaderCard />
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as ProfileTab)}>
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="wallet">{t.profile.tabs.wallet}</TabsTrigger>
-          <TabsTrigger value="user">{t.profile.tabs.user}</TabsTrigger>
+          <TabsTrigger value="wallet">{t("profile.tabs.wallet")}</TabsTrigger>
+          <TabsTrigger value="user">{t("profile.tabs.user")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="wallet" className="flex flex-col gap-4">
@@ -88,7 +88,7 @@ function ProfileHeaderCard() {
   const { user } = useAuth();
   const supabase = useSupabase();
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t } = useT();
 
   async function handleSignOut() {
     clearPinUnlocked();
@@ -113,7 +113,7 @@ function ProfileHeaderCard() {
         </div>
         <Button variant="outline" size="sm" onClick={handleSignOut}>
           <LogOut className="size-4" />
-          {t.profile.header.signOut}
+          {t("profile.header.signOut")}
         </Button>
       </CardContent>
     </Card>
@@ -121,22 +121,22 @@ function ProfileHeaderCard() {
 }
 
 function AccountsWidgetCard() {
-  const { t } = useTranslation();
+  const { t } = useT();
   const { data: accounts } = useAccountsWithBalance();
   const top = (accounts ?? []).slice(0, 4);
 
   return (
     <Card>
       <CardHeader className="flex-row items-center justify-between gap-2">
-        <CardTitle className="text-base">{t.profile.accountsWidget.title}</CardTitle>
+        <CardTitle className="text-base">{t("profile.accountsWidget.title")}</CardTitle>
         <Link href={ROUTES.accounts} className="flex items-center gap-0.5 text-sm font-semibold text-primary">
-          {t.profile.accountsWidget.viewAll}
+          {t("profile.accountsWidget.viewAll")}
           <ChevronRight className="size-4" />
         </Link>
       </CardHeader>
       <CardContent>
         {top.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t.profile.accountsWidget.empty}</p>
+          <p className="text-sm text-muted-foreground">{t("profile.accountsWidget.empty")}</p>
         ) : (
           <ul className="flex flex-col gap-2.5">
             {top.map((account) => {
@@ -167,22 +167,22 @@ function AccountsWidgetCard() {
 }
 
 function CategoriesWidgetCard() {
-  const { t } = useTranslation();
+  const { t } = useT();
   const { data: categories } = useCategories();
   const top = (categories ?? []).slice(0, 8);
 
   return (
     <Card>
       <CardHeader className="flex-row items-center justify-between gap-2">
-        <CardTitle className="text-base">{t.profile.categoriesWidget.title}</CardTitle>
+        <CardTitle className="text-base">{t("profile.categoriesWidget.title")}</CardTitle>
         <Link href={ROUTES.categories} className="flex items-center gap-0.5 text-sm font-semibold text-primary">
-          {t.profile.categoriesWidget.viewAll}
+          {t("profile.categoriesWidget.viewAll")}
           <ChevronRight className="size-4" />
         </Link>
       </CardHeader>
       <CardContent>
         {top.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t.profile.categoriesWidget.empty}</p>
+          <p className="text-sm text-muted-foreground">{t("profile.categoriesWidget.empty")}</p>
         ) : (
           <div className="flex flex-wrap gap-2">
             {top.map((category) => {
@@ -213,7 +213,7 @@ function ProfileInfoCard({
   onSave: (values: InfoFormValues) => void;
   saving: boolean;
 }) {
-  const { t } = useTranslation();
+  const { t } = useT();
   const { register, handleSubmit, reset, watch, setValue } = useForm<InfoFormValues>({
     resolver: zodResolver(infoSchema),
     defaultValues: { display_name: "", birth_date: undefined },
@@ -230,23 +230,23 @@ function ProfileInfoCard({
 
   function submit(values: InfoFormValues) {
     onSave(values);
-    toast.success(t.profile.info.toastSaved);
+    toast.success(t("profile.info.toastSaved"));
   }
 
   return (
     <Card>
       <CardHeader className="flex-row items-center gap-2">
         <UserIcon className="size-4.5 text-brand-600" />
-        <CardTitle className="text-base">{t.profile.info.title}</CardTitle>
+        <CardTitle className="text-base">{t("profile.info.title")}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(submit)} className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="display_name">{t.profile.info.nameLabel}</Label>
-            <Input id="display_name" placeholder={t.profile.info.namePlaceholder} {...register("display_name")} />
+            <Label htmlFor="display_name">{t("profile.info.nameLabel")}</Label>
+            <Input id="display_name" placeholder={t("profile.info.namePlaceholder")} {...register("display_name")} />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="birth_date">{t.profile.info.birthDateLabel}</Label>
+            <Label htmlFor="birth_date">{t("profile.info.birthDateLabel")}</Label>
             <DateField
               id="birth_date"
               value={birthDate ?? ""}
@@ -255,7 +255,7 @@ function ProfileInfoCard({
             />
           </div>
           <Button type="submit" disabled={saving} className="self-start">
-            {saving ? t.common.saving : t.profile.info.save}
+            {saving ? t("common.saving") : t("profile.info.save")}
           </Button>
         </form>
       </CardContent>
@@ -274,7 +274,7 @@ function PinCard({
   onSave: (pinHash: string) => void;
   saving: boolean;
 }) {
-  const { t } = useTranslation();
+  const { t } = useT();
   const [pin, setPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -284,11 +284,11 @@ function PinCard({
     setError(null);
 
     if (!isValidPin(pin)) {
-      setError(t.profile.pin.errorLength);
+      setError(t("profile.pin.errorLength"));
       return;
     }
     if (pin !== confirmPin) {
-      setError(t.profile.pin.errorMismatch);
+      setError(t("profile.pin.errorMismatch"));
       return;
     }
     if (!userId) return;
@@ -297,26 +297,26 @@ function PinCard({
     onSave(hash);
     setPin("");
     setConfirmPin("");
-    toast.success(hasPin ? t.profile.pin.toastChanged : t.profile.pin.toastSet);
+    toast.success(hasPin ? t("profile.pin.toastChanged") : t("profile.pin.toastSet"));
   }
 
   return (
     <Card>
       <CardHeader className="flex-row items-center gap-2">
         <KeyRound className="size-4.5 text-brand-600" />
-        <CardTitle className="text-base">{t.profile.pin.title}</CardTitle>
+        <CardTitle className="text-base">{t("profile.pin.title")}</CardTitle>
       </CardHeader>
       <CardContent>
         {hasPin && (
           <p className="mb-3 flex items-center gap-1.5 text-sm font-semibold text-income">
             <ShieldCheck className="size-4" />
-            {t.profile.pin.hasPinBadge}
+            {t("profile.pin.hasPinBadge")}
           </p>
         )}
         <form onSubmit={submit} className="flex flex-col gap-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="pin">{hasPin ? t.profile.pin.newPinLabel : t.profile.pin.pinLabel}</Label>
+              <Label htmlFor="pin">{hasPin ? t("profile.pin.newPinLabel") : t("profile.pin.pinLabel")}</Label>
               <Input
                 id="pin"
                 type="password"
@@ -328,7 +328,7 @@ function PinCard({
               />
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="pin-confirm">{t.profile.pin.confirmLabel}</Label>
+              <Label htmlFor="pin-confirm">{t("profile.pin.confirmLabel")}</Label>
               <Input
                 id="pin-confirm"
                 type="password"
@@ -342,7 +342,7 @@ function PinCard({
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
           <Button type="submit" disabled={saving} className="self-start">
-            {saving ? t.common.saving : hasPin ? t.profile.pin.changePin : t.profile.pin.setPin}
+            {saving ? t("common.saving") : hasPin ? t("profile.pin.changePin") : t("profile.pin.setPin")}
           </Button>
         </form>
       </CardContent>
@@ -352,39 +352,39 @@ function PinCard({
 
 /** Gộp chủ đề / ngôn ngữ / ẩn-hiện số tiền thành 1 card gọn dạng danh sách, thay vì 3 card riêng — đỡ cuộn dài trên mobile. */
 function PreferencesCard() {
-  const { t, locale, setLocale } = useTranslation();
+  const { t, locale, setLocale } = useT();
   const [theme, setTheme] = useTheme();
 
   const themeOptions: { value: Theme; label: string }[] = [
-    { value: "light", label: t.profile.appearance.light },
-    { value: "dark", label: t.profile.appearance.dark },
-    { value: "system", label: t.profile.appearance.system },
+    { value: "light", label: t("profile.appearance.light") },
+    { value: "dark", label: t("profile.appearance.dark") },
+    { value: "system", label: t("profile.appearance.system") },
   ];
   const localeOptions: { value: Locale; label: string }[] = [
-    { value: "vi", label: t.profile.language.vi },
-    { value: "en", label: t.profile.language.en },
+    { value: "vi", label: t("profile.language.vi") },
+    { value: "en", label: t("profile.language.en") },
   ];
 
   return (
     <Card>
       <CardHeader className="flex-row items-center gap-2">
         <SlidersHorizontal className="size-4.5 text-brand-600" />
-        <CardTitle className="text-base">{t.profile.preferences.title}</CardTitle>
+        <CardTitle className="text-base">{t("profile.preferences.title")}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3.5">
-        <PreferenceRow label={t.profile.appearance.themeLabel}>
+        <PreferenceRow label={t("profile.appearance.themeLabel")}>
           <SegmentedControl value={theme} options={themeOptions} onChange={setTheme} />
         </PreferenceRow>
-        <PreferenceRow label={t.profile.language.title}>
+        <PreferenceRow label={t("profile.language.title")}>
           <SegmentedControl value={locale} options={localeOptions} onChange={setLocale} />
         </PreferenceRow>
-        <PreferenceRow label={t.profile.amountVisibility.title}>
+        <PreferenceRow label={t("profile.amountVisibility.title")}>
           <div className="flex gap-1.5">
             <Button
               variant="outline"
               size="icon"
               className="size-9"
-              aria-label={t.profile.amountVisibility.showAll}
+              aria-label={t("profile.amountVisibility.showAll")}
               onClick={() => setAllAmountVisibility(true)}
             >
               <Eye className="size-4" />
@@ -393,7 +393,7 @@ function PreferencesCard() {
               variant="outline"
               size="icon"
               className="size-9"
-              aria-label={t.profile.amountVisibility.hideAll}
+              aria-label={t("profile.amountVisibility.hideAll")}
               onClick={() => setAllAmountVisibility(false)}
             >
               <EyeOff className="size-4" />

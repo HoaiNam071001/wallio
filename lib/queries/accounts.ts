@@ -114,6 +114,18 @@ export async function createAccount(supabase: Client, input: AccountInsert): Pro
   return data;
 }
 
+/** Tạo nhiều account cùng lúc — dùng khi nhập CSV, một round-trip thay vì N lần insert đơn. */
+export async function bulkCreateAccounts(
+  supabase: Client,
+  inputs: AccountInsert[],
+): Promise<Account[]> {
+  if (inputs.length === 0) return [];
+  const { data, error } = await supabase.from("accounts").insert(inputs).select();
+
+  if (error) throw error;
+  return data;
+}
+
 export async function updateAccount(
   supabase: Client,
   id: string,
@@ -132,5 +144,12 @@ export async function updateAccount(
 
 export async function deleteAccount(supabase: Client, id: string): Promise<void> {
   const { error } = await supabase.from("accounts").delete().eq("id", id);
+  if (error) throw error;
+}
+
+/** Xoá nhiều account cùng lúc — dùng để rollback thủ công nếu 1 bước sau trong import thất bại. */
+export async function bulkDeleteAccounts(supabase: Client, ids: string[]): Promise<void> {
+  if (ids.length === 0) return;
+  const { error } = await supabase.from("accounts").delete().in("id", ids);
   if (error) throw error;
 }

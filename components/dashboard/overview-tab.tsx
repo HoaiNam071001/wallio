@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DateRangeFilter } from "@/components/shared/date-range-filter";
 import { SummaryCards } from "@/components/dashboard/summary-cards";
 import { IncomeExpenseChart } from "@/components/charts/income-expense-chart";
 import { AccountBreakdownChart } from "@/components/charts/account-breakdown-chart";
@@ -20,19 +20,22 @@ import {
   usePeriodTotals,
 } from "@/lib/hooks/use-summary";
 import { useTransactions } from "@/lib/hooks/use-transactions";
-import { useTranslation } from "@/lib/i18n/use-translation";
+import { useT } from "@/lib/i18n/use-t";
 import { getPresetRange, toQueryDate, type DateRangePreset } from "@/lib/utils";
 import type { TransactionWithRelations } from "@/lib/queries/transactions";
 
 export function OverviewTab() {
-  const { t } = useTranslation();
+  const { t } = useT();
   const [preset, setPreset] = useState<DateRangePreset>("month");
+  const [customStart, setCustomStart] = useState(toQueryDate(new Date()));
+  const [customEnd, setCustomEnd] = useState(toQueryDate(new Date()));
   const [viewing, setViewing] = useState<TransactionWithRelations | null>(null);
 
   const { startDate, endDate } = useMemo(() => {
-    const range = getPresetRange(preset === "custom" ? "month" : preset);
+    if (preset === "custom") return { startDate: customStart, endDate: customEnd };
+    const range = getPresetRange(preset);
     return { startDate: toQueryDate(range.start), endDate: toQueryDate(range.end) };
-  }, [preset]);
+  }, [preset, customStart, customEnd]);
 
   const { data: netWorth } = useNetWorthSummary();
   const { data: totals } = usePeriodTotals(startDate, endDate);
@@ -48,16 +51,15 @@ export function OverviewTab() {
 
       <Card>
         <CardHeader className="flex-row items-center justify-between gap-2">
-          <CardTitle className="text-base">{t.dashboard.page.incomeExpense}</CardTitle>
-          <Tabs value={preset} onValueChange={(v) => setPreset(v as DateRangePreset)}>
-            <TabsList className="h-9">
-              {(["today", "week", "month", "year"] as DateRangePreset[]).map((p) => (
-                <TabsTrigger key={p} value={p} className="px-2.5 text-xs">
-                  {t.dateRangePreset[p]}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+          <CardTitle className="text-base">{t("dashboard.page.incomeExpense")}</CardTitle>
+          <DateRangeFilter
+            value={{ preset, customStart, customEnd }}
+            onChange={(next) => {
+              setPreset(next.preset);
+              setCustomStart(next.customStart);
+              setCustomEnd(next.customEnd);
+            }}
+          />
         </CardHeader>
         <CardContent>
           {totals && <IncomeExpenseChart income={totals.income} expense={totals.expense} />}
@@ -66,7 +68,7 @@ export function OverviewTab() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">{t.dashboard.page.balanceByAccount}</CardTitle>
+          <CardTitle className="text-base">{t("dashboard.page.balanceByAccount")}</CardTitle>
         </CardHeader>
         <CardContent>
           <AccountBreakdownChart data={accountBreakdown ?? []} scope="dashboard" />
@@ -76,7 +78,7 @@ export function OverviewTab() {
       {inKindAccounts.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">{t.dashboard.page.inKind}</CardTitle>
+            <CardTitle className="text-base">{t("dashboard.page.inKind")}</CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="flex flex-col gap-2.5">
@@ -108,24 +110,24 @@ export function OverviewTab() {
       )}
 
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold">{t.dashboard.page.recent}</h2>
+        <h2 className="text-lg font-bold">{t("dashboard.page.recent")}</h2>
         <Link
           href={ROUTES.transactions}
           className="flex items-center gap-0.5 text-sm font-semibold text-primary"
         >
-          {t.dashboard.page.viewAll}
+          {t("dashboard.page.viewAll")}
           <ChevronRight className="size-4" />
         </Link>
       </div>
 
       {loadingTransactions ? (
-        <p className="text-muted-foreground">{t.common.loading}</p>
+        <p className="text-muted-foreground">{t("common.loading")}</p>
       ) : (
         <TransactionList
           transactions={recentTransactions ?? []}
           scope="dashboard"
           onView={setViewing}
-          emptyLabel={t.dashboard.page.emptyRecent}
+          emptyLabel={t("dashboard.page.emptyRecent")}
         />
       )}
 

@@ -21,7 +21,7 @@ import {
   markPinUnlocked,
 } from "@/lib/utils/pin";
 import { cn } from "@/lib/utils";
-import { useTranslation } from "@/lib/i18n/use-translation";
+import { useT } from "@/lib/i18n/use-t";
 import { ROUTES } from "@/lib/constants/routes";
 
 /**
@@ -29,7 +29,7 @@ import { ROUTES } from "@/lib/constants/routes";
  * Đây là lớp tiện lợi trên một phiên Supabase đã xác thực — RLS mới là ranh giới bảo mật thật.
  */
 export function PinGate({ children }: { children: React.ReactNode }) {
-  const { t } = useTranslation();
+  const { t } = useT();
   const { user, loading: authLoading } = useAuth();
   const { data: profile, isLoading: profileLoading } = useProfile();
   const supabase = useSupabase();
@@ -125,8 +125,8 @@ export function PinGate({ children }: { children: React.ReactNode }) {
         <div className="brand-gradient mx-auto flex size-16 items-center justify-center rounded-3xl shadow-glow">
           <LockKeyhole className="size-7 text-white" />
         </div>
-        <h1 className="mt-4 text-lg font-extrabold">{t.auth.pinGate.title}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t.auth.pinGate.subtitle}</p>
+        <h1 className="mt-4 text-lg font-extrabold">{t("auth.pinGate.title")}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t("auth.pinGate.subtitle")}</p>
 
         <div className="mt-6 flex justify-between gap-2">
           {digits.map((digit, index) => (
@@ -151,7 +151,7 @@ export function PinGate({ children }: { children: React.ReactNode }) {
             />
           ))}
         </div>
-        {error && <p className="mt-2 text-sm text-destructive">{t.auth.pinGate.wrongPin}</p>}
+        {error && <p className="mt-2 text-sm text-destructive">{t("auth.pinGate.wrongPin")}</p>}
 
         <Button
           type="submit"
@@ -159,14 +159,14 @@ export function PinGate({ children }: { children: React.ReactNode }) {
           className="mt-6 w-full"
           disabled={pin.length !== 6 || verifying}
         >
-          {verifying ? t.auth.pinGate.checking : t.auth.pinGate.unlock}
+          {verifying ? t("auth.pinGate.checking") : t("auth.pinGate.unlock")}
         </Button>
         <button
           type="button"
           onClick={handleForgot}
           className="mt-4 text-xs font-semibold text-muted-foreground underline-offset-2 hover:underline"
         >
-          {t.auth.pinGate.forgot}
+          {t("auth.pinGate.forgot")}
         </button>
       </form>
     </div>
@@ -176,7 +176,7 @@ export function PinGate({ children }: { children: React.ReactNode }) {
 /** Hiện ra sau khi user bấm "Quên mật khẩu?" và đăng nhập lại Google thành công — đăng nhập
  * lại đã tự chứng minh danh tính rồi nên cho đặt PIN mới ngay, không cần nhập PIN cũ. */
 function ResetPinForm({ userId, onDone }: { userId: string | undefined; onDone: () => void }) {
-  const { t } = useTranslation();
+  const { t } = useT();
   const upsertProfile = useUpsertProfile();
   const [pin, setPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
@@ -187,11 +187,11 @@ function ResetPinForm({ userId, onDone }: { userId: string | undefined; onDone: 
     setError(null);
 
     if (!isValidPin(pin)) {
-      setError(t.profile.pin.errorLength);
+      setError(t("profile.pin.errorLength"));
       return;
     }
     if (pin !== confirmPin) {
-      setError(t.profile.pin.errorMismatch);
+      setError(t("profile.pin.errorMismatch"));
       return;
     }
     if (!userId) return;
@@ -201,7 +201,7 @@ function ResetPinForm({ userId, onDone }: { userId: string | undefined; onDone: 
       { pin_hash: hash, pin_set_at: new Date().toISOString() },
       {
         onSuccess: () => {
-          toast.success(t.profile.pin.toastChanged);
+          toast.success(t("profile.pin.toastChanged"));
           onDone();
         },
       },
@@ -214,12 +214,12 @@ function ResetPinForm({ userId, onDone }: { userId: string | undefined; onDone: 
         <div className="brand-gradient mx-auto flex size-16 items-center justify-center rounded-3xl shadow-glow">
           <KeyRound className="size-7 text-white" />
         </div>
-        <h1 className="mt-4 text-lg font-extrabold">{t.auth.pinGate.resetTitle}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t.auth.pinGate.resetSubtitle}</p>
+        <h1 className="mt-4 text-lg font-extrabold">{t("auth.pinGate.resetTitle")}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t("auth.pinGate.resetSubtitle")}</p>
 
         <div className="mt-6 flex flex-col gap-4 text-left">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="reset-pin">{t.profile.pin.newPinLabel}</Label>
+            <Label htmlFor="reset-pin">{t("profile.pin.newPinLabel")}</Label>
             <Input
               id="reset-pin"
               type="password"
@@ -232,7 +232,7 @@ function ResetPinForm({ userId, onDone }: { userId: string | undefined; onDone: 
             />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="reset-pin-confirm">{t.profile.pin.confirmLabel}</Label>
+            <Label htmlFor="reset-pin-confirm">{t("profile.pin.confirmLabel")}</Label>
             <Input
               id="reset-pin-confirm"
               type="password"
@@ -247,7 +247,7 @@ function ResetPinForm({ userId, onDone }: { userId: string | undefined; onDone: 
         {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
 
         <Button type="submit" size="lg" className="mt-6 w-full" disabled={upsertProfile.isPending}>
-          {upsertProfile.isPending ? t.common.saving : t.auth.pinGate.resetSubmit}
+          {upsertProfile.isPending ? t("common.saving") : t("auth.pinGate.resetSubmit")}
         </Button>
       </form>
     </div>

@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import { NotebookPen, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -25,22 +24,24 @@ import {
 import { TransactionList } from "@/components/transactions/transaction-list";
 import { TransactionDetailDialog } from "@/components/transactions/transaction-detail-dialog";
 import { TodayHero } from "@/components/transactions/today-hero";
-import { ROUTES } from "@/lib/constants/routes";
 import {
   TransactionForm,
   type TransactionFormValues,
 } from "@/components/transactions/transaction-form";
 import { CategoryBreakdownChart } from "@/components/charts/category-breakdown-chart";
+import { ChartTypeToggle } from "@/components/charts/chart-type-toggle";
 import { EmptyState } from "@/components/shared/empty-state";
 import { AmountText } from "@/components/shared/amount-text";
 import {
-  useTransactions,
+  useInfiniteTransactions,
   useUpdateTransaction,
   useDeleteTransaction,
 } from "@/lib/hooks/use-transactions";
 import { useCategoryBreakdown, usePeriodTotals } from "@/lib/hooks/use-summary";
+import { useChartType } from "@/lib/hooks/use-chart-type";
+import { openNewTransactionModal } from "@/lib/hooks/use-new-transaction-modal";
 import { getPresetRange, toQueryDate } from "@/lib/utils";
-import { useTranslation } from "@/lib/i18n/use-translation";
+import { useT } from "@/lib/i18n/use-t";
 import type { TransactionWithRelations } from "@/lib/queries/transactions";
 
 const TODAY = toQueryDate(new Date());
@@ -55,9 +56,10 @@ const DEFAULT_FILTER: TransactionFilterState = {
 };
 
 export default function TransactionsPage() {
-  const { t } = useTranslation();
+  const { t } = useT();
   const [filter, setFilter] = useState<TransactionFilterState>(DEFAULT_FILTER);
   const [breakdownKind, setBreakdownKind] = useState<"expense" | "income">("expense");
+  const [chartType, setChartType] = useChartType("transactions");
   const [viewing, setViewing] = useState<TransactionWithRelations | null>(null);
   const [editing, setEditing] = useState<TransactionWithRelations | null>(null);
   const [deleting, setDeleting] = useState<TransactionWithRelations | null>(null);
@@ -77,13 +79,20 @@ export default function TransactionsPage() {
   const { data: periodTotals } = usePeriodTotals(startDate, endDate);
   const { data: breakdown } = useCategoryBreakdown(startDate, endDate, breakdownKind);
 
-  const { data: transactions, isLoading } = useTransactions({
+  const {
+    data: transactionPages,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useInfiniteTransactions({
     startDate,
     endDate,
     accountId: filter.accountId || undefined,
     categoryId: filter.categoryId || undefined,
     search: filter.search || undefined,
   });
+  const transactions = useMemo(() => transactionPages?.pages.flat() ?? [], [transactionPages]);
 
   function handleUpdate(values: TransactionFormValues) {
     if (!editing) return;
@@ -99,10 +108,10 @@ export default function TransactionsPage() {
       },
       {
         onSuccess: () => {
-          toast.success(t.transactions.page.toastUpdated);
+          toast.success(t("transactions.page.toastUpdated"));
           setEditing(null);
         },
-        onError: () => toast.error(t.common.genericError),
+        onError: () => toast.error(t("common.genericError")),
       },
     );
   }
@@ -111,10 +120,10 @@ export default function TransactionsPage() {
     if (!deleting) return;
     deleteTransaction.mutate(deleting.id, {
       onSuccess: () => {
-        toast.success(t.transactions.page.toastDeleted);
+        toast.success(t("transactions.page.toastDeleted"));
         setDeleting(null);
       },
-      onError: () => toast.error(t.common.genericError),
+      onError: () => toast.error(t("common.genericError")),
     });
   }
 
@@ -128,87 +137,96 @@ export default function TransactionsPage() {
 
       <TransactionFilterBar value={filter} onChange={setFilter} />
 
-      {/* Tổng quan kỳ đang xem */}
-      {periodTotals && (
-        <div className="grid grid-cols-3 gap-2">
-          {[
-            { label: t.transactions.page.income, value: periodTotals.income, className: "text-income" },
-            { label: t.transactions.page.expense, value: periodTotals.expense, className: "text-expense" },
-            {
-              label: t.transactions.page.remaining,
-              value: periodTotals.net,
-              className: periodTotals.net >= 0 ? "text-income" : "text-expense",
-            },
-          ].map((item) => (
-            <div key={item.label} className="glass rounded-2xl px-3 py-2.5">
-              <p className="text-[11px] font-semibold text-muted-foreground">{item.label}</p>
-              <AmountText
-                amount={item.value}
-                scope="transactions"
-                className={`block truncate text-sm font-extrabold tabular-nums ${item.className}`}
-              />
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Cơ cấu theo danh mục */}
+      {/* Tổng quan kỳ đang xem + cơ cấu theo danh mục gộp chung 1 card cho gọn */}
       <Card>
         <CardHeader className="flex-row items-center justify-between gap-2">
-          <CardTitle className="text-base">{t.transactions.page.categoryBreakdownTitle}</CardTitle>
-          <Tabs
-            value={breakdownKind}
-            onValueChange={(v) => setBreakdownKind(v as "expense" | "income")}
-          >
-            <TabsList className="h-9">
-              <TabsTrigger value="expense" className="text-xs">
-                {t.transactions.page.expense}
-              </TabsTrigger>
-              <TabsTrigger value="income" className="text-xs">
-                {t.transactions.page.income}
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <CardTitle className="text-base">{t("transactions.page.categoryBreakdownTitle")}</CardTitle>
+          <div className="flex items-center gap-1.5">
+            <ChartTypeToggle value={chartType} onChange={setChartType} />
+            <Tabs
+              value={breakdownKind}
+              onValueChange={(v) => setBreakdownKind(v as "expense" | "income")}
+            >
+              <TabsList className="h-9">
+                <TabsTrigger value="expense" className="text-xs">
+                  {t("transactions.page.expense")}
+                </TabsTrigger>
+                <TabsTrigger value="income" className="text-xs">
+                  {t("transactions.page.income")}
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
         </CardHeader>
-        <CardContent>
-          <CategoryBreakdownChart data={breakdown ?? []} scope="transactions" />
+        <CardContent className="flex flex-col gap-4">
+          {periodTotals && (
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { label: t("transactions.page.income"), value: periodTotals.income, className: "text-income" },
+                { label: t("transactions.page.expense"), value: periodTotals.expense, className: "text-expense" },
+                {
+                  label: t("transactions.page.remaining"),
+                  value: periodTotals.net,
+                  className: periodTotals.net >= 0 ? "text-income" : "text-expense",
+                },
+              ].map((item) => (
+                <div key={item.label} className="rounded-2xl bg-muted/50 px-3 py-2">
+                  <p className="text-[11px] font-semibold text-muted-foreground">{item.label}</p>
+                  <AmountText
+                    amount={item.value}
+                    scope="transactions"
+                    className={`block truncate text-sm font-extrabold tabular-nums ${item.className}`}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+          <CategoryBreakdownChart data={breakdown ?? []} scope="transactions" variant={chartType} />
         </CardContent>
       </Card>
 
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold">{t.transactions.page.recorded}</h2>
-        <Button size="sm" asChild>
-          <Link href={ROUTES.newTransaction}>
-            <Plus className="size-4" />
-            {t.transactions.page.newEntry}
-          </Link>
+        <h2 className="text-lg font-bold">{t("transactions.page.recorded")}</h2>
+        <Button size="sm" onClick={openNewTransactionModal}>
+          <Plus className="size-4" />
+          {t("transactions.page.newEntry")}
         </Button>
       </div>
 
       {isLoading ? (
-        <p className="text-muted-foreground">{t.common.loading}</p>
-      ) : transactions?.length === 0 ? (
+        <p className="text-muted-foreground">{t("common.loading")}</p>
+      ) : transactions.length === 0 ? (
         <EmptyState
           icon={NotebookPen}
-          title={t.transactions.page.emptyTitle}
-          description={t.transactions.page.emptyDescription}
+          title={t("transactions.page.emptyTitle")}
+          description={t("transactions.page.emptyDescription")}
           action={
-            <Button asChild>
-              <Link href={ROUTES.newTransaction}>
-                <Plus className="size-4" />
-                {t.transactions.page.newEntry}
-              </Link>
+            <Button onClick={openNewTransactionModal}>
+              <Plus className="size-4" />
+              {t("transactions.page.newEntry")}
             </Button>
           }
         />
       ) : (
-        <TransactionList
-          transactions={transactions ?? []}
-          scope="transactions"
-          onView={setViewing}
-          onEdit={setEditing}
-          onDelete={setDeleting}
-        />
+        <>
+          <TransactionList
+            transactions={transactions}
+            scope="transactions"
+            onView={setViewing}
+            onEdit={setEditing}
+            onDelete={setDeleting}
+          />
+          {hasNextPage && (
+            <Button
+              variant="outline"
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+              className="self-center"
+            >
+              {isFetchingNextPage ? t("transactions.page.loadingMore") : t("transactions.page.loadMore")}
+            </Button>
+          )}
+        </>
       )}
 
       <TransactionDetailDialog
@@ -229,7 +247,7 @@ export default function TransactionsPage() {
       <Dialog open={!!editing} onOpenChange={(open) => !open && setEditing(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t.transactions.page.editTitle}</DialogTitle>
+            <DialogTitle>{t("transactions.page.editTitle")}</DialogTitle>
           </DialogHeader>
           {editing && (
             <TransactionForm
@@ -244,12 +262,12 @@ export default function TransactionsPage() {
       <AlertDialog open={!!deleting} onOpenChange={(open) => !open && setDeleting(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t.transactions.page.deleteTitle}</AlertDialogTitle>
-            <AlertDialogDescription>{t.transactions.page.deleteDescription}</AlertDialogDescription>
+            <AlertDialogTitle>{t("transactions.page.deleteTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("transactions.page.deleteDescription")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>{t.common.delete}</AlertDialogAction>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>{t("common.delete")}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
