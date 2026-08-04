@@ -21,6 +21,10 @@ export const vi = {
   calendar: {
     prevMonth: "Tháng trước",
     nextMonth: "Tháng sau",
+    prevYear: "Năm trước",
+    nextYear: "Năm sau",
+    prevDecade: "Thập niên trước",
+    nextDecade: "Thập niên sau",
     weekdays: ["T2", "T3", "T4", "T5", "T6", "T7", "CN"],
   },
 

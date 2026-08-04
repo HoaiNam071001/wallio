@@ -23,6 +23,10 @@ export const en: Dictionary = {
   calendar: {
     prevMonth: "Previous month",
     nextMonth: "Next month",
+    prevYear: "Previous year",
+    nextYear: "Next year",
+    prevDecade: "Previous years",
+    nextDecade: "Next years",
     weekdays: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
   },
 
