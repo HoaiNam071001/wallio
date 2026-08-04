@@ -446,7 +446,10 @@
     },
     "currency": {
       "title": "Đơn vị tiền",
-      "customSymbolLabel": "Ký hiệu tuỳ chỉnh"
+      "selectLabel": "Chọn đơn vị tiền",
+      "customSymbolLabel": "Ký hiệu tuỳ chỉnh",
+      "save": "Lưu",
+      "toastSaved": "Đã lưu đơn vị tiền"
     }
   }
 }

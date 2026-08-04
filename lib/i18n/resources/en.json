@@ -446,7 +446,10 @@
     },
     "currency": {
       "title": "Currency",
-      "customSymbolLabel": "Custom symbol"
+      "selectLabel": "Select currency",
+      "customSymbolLabel": "Custom symbol",
+      "save": "Save",
+      "toastSaved": "Currency saved"
     }
   }
 }
