@@ -1,7 +1,7 @@
 "use client";
 
 import { format, parseISO } from "date-fns";
-import { vi } from "date-fns/locale";
+import { vi, enUS } from "date-fns/locale";
 import { ArrowLeftRight, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { EntityIcon } from "@/components/shared/entity-icon";
 import { AmountTextForAccount } from "@/components/shared/amount-text";
 import { ACCOUNT_TYPE_META } from "@/components/accounts/account-type";
+import { useTranslation } from "@/lib/i18n/use-translation";
 import type { AmountVisibilityScope } from "@/lib/hooks/use-amount-visibility";
 import type { AccountType } from "@/lib/types/database.types";
 import type { TransactionWithRelations } from "@/lib/queries/transactions";
@@ -34,6 +35,7 @@ export function TransactionDetailDialog({
   /** Dùng khi màn hình hiện tại không có sẵn form sửa (vd Dashboard) — điều hướng sang nơi có. */
   editHref?: string;
 }) {
+  const { t: tr, locale } = useTranslation();
   if (!t) return null;
 
   const isTransfer = t.type === "transfer";
@@ -46,7 +48,7 @@ export function TransactionDetailDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Chi tiết giao dịch</DialogTitle>
+          <DialogTitle>{tr.transactions.detail.title}</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col items-center gap-1 py-2 text-center">
@@ -63,7 +65,7 @@ export function TransactionDetailDialog({
             />
           )}
           <p className="mt-2 text-lg font-extrabold">
-            {isTransfer ? "Chuyển khoản" : (t.category?.name ?? "Không phân loại")}
+            {isTransfer ? tr.common.transfer : (t.category?.name ?? tr.common.uncategorized)}
           </p>
 
           {isDualLeg ? (
@@ -90,16 +92,21 @@ export function TransactionDetailDialog({
         </div>
 
         <dl className="flex flex-col gap-2 rounded-2xl bg-muted/50 p-4 text-sm">
-          <Row label="Ngày" value={format(parseISO(t.transaction_date), "EEEE, dd/MM/yyyy", { locale: vi })} />
+          <Row
+            label={tr.transactions.detail.date}
+            value={format(parseISO(t.transaction_date), "EEEE, dd/MM/yyyy", {
+              locale: locale === "en" ? enUS : vi,
+            })}
+          />
           {isTransfer ? (
             <>
-              <Row label="Từ nguồn tiền" value={t.account?.name ?? "—"} />
-              <Row label="Đến nguồn tiền" value={t.to_account?.name ?? "—"} />
+              <Row label={tr.transactions.detail.fromAccount} value={t.account?.name ?? "—"} />
+              <Row label={tr.transactions.detail.toAccount} value={t.to_account?.name ?? "—"} />
             </>
           ) : (
-            <Row label="Nguồn tiền" value={t.account?.name ?? "—"} />
+            <Row label={tr.transactions.detail.account} value={t.account?.name ?? "—"} />
           )}
-          {t.note && <Row label="Ghi chú" value={t.note} />}
+          {t.note && <Row label={tr.transactions.detail.note} value={t.note} />}
         </dl>
 
         {(onEdit || onDelete || editHref) && (
@@ -108,20 +115,20 @@ export function TransactionDetailDialog({
               <Button variant="outline" className="flex-1" asChild>
                 <Link href={editHref}>
                   <Pencil className="size-4" />
-                  Sửa trong Sổ thu chi
+                  {tr.transactions.detail.editInTransactions}
                 </Link>
               </Button>
             )}
             {onEdit && (
               <Button variant="outline" className="flex-1" onClick={onEdit}>
                 <Pencil className="size-4" />
-                Sửa
+                {tr.common.edit}
               </Button>
             )}
             {onDelete && (
               <Button variant="destructive" className="flex-1" onClick={onDelete}>
                 <Trash2 className="size-4" />
-                Xoá
+                {tr.common.delete}
               </Button>
             )}
           </div>

@@ -33,11 +33,13 @@ import {
   useDeleteAccount,
   useUpdateAccount,
 } from "@/lib/hooks/use-accounts";
+import { useTranslation } from "@/lib/i18n/use-translation";
 import type { AccountWithBalance } from "@/lib/types/database.types";
 
 const LIQUID_TYPES = new Set(["cash", "ewallet", "bank"]);
 
 export default function AccountsPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { data: accounts, isLoading } = useAccountsWithBalance();
   const createAccount = useCreateAccount();
@@ -73,10 +75,10 @@ export default function AccountsPage() {
         { id: editing.id, input: values },
         {
           onSuccess: () => {
-            toast.success("Đã cập nhật nguồn tiền");
+            toast.success(t.accounts.page.toastUpdated);
             setFormOpen(false);
           },
-          onError: () => toast.error("Có lỗi xảy ra, thử lại sau"),
+          onError: () => toast.error(t.common.genericError),
         },
       );
       return;
@@ -87,10 +89,10 @@ export default function AccountsPage() {
       { ...values, user_id: user.id },
       {
         onSuccess: () => {
-          toast.success("Đã thêm nguồn tiền");
+          toast.success(t.accounts.page.toastAdded);
           setFormOpen(false);
         },
-        onError: () => toast.error("Có lỗi xảy ra, thử lại sau"),
+        onError: () => toast.error(t.common.genericError),
       },
     );
   }
@@ -99,11 +101,11 @@ export default function AccountsPage() {
     if (!deleting) return;
     deleteAccount.mutate(deleting.id, {
       onSuccess: () => {
-        toast.success("Đã xoá nguồn tiền");
+        toast.success(t.accounts.page.toastDeleted);
         setDeleting(null);
       },
       onError: () => {
-        toast.error("Không thể xoá — có thể còn giao dịch liên quan");
+        toast.error(t.accounts.page.toastDeleteError);
         setDeleting(null);
       },
     });
@@ -112,32 +114,32 @@ export default function AccountsPage() {
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
-        title="Nguồn tiền"
+        title={t.accounts.page.title}
         subtitle={
           <span className="flex items-center gap-1">
-            Tiền khả dụng: <AmountText amount={total} scope="accounts" />
+            {t.accounts.page.availableCash}: <AmountText amount={total} scope="accounts" />
           </span>
         }
         amountScope="accounts"
         action={
           <Button onClick={openCreate} size="sm">
             <Plus className="size-4" />
-            Thêm
+            {t.common.add}
           </Button>
         }
       />
 
-      {isLoading && <p className="text-muted-foreground">Đang tải...</p>}
+      {isLoading && <p className="text-muted-foreground">{t.common.loading}</p>}
 
       {!isLoading && accounts?.length === 0 && (
         <EmptyState
           icon={WalletMinimal}
-          title="Chưa có nguồn tiền nào"
-          description="Thêm ví, tài khoản ngân hàng hay khoản nợ để bắt đầu theo dõi."
+          title={t.accounts.page.emptyTitle}
+          description={t.accounts.page.emptyDescription}
           action={
             <Button onClick={openCreate}>
               <Plus className="size-4" />
-              Thêm nguồn tiền
+              {t.accounts.page.addAccount}
             </Button>
           }
         />
@@ -164,7 +166,7 @@ export default function AccountsPage() {
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editing ? "Sửa nguồn tiền" : "Thêm nguồn tiền"}</DialogTitle>
+            <DialogTitle>{editing ? t.accounts.page.editTitle : t.accounts.page.addTitle}</DialogTitle>
           </DialogHeader>
           <AccountForm
             defaultValues={editing ?? undefined}
@@ -177,14 +179,12 @@ export default function AccountsPage() {
       <AlertDialog open={!!deleting} onOpenChange={(open) => !open && setDeleting(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Xoá nguồn tiền &quot;{deleting?.name}&quot;?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Hành động này không thể hoàn tác. Nguồn tiền có giao dịch liên quan sẽ không xoá được.
-            </AlertDialogDescription>
+            <AlertDialogTitle>{t.accounts.page.deleteTitle(deleting?.name ?? "")}</AlertDialogTitle>
+            <AlertDialogDescription>{t.accounts.page.deleteDescription}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Huỷ</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>Xoá</AlertDialogAction>
+            <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>{t.common.delete}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

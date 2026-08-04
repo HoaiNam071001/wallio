@@ -13,11 +13,10 @@ import {
   startOfWeek,
   subMonths,
 } from "date-fns";
-import { vi } from "date-fns/locale";
+import { vi, enUS } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const WEEKDAYS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
+import { useTranslation } from "@/lib/i18n/use-translation";
 
 /** Lịch tháng tự vẽ (không phụ thuộc UI native của trình duyệt) — dùng cho desktop. */
 export function Calendar({
@@ -31,6 +30,8 @@ export function Calendar({
   maxDate?: string;
   minDate?: string;
 }) {
+  const { t, locale } = useTranslation();
+  const dateLocale = locale === "en" ? enUS : vi;
   const selected = value ? parseISO(value) : undefined;
   const [month, setMonth] = React.useState(() => selected ?? new Date());
 
@@ -49,25 +50,25 @@ export function Calendar({
           type="button"
           onClick={() => setMonth((m) => subMonths(m, 1))}
           className="flex size-7 items-center justify-center rounded-full text-muted-foreground hover:bg-accent"
-          aria-label="Tháng trước"
+          aria-label={t.calendar.prevMonth}
         >
           <ChevronLeft className="size-4" />
         </button>
         <span className="text-sm font-bold capitalize">
-          {format(month, "MMMM yyyy", { locale: vi })}
+          {format(month, "MMMM yyyy", { locale: dateLocale })}
         </span>
         <button
           type="button"
           onClick={() => setMonth((m) => addMonths(m, 1))}
           className="flex size-7 items-center justify-center rounded-full text-muted-foreground hover:bg-accent"
-          aria-label="Tháng sau"
+          aria-label={t.calendar.nextMonth}
         >
           <ChevronRight className="size-4" />
         </button>
       </div>
 
       <div className="grid grid-cols-7 px-1 pb-1 text-center text-[11px] font-bold text-muted-foreground">
-        {WEEKDAYS.map((d) => (
+        {t.calendar.weekdays.map((d) => (
           <span key={d}>{d}</span>
         ))}
       </div>

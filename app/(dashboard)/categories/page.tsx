@@ -28,9 +28,11 @@ import {
   useUpdateCategory,
 } from "@/lib/hooks/use-categories";
 import { normalizeColor, withAlpha } from "@/lib/theme/palette";
+import { useTranslation } from "@/lib/i18n/use-translation";
 import type { Category, CategoryKind } from "@/lib/types/database.types";
 
 export default function CategoriesPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { data: categories, isLoading } = useCategories();
   const createCategory = useCreateCategory();
@@ -63,10 +65,10 @@ export default function CategoriesPage() {
         { id: editing.id, input: values },
         {
           onSuccess: () => {
-            toast.success("Đã cập nhật danh mục");
+            toast.success(t.categories.page.toastUpdated);
             setFormOpen(false);
           },
-          onError: () => toast.error("Có lỗi xảy ra, thử lại sau"),
+          onError: () => toast.error(t.common.genericError),
         },
       );
       return;
@@ -77,10 +79,10 @@ export default function CategoriesPage() {
       { ...values, user_id: user.id },
       {
         onSuccess: () => {
-          toast.success("Đã thêm danh mục");
+          toast.success(t.categories.page.toastAdded);
           setFormOpen(false);
         },
-        onError: () => toast.error("Có lỗi xảy ra, thử lại sau"),
+        onError: () => toast.error(t.common.genericError),
       },
     );
   }
@@ -89,11 +91,11 @@ export default function CategoriesPage() {
     if (!deleting) return;
     deleteCategory.mutate(deleting.id, {
       onSuccess: () => {
-        toast.success("Đã xoá danh mục");
+        toast.success(t.categories.page.toastDeleted);
         setDeleting(null);
       },
       onError: () => {
-        toast.error("Không thể xoá danh mục");
+        toast.error(t.categories.page.toastDeleteError);
         setDeleting(null);
       },
     });
@@ -102,34 +104,36 @@ export default function CategoriesPage() {
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
-        title="Danh mục"
-        subtitle="Gắn màu và biểu tượng để nhìn phát ra ngay"
+        title={t.categories.page.title}
+        subtitle={t.categories.page.subtitle}
         action={
           <Button size="sm" onClick={openCreate}>
             <Plus className="size-4" />
-            Thêm
+            {t.common.add}
           </Button>
         }
       />
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as CategoryKind)}>
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="expense">Chi tiêu</TabsTrigger>
-          <TabsTrigger value="income">Thu nhập</TabsTrigger>
+          <TabsTrigger value="expense">{t.categories.page.tabExpense}</TabsTrigger>
+          <TabsTrigger value="income">{t.categories.page.tabIncome}</TabsTrigger>
         </TabsList>
       </Tabs>
 
-      {isLoading && <p className="text-muted-foreground">Đang tải...</p>}
+      {isLoading && <p className="text-muted-foreground">{t.common.loading}</p>}
 
       {!isLoading && filtered.length === 0 && (
         <EmptyState
           icon={Tags}
-          title={`Chưa có danh mục ${tab === "income" ? "thu nhập" : "chi tiêu"}`}
-          description="Tạo vài danh mục quen thuộc như Ăn uống, Xăng xe, Lương..."
+          title={t.categories.page.emptyTitle(
+            tab === "income" ? t.transactions.form.kindIncomeLower : t.transactions.form.kindExpenseLower,
+          )}
+          description={t.categories.page.emptyDescription}
           action={
             <Button onClick={openCreate}>
               <Plus className="size-4" />
-              Thêm danh mục
+              {t.categories.page.addCategory}
             </Button>
           }
         />
@@ -153,7 +157,7 @@ export default function CategoriesPage() {
                   variant="ghost"
                   size="icon"
                   className="size-8"
-                  aria-label="Sửa"
+                  aria-label={t.common.edit}
                   onClick={() => openEdit(category)}
                 >
                   <Pencil className="size-4" />
@@ -162,7 +166,7 @@ export default function CategoriesPage() {
                   variant="ghost"
                   size="icon"
                   className="size-8 text-destructive"
-                  aria-label="Xoá"
+                  aria-label={t.common.delete}
                   onClick={() => setDeleting(category)}
                 >
                   <Trash2 className="size-4" />
@@ -176,7 +180,7 @@ export default function CategoriesPage() {
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editing ? "Sửa danh mục" : "Thêm danh mục"}</DialogTitle>
+            <DialogTitle>{editing ? t.categories.page.editTitle : t.categories.page.addTitle}</DialogTitle>
           </DialogHeader>
           <CategoryForm
             defaultValues={editing ?? { kind: tab }}
@@ -189,14 +193,12 @@ export default function CategoriesPage() {
       <AlertDialog open={!!deleting} onOpenChange={(open) => !open && setDeleting(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Xoá danh mục &quot;{deleting?.name}&quot;?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Các giao dịch đang dùng danh mục này sẽ chuyển về &quot;Không phân loại&quot;.
-            </AlertDialogDescription>
+            <AlertDialogTitle>{t.categories.page.deleteTitle(deleting?.name ?? "")}</AlertDialogTitle>
+            <AlertDialogDescription>{t.categories.page.deleteDescription}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Huỷ</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>Xoá</AlertDialogAction>
+            <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>{t.common.delete}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

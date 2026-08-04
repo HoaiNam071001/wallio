@@ -17,48 +17,41 @@ import { useCategories } from "@/lib/hooks/use-categories";
 import { useAccountsWithBalance } from "@/lib/hooks/use-accounts";
 import { cn, formatAmount } from "@/lib/utils";
 import { normalizeColor, withAlpha } from "@/lib/theme/palette";
+import { useTranslation } from "@/lib/i18n/use-translation";
+import type { Dictionary } from "@/lib/i18n/dictionaries/vi";
 import type { Transaction, TransactionType } from "@/lib/types/database.types";
+
+/** Zod message chỉ giữ mã lỗi — nội dung hiển thị lấy từ t.transactions.form.validation[code]. */
+type ValidationCode = keyof Dictionary["transactions"]["form"]["validation"];
 
 const transactionFormSchema = z
   .object({
     type: z.enum(["income", "expense", "transfer"]),
-    amount: z.number().positive("Số tiền phải lớn hơn 0"),
+    amount: z.number().positive("amountPositive" satisfies ValidationCode),
     to_amount: z.number().positive().optional(),
-    account_id: z.string().min(1, "Chọn nguồn tiền"),
+    account_id: z.string().min(1, "chooseAccount" satisfies ValidationCode),
     to_account_id: z.string().optional(),
     category_id: z.string().optional(),
     note: z.string().optional(),
-    transaction_date: z.string().min(1, "Chọn ngày"),
+    transaction_date: z.string().min(1, "chooseDate" satisfies ValidationCode),
   })
   .refine((data) => data.type !== "transfer" || !!data.to_account_id, {
-    message: "Chọn nguồn tiền nhận",
+    message: "chooseToAccount" satisfies ValidationCode,
     path: ["to_account_id"],
   })
   .refine((data) => data.type !== "transfer" || data.to_account_id !== data.account_id, {
-    message: "Nguồn tiền chuyển và nhận phải khác nhau",
+    message: "accountsMustDiffer" satisfies ValidationCode,
     path: ["to_account_id"],
   });
 
 export type TransactionFormValues = z.infer<typeof transactionFormSchema>;
 
-const TYPE_OPTIONS = [
-  { value: "expense" as const, label: "Chi tiêu", icon: ArrowUpRight, color: "var(--expense)" },
-  { value: "income" as const, label: "Thu nhập", icon: ArrowDownLeft, color: "var(--income)" },
-  {
-    value: "transfer" as const,
-    label: "Chuyển khoản",
-    icon: ArrowLeftRight,
-    color: "var(--transfer)",
-  },
-];
+function validationMessage(t: Dictionary, code?: string) {
+  return code ? t.transactions.form.validation[code as ValidationCode] : undefined;
+}
 
 /** Gợi ý nhập nhanh cho mobile. */
 const QUICK_AMOUNTS = [10_000, 20_000, 50_000, 100_000, 200_000, 500_000];
-
-const DATE_SHORTCUTS = [
-  { label: "Hôm nay", value: () => format(new Date(), "yyyy-MM-dd") },
-  { label: "Hôm qua", value: () => format(subDays(new Date(), 1), "yyyy-MM-dd") },
-];
 
 export function TransactionForm({
   defaultValues,
@@ -69,8 +62,25 @@ export function TransactionForm({
   onSubmit: (values: TransactionFormValues) => void;
   submitting?: boolean;
 }) {
+  const { t } = useTranslation();
   const { data: categories } = useCategories();
   const { data: accounts } = useAccountsWithBalance();
+
+  const TYPE_OPTIONS = [
+    { value: "expense" as const, label: t.transactions.form.typeExpense, icon: ArrowUpRight, color: "var(--expense)" },
+    { value: "income" as const, label: t.transactions.form.typeIncome, icon: ArrowDownLeft, color: "var(--income)" },
+    {
+      value: "transfer" as const,
+      label: t.transactions.form.typeTransfer,
+      icon: ArrowLeftRight,
+      color: "var(--transfer)",
+    },
+  ];
+
+  const DATE_SHORTCUTS = [
+    { label: t.common.today, value: () => format(new Date(), "yyyy-MM-dd") },
+    { label: t.common.yesterday, value: () => format(subDays(new Date(), 1), "yyyy-MM-dd") },
+  ];
 
   const {
     register,
@@ -140,11 +150,11 @@ export function TransactionForm({
     if (!isDualAmount) setValue("to_amount", undefined);
   }, [isDualAmount, setValue]);
 
-  const activeType = TYPE_OPTIONS.find((t) => t.value === type)!;
+  const activeType = TYPE_OPTIONS.find((opt) => opt.value === type)!;
 
   function handleFormSubmit(values: TransactionFormValues) {
     if (isDualAmount && !values.to_amount) {
-      setError("to_amount", { message: "Nhập số lượng nhận được" });
+      setError("to_amount", { message: "enterReceivedAmount" satisfies ValidationCode });
       return;
     }
     onSubmit(values);
@@ -183,7 +193,9 @@ export function TransactionForm({
         style={{ backgroundColor: `color-mix(in oklab, ${activeType.color} 10%, transparent)` }}
       >
         <Label htmlFor="amount" className="text-xs font-bold tracking-wide uppercase opacity-70">
-          {isDualAmount ? `Số tiền/số lượng — ${fromAccount?.name}` : "Số tiền"}
+          {isDualAmount
+            ? t.transactions.form.amountWithAccount(fromAccount?.name ?? "")
+            : t.transactions.form.amountLabel}
         </Label>
         <CurrencyInput
           id="amount"
@@ -211,7 +223,11 @@ export function TransactionForm({
             ))}
           </div>
         )}
-        {errors.amount && <p className="mt-1 text-sm text-destructive">{errors.amount.message}</p>}
+        {errors.amount && (
+          <p className="mt-1 text-sm text-destructive">
+            {validationMessage(t, errors.amount.message)}
+          </p>
+        )}
 
         {isDualAmount && (
           <div className="mt-4 border-t border-black/10 pt-4 dark:border-white/10">
@@ -219,7 +235,7 @@ export function TransactionForm({
               htmlFor="to_amount"
               className="text-xs font-bold tracking-wide uppercase opacity-70"
             >
-              Nhận được — {toAccount?.name}
+              {t.transactions.form.receivedWithAccount(toAccount?.name ?? "")}
             </Label>
             <CurrencyInput
               id="to_amount"
@@ -233,7 +249,9 @@ export function TransactionForm({
               style={{ color: activeType.color }}
             />
             {errors.to_amount && (
-              <p className="mt-1 text-sm text-destructive">{errors.to_amount.message}</p>
+              <p className="mt-1 text-sm text-destructive">
+                {validationMessage(t, errors.to_amount.message)}
+              </p>
             )}
           </div>
         )}
@@ -242,10 +260,14 @@ export function TransactionForm({
       {/* Danh mục dạng chip */}
       {type !== "transfer" && (
         <div className="flex flex-col gap-2">
-          <Label>Danh mục</Label>
+          <Label>{t.transactions.form.category}</Label>
           {relevantCategories.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              Chưa có danh mục {type === "income" ? "thu nhập" : "chi tiêu"} nào — tạo ở mục Danh mục.
+              {t.transactions.form.noCategoryOf(
+                type === "income"
+                  ? t.transactions.form.kindIncomeLower
+                  : t.transactions.form.kindExpenseLower,
+              )}
             </p>
           ) : (
             <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
@@ -288,28 +310,30 @@ export function TransactionForm({
       {/* Nguồn tiền */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex min-w-0 flex-col gap-2">
-          <Label>{type === "transfer" ? "Từ nguồn tiền" : "Nguồn tiền"}</Label>
+          <Label>{type === "transfer" ? t.transactions.form.fromAccount : t.transactions.form.account}</Label>
           <AccountSelect
             value={accountId}
             onChange={(v) => setValue("account_id", v)}
             excludeTypes={type !== "transfer" ? ["in_kind"] : undefined}
           />
           {errors.account_id && (
-            <p className="text-sm text-destructive">{errors.account_id.message}</p>
+            <p className="text-sm text-destructive">{validationMessage(t, errors.account_id.message)}</p>
           )}
         </div>
 
         {type === "transfer" && (
           <div className="flex min-w-0 flex-col gap-2">
-            <Label>Đến nguồn tiền</Label>
+            <Label>{t.transactions.form.toAccount}</Label>
             <AccountSelect
               value={toAccountId}
               onChange={(v) => setValue("to_account_id", v)}
-              placeholder="Chọn nguồn tiền nhận"
+              placeholder={t.transactions.form.toAccountPlaceholder}
               excludeId={accountId}
             />
             {errors.to_account_id && (
-              <p className="text-sm text-destructive">{errors.to_account_id.message}</p>
+              <p className="text-sm text-destructive">
+                {validationMessage(t, errors.to_account_id.message)}
+              </p>
             )}
           </div>
         )}
@@ -317,7 +341,7 @@ export function TransactionForm({
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex min-w-0 flex-col gap-2">
-          <Label htmlFor="transaction_date">Ngày</Label>
+          <Label htmlFor="transaction_date">{t.transactions.form.date}</Label>
           <div className="flex flex-wrap items-center gap-2">
             <DateField
               id="transaction_date"
@@ -345,18 +369,20 @@ export function TransactionForm({
             })}
           </div>
           {errors.transaction_date && (
-            <p className="text-sm text-destructive">{errors.transaction_date.message}</p>
+            <p className="text-sm text-destructive">
+              {validationMessage(t, errors.transaction_date.message)}
+            </p>
           )}
         </div>
 
         <div className="flex min-w-0 flex-col gap-2">
-          <Label htmlFor="note">Ghi chú</Label>
-          <Textarea id="note" placeholder="Ghi chú (tuỳ chọn)" {...register("note")} />
+          <Label htmlFor="note">{t.transactions.form.note}</Label>
+          <Textarea id="note" placeholder={t.transactions.form.notePlaceholder} {...register("note")} />
         </div>
       </div>
 
       <Button type="submit" size="lg" disabled={submitting}>
-        {submitting ? "Đang lưu..." : "Lưu giao dịch"}
+        {submitting ? t.common.saving : t.transactions.form.submit}
       </Button>
     </form>
   );

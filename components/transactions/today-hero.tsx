@@ -2,18 +2,20 @@
 
 import Link from "next/link";
 import { format } from "date-fns";
-import { vi } from "date-fns/locale";
+import { vi, enUS } from "date-fns/locale";
 import { ArrowDownLeft, ArrowUpRight, Eye, EyeOff, Plus } from "lucide-react";
 import { AmountText } from "@/components/shared/amount-text";
 import { useAmountVisibility } from "@/lib/hooks/use-amount-visibility";
+import { useTranslation } from "@/lib/i18n/use-translation";
+import type { Dictionary } from "@/lib/i18n/dictionaries/vi";
 import { ROUTES } from "@/lib/constants/routes";
 
-function greeting(date: Date): string {
+function greeting(t: Dictionary, date: Date): string {
   const hour = date.getHours();
-  if (hour < 11) return "Chào buổi sáng";
-  if (hour < 14) return "Chào buổi trưa";
-  if (hour < 18) return "Chào buổi chiều";
-  return "Chào buổi tối";
+  if (hour < 11) return t.transactions.todayHero.greetingMorning;
+  if (hour < 14) return t.transactions.todayHero.greetingNoon;
+  if (hour < 18) return t.transactions.todayHero.greetingAfternoon;
+  return t.transactions.todayHero.greetingEvening;
 }
 
 /**
@@ -31,6 +33,7 @@ export function TodayHero({
 }) {
   const today = new Date();
   const [visible, toggle] = useAmountVisibility("transactions");
+  const { t, locale } = useTranslation();
 
   return (
     <section className="brand-gradient relative overflow-hidden rounded-3xl p-5 text-white shadow-glow">
@@ -40,16 +43,16 @@ export function TodayHero({
 
       <div className="relative flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm font-medium text-white/80">{greeting(today)} 👋</p>
+          <p className="text-sm font-medium text-white/80">{greeting(t, today)} 👋</p>
           <p className="text-xs text-white/70">
-            {format(today, "EEEE, dd MMMM yyyy", { locale: vi })}
+            {format(today, "EEEE, dd MMMM yyyy", { locale: locale === "en" ? enUS : vi })}
           </p>
         </div>
         <div className="flex flex-col items-end gap-2">
           <button
             type="button"
             onClick={toggle}
-            aria-label={visible ? "Ẩn số tiền" : "Hiện số tiền"}
+            aria-label={visible ? t.common.hideAmount : t.common.showAmount}
             className="flex size-8 items-center justify-center rounded-full bg-white/20 backdrop-blur transition-transform active:scale-95"
           >
             {visible ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
@@ -59,14 +62,14 @@ export function TodayHero({
             className="flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1.5 text-xs font-bold backdrop-blur transition-transform active:scale-95"
           >
             <Plus className="size-3.5" />
-            Ghi ngay
+            {t.transactions.todayHero.recordNow}
           </Link>
         </div>
       </div>
 
       <div className="relative mt-4">
         <p className="text-xs font-semibold tracking-wide text-white/75 uppercase">
-          Đã chi hôm nay
+          {t.transactions.todayHero.spentToday}
         </p>
         <p className="text-4xl font-extrabold tabular-nums">
           {loading ? "—" : <AmountText amount={expense} scope="transactions" />}
@@ -77,7 +80,7 @@ export function TodayHero({
         <div className="rounded-2xl bg-white/15 p-3 backdrop-blur">
           <div className="flex items-center gap-1.5 text-[11px] font-semibold text-white/80">
             <ArrowDownLeft className="size-3.5" />
-            Thu hôm nay
+            {t.transactions.todayHero.incomeToday}
           </div>
           <p className="mt-0.5 text-base font-extrabold tabular-nums">
             {loading ? "—" : <AmountText amount={income} scope="transactions" />}
@@ -86,7 +89,7 @@ export function TodayHero({
         <div className="rounded-2xl bg-white/15 p-3 backdrop-blur">
           <div className="flex items-center gap-1.5 text-[11px] font-semibold text-white/80">
             <ArrowUpRight className="size-3.5" />
-            Chênh lệch
+            {t.transactions.todayHero.difference}
           </div>
           <p className="mt-0.5 text-base font-extrabold tabular-nums">
             {loading ? "—" : <AmountText amount={income - expense} scope="transactions" />}

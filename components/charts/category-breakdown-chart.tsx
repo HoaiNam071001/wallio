@@ -7,6 +7,7 @@ import { AmountText } from "@/components/shared/amount-text";
 import { useAmountVisibility, type AmountVisibilityScope } from "@/lib/hooks/use-amount-visibility";
 import { formatCurrency } from "@/lib/utils";
 import { colorForKey } from "@/lib/theme/palette";
+import { useTranslation } from "@/lib/i18n/use-translation";
 import type { CategoryBreakdownItem } from "@/lib/queries/summary";
 
 interface Slice extends CategoryBreakdownItem {
@@ -33,12 +34,13 @@ function TooltipCard({ slice, visible }: { slice: Slice; visible: boolean }) {
 export function CategoryBreakdownChart({
   data,
   scope,
-  emptyLabel = "Chưa có dữ liệu trong khoảng thời gian này.",
+  emptyLabel,
 }: {
   data: CategoryBreakdownItem[];
   scope: AmountVisibilityScope;
   emptyLabel?: string;
 }) {
+  const { t } = useTranslation();
   const [visible] = useAmountVisibility(scope);
   const { slices, total } = useMemo(() => {
     const sum = data.reduce((acc, item) => acc + item.total, 0);
@@ -58,7 +60,11 @@ export function CategoryBreakdownChart({
   }, [data]);
 
   if (slices.length === 0) {
-    return <p className="py-6 text-center text-sm text-muted-foreground">{emptyLabel}</p>;
+    return (
+      <p className="py-6 text-center text-sm text-muted-foreground">
+        {emptyLabel ?? t.charts.categoryBreakdown.empty}
+      </p>
+    );
   }
 
   return (
@@ -93,7 +99,7 @@ export function CategoryBreakdownChart({
 
         {/* Số tổng đặt giữa donut */}
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-[11px] font-semibold text-muted-foreground">Tổng</span>
+          <span className="text-[11px] font-semibold text-muted-foreground">{t.charts.categoryBreakdown.total}</span>
           <AmountText
             amount={total}
             scope={scope}

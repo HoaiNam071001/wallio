@@ -4,6 +4,7 @@ import { EntityIcon } from "@/components/shared/entity-icon";
 import { AmountText } from "@/components/shared/amount-text";
 import { ACCOUNT_TYPE_META } from "@/components/accounts/account-type";
 import { colorForKey } from "@/lib/theme/palette";
+import { useTranslation } from "@/lib/i18n/use-translation";
 import type { AmountVisibilityScope } from "@/lib/hooks/use-amount-visibility";
 import type { AccountBreakdownItem } from "@/lib/queries/summary";
 import type { AccountType } from "@/lib/types/database.types";
@@ -16,12 +17,13 @@ export function AccountBreakdownChart({
   data: AccountBreakdownItem[];
   scope: AmountVisibilityScope;
 }) {
+  const { t } = useTranslation();
   // Hiện vật không có giá VNĐ cố định nên không so được cùng thang với các nguồn còn lại —
   // hiển thị riêng ở mục "Hiện vật" trên Dashboard thay vì gộp vào đây.
   const vndData = data.filter((item) => item.type !== "in_kind");
 
   if (vndData.length === 0) {
-    return <p className="py-6 text-center text-sm text-muted-foreground">Chưa có nguồn tiền nào.</p>;
+    return <p className="py-6 text-center text-sm text-muted-foreground">{t.charts.accountBreakdown.empty}</p>;
   }
 
   const max = Math.max(...vndData.map((item) => Math.abs(item.balance)), 1);

@@ -21,15 +21,12 @@ import {
   usePeriodTotals,
 } from "@/lib/hooks/use-summary";
 import { useTransactions } from "@/lib/hooks/use-transactions";
-import {
-  DATE_RANGE_PRESET_LABELS,
-  getPresetRange,
-  toQueryDate,
-  type DateRangePreset,
-} from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/use-translation";
+import { getPresetRange, toQueryDate, type DateRangePreset } from "@/lib/utils";
 import type { TransactionWithRelations } from "@/lib/queries/transactions";
 
 export default function DashboardPage() {
+  const { t } = useTranslation();
   const [preset, setPreset] = useState<DateRangePreset>("month");
   const [viewing, setViewing] = useState<TransactionWithRelations | null>(null);
 
@@ -48,18 +45,18 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHeader title="Tổng quan" subtitle="Bức tranh tài chính của bạn" amountScope="dashboard" />
+      <PageHeader title={t.dashboard.page.title} subtitle={t.dashboard.page.subtitle} amountScope="dashboard" />
 
       {netWorth && <SummaryCards summary={netWorth} />}
 
       <Card>
         <CardHeader className="flex-row items-center justify-between gap-2">
-          <CardTitle className="text-base">Thu / Chi</CardTitle>
+          <CardTitle className="text-base">{t.dashboard.page.incomeExpense}</CardTitle>
           <Tabs value={preset} onValueChange={(v) => setPreset(v as DateRangePreset)}>
             <TabsList className="h-9">
               {(["today", "week", "month", "year"] as DateRangePreset[]).map((p) => (
                 <TabsTrigger key={p} value={p} className="px-2.5 text-xs">
-                  {DATE_RANGE_PRESET_LABELS[p]}
+                  {t.dateRangePreset[p]}
                 </TabsTrigger>
               ))}
             </TabsList>
@@ -72,7 +69,7 @@ export default function DashboardPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Số dư theo nguồn tiền</CardTitle>
+          <CardTitle className="text-base">{t.dashboard.page.balanceByAccount}</CardTitle>
         </CardHeader>
         <CardContent>
           <AccountBreakdownChart data={accountBreakdown ?? []} scope="dashboard" />
@@ -82,7 +79,7 @@ export default function DashboardPage() {
       {inKindAccounts.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Hiện vật</CardTitle>
+            <CardTitle className="text-base">{t.dashboard.page.inKind}</CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="flex flex-col gap-2.5">
@@ -114,24 +111,24 @@ export default function DashboardPage() {
       )}
 
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold">Gần đây</h2>
+        <h2 className="text-lg font-bold">{t.dashboard.page.recent}</h2>
         <Link
           href={ROUTES.transactions}
           className="flex items-center gap-0.5 text-sm font-semibold text-primary"
         >
-          Xem tất cả
+          {t.dashboard.page.viewAll}
           <ChevronRight className="size-4" />
         </Link>
       </div>
 
       {loadingTransactions ? (
-        <p className="text-muted-foreground">Đang tải...</p>
+        <p className="text-muted-foreground">{t.common.loading}</p>
       ) : (
         <TransactionList
           transactions={recentTransactions ?? []}
           scope="dashboard"
           onView={setViewing}
-          emptyLabel="Chưa có khoản nào được ghi."
+          emptyLabel={t.dashboard.page.emptyRecent}
         />
       )}
 

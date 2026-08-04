@@ -4,9 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { NAV_ITEMS } from "@/components/layout/nav-items";
+import { useTranslation } from "@/lib/i18n/use-translation";
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { t } = useTranslation();
 
   return (
     <nav
@@ -37,7 +39,7 @@ export function BottomNav() {
                   active ? "text-primary" : "text-muted-foreground",
                 )}
               >
-                {item.shortLabel}
+                {t.nav[item.navKey].shortLabel}
               </span>
             </Link>
           );

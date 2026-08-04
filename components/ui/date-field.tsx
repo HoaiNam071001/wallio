@@ -2,10 +2,11 @@
 
 import * as React from "react";
 import { format, parseISO } from "date-fns";
-import { vi } from "date-fns/locale";
+import { vi, enUS } from "date-fns/locale";
 import { CalendarDays } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsHandheld } from "@/lib/hooks/use-is-handheld";
+import { useTranslation } from "@/lib/i18n/use-translation";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Calendar } from "@/components/ui/calendar";
@@ -23,9 +24,12 @@ type DateFieldProps = Omit<React.ComponentProps<"input">, "value" | "onChange" |
  */
 export function DateField({ value, onChange, className, id, max, min }: DateFieldProps) {
   const isHandheld = useIsHandheld();
+  const { t, locale } = useTranslation();
   const [open, setOpen] = React.useState(false);
 
-  const label = value ? format(parseISO(value), "dd/MM/yyyy", { locale: vi }) : "Chọn ngày";
+  const label = value
+    ? format(parseISO(value), "dd/MM/yyyy", { locale: locale === "en" ? enUS : vi })
+    : t.common.chooseDate;
 
   const pill = (
     <div
@@ -64,7 +68,7 @@ export function DateField({ value, onChange, className, id, max, min }: DateFiel
         </button>
         <DialogContent className="w-auto max-w-[calc(100%-2rem)] p-4">
           <DialogHeader className="sr-only">
-            <DialogTitle>Chọn ngày</DialogTitle>
+            <DialogTitle>{t.common.chooseDate}</DialogTitle>
           </DialogHeader>
           {calendar}
         </DialogContent>

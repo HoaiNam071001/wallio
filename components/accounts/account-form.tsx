@@ -11,13 +11,14 @@ import { CurrencyInput } from "@/components/ui/currency-input";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { IconPicker } from "@/components/ui/icon-picker";
 import { EntityIcon } from "@/components/shared/entity-icon";
-import { ACCOUNT_TYPE_META, ACCOUNT_TYPE_OPTIONS } from "@/components/accounts/account-type";
+import { ACCOUNT_TYPE_META, accountTypeOptions } from "@/components/accounts/account-type";
 import { ACCOUNT_ICON_NAMES, getIcon } from "@/lib/theme/icons";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/use-translation";
 import type { Account, AccountType } from "@/lib/types/database.types";
 
 const accountFormSchema = z.object({
-  name: z.string().min(1, "Nhập tên nguồn tiền"),
+  name: z.string().min(1),
   type: z.enum(["cash", "ewallet", "bank", "lending", "debt", "in_kind", "other"]),
   initial_balance: z.number(),
   unit: z.string().optional(),
@@ -36,6 +37,7 @@ export function AccountForm({
   onSubmit: (values: AccountFormValues) => void;
   submitting?: boolean;
 }) {
+  const { t } = useTranslation();
   const isEditing = !!defaultValues?.id;
   const initialType = defaultValues?.type ?? "cash";
 
@@ -76,21 +78,23 @@ export function AccountForm({
       <div className="flex items-center gap-3 rounded-2xl bg-muted/50 p-3">
         <EntityIcon icon={icon} color={color} className="size-12" iconClassName="size-6" />
         <div className="min-w-0">
-          <p className="truncate font-bold">{name || "Nguồn tiền mới"}</p>
-          <p className="text-xs text-muted-foreground">{ACCOUNT_TYPE_META[type].hint}</p>
+          <p className="truncate font-bold">{name || t.accounts.form.newAccountName}</p>
+          <p className="text-xs text-muted-foreground">{t.accountType[type].hint}</p>
         </div>
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="name">Tên nguồn tiền</Label>
-        <Input id="name" placeholder="VD: Momo, Tiền mặt, Vietcombank..." {...register("name")} />
-        {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
+        <Label htmlFor="name">{t.accounts.form.nameLabel}</Label>
+        <Input id="name" placeholder={t.accounts.form.namePlaceholder} {...register("name")} />
+        {errors.name && (
+          <p className="text-sm text-destructive">{t.accounts.form.validation.nameRequired}</p>
+        )}
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label>Loại</Label>
+        <Label>{t.accounts.form.typeLabel}</Label>
         <div className="grid grid-cols-3 gap-2">
-          {ACCOUNT_TYPE_OPTIONS.map((option) => {
+          {accountTypeOptions(t).map((option) => {
             const OptionIcon = getIcon(option.icon);
             const active = type === option.value;
             return (
@@ -116,13 +120,15 @@ export function AccountForm({
 
       {isInKind && (
         <div className="flex flex-col gap-2">
-          <Label htmlFor="unit">Đơn vị tính</Label>
-          <Input id="unit" placeholder="VD: chỉ, cây, cổ phiếu..." {...register("unit")} />
+          <Label htmlFor="unit">{t.accounts.form.unitLabel}</Label>
+          <Input id="unit" placeholder={t.accounts.form.unitPlaceholder} {...register("unit")} />
         </div>
       )}
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="initial_balance">{isInKind ? "Số lượng ban đầu" : "Số dư ban đầu"}</Label>
+        <Label htmlFor="initial_balance">
+          {isInKind ? t.accounts.form.initialQuantityLabel : t.accounts.form.initialBalanceLabel}
+        </Label>
         <CurrencyInput
           id="initial_balance"
           allowNegative
@@ -132,10 +138,10 @@ export function AccountForm({
         />
         <p className="text-xs text-muted-foreground">
           {type === "debt"
-            ? "Khoản nợ: nhập số âm nếu bạn đang nợ (VD: -500.000)."
+            ? t.accounts.form.hintDebt
             : isInKind
-              ? "Số lượng đang có trước khi bắt đầu ghi chép, không có giá VNĐ cố định."
-              : "Số tiền đang có trước khi bắt đầu ghi chép."}
+              ? t.accounts.form.hintInKind
+              : t.accounts.form.hintDefault}
         </p>
         {errors.initial_balance && (
           <p className="text-sm text-destructive">{errors.initial_balance.message}</p>
@@ -143,12 +149,12 @@ export function AccountForm({
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label>Màu</Label>
+        <Label>{t.accounts.form.colorLabel}</Label>
         <ColorPicker value={color} onChange={(next) => setValue("color", next)} />
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label>Biểu tượng</Label>
+        <Label>{t.accounts.form.iconLabel}</Label>
         <IconPicker
           value={icon}
           color={color}
@@ -158,7 +164,7 @@ export function AccountForm({
       </div>
 
       <Button type="submit" size="lg" disabled={submitting} className="mt-1">
-        {submitting ? "Đang lưu..." : "Lưu"}
+        {submitting ? t.common.saving : t.common.save}
       </Button>
     </form>
   );

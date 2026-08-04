@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Eye, EyeOff, KeyRound, ShieldCheck, User as UserIcon } from "lucide-react";
+import { Eye, EyeOff, KeyRound, Languages, Palette, ShieldCheck, User as UserIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,7 +14,11 @@ import { PageHeader } from "@/components/layout/page-header";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { useProfile, useUpsertProfile } from "@/lib/hooks/use-profile";
 import { setAllAmountVisibility } from "@/lib/hooks/use-amount-visibility";
+import { useTheme, type Theme } from "@/lib/hooks/use-theme";
+import { useTranslation } from "@/lib/i18n/use-translation";
+import type { Locale } from "@/lib/i18n/locale-store";
 import { hashPin, isValidPin } from "@/lib/utils/pin";
+import { cn } from "@/lib/utils";
 
 const infoSchema = z.object({
   display_name: z.string().max(80).optional(),
@@ -32,14 +36,17 @@ export default function ProfilePage() {
   const { user } = useAuth();
   const { data: profile } = useProfile();
   const upsertProfile = useUpsertProfile();
+  const { t } = useTranslation();
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHeader title="Hồ sơ" subtitle={user?.email ?? undefined} />
+      <PageHeader title={t.profile.page.title} subtitle={user?.email ?? undefined} />
 
       <ProfileInfoCard profile={profile} onSave={(values) => upsertProfile.mutate(values)} saving={upsertProfile.isPending} />
       <PinCard hasPin={!!profile?.pin_hash} userId={user?.id} onSave={(pin_hash) => upsertProfile.mutate({ pin_hash, pin_set_at: new Date().toISOString() })} saving={upsertProfile.isPending} />
       <AmountVisibilityCard />
+      <AppearanceCard />
+      <LanguageCard />
     </div>
   );
 }
@@ -53,6 +60,7 @@ function ProfileInfoCard({
   onSave: (values: InfoFormValues) => void;
   saving: boolean;
 }) {
+  const { t } = useTranslation();
   const { register, handleSubmit, reset } = useForm<InfoFormValues>({
     resolver: zodResolver(infoSchema),
     defaultValues: { display_name: "", birth_year: undefined },
@@ -68,32 +76,32 @@ function ProfileInfoCard({
 
   function submit(values: InfoFormValues) {
     onSave(values);
-    toast.success("Đã lưu hồ sơ");
+    toast.success(t.profile.info.toastSaved);
   }
 
   return (
     <Card>
       <CardHeader className="flex-row items-center gap-2">
         <UserIcon className="size-4.5 text-brand-600" />
-        <CardTitle className="text-base">Thông tin cá nhân</CardTitle>
+        <CardTitle className="text-base">{t.profile.info.title}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(submit)} className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="display_name">Tên hiển thị</Label>
-            <Input id="display_name" placeholder="Tên của bạn" {...register("display_name")} />
+            <Label htmlFor="display_name">{t.profile.info.nameLabel}</Label>
+            <Input id="display_name" placeholder={t.profile.info.namePlaceholder} {...register("display_name")} />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="birth_year">Năm sinh</Label>
+            <Label htmlFor="birth_year">{t.profile.info.birthYearLabel}</Label>
             <Input
               id="birth_year"
               type="number"
-              placeholder="VD: 1995"
+              placeholder={t.profile.info.birthYearPlaceholder}
               {...register("birth_year", { valueAsNumber: true })}
             />
           </div>
           <Button type="submit" disabled={saving} className="self-start">
-            {saving ? "Đang lưu..." : "Lưu hồ sơ"}
+            {saving ? t.common.saving : t.profile.info.save}
           </Button>
         </form>
       </CardContent>
@@ -112,6 +120,7 @@ function PinCard({
   onSave: (pinHash: string) => void;
   saving: boolean;
 }) {
+  const { t } = useTranslation();
   const [pin, setPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -121,11 +130,11 @@ function PinCard({
     setError(null);
 
     if (!isValidPin(pin)) {
-      setError("Mật khẩu phải gồm đúng 6 số");
+      setError(t.profile.pin.errorLength);
       return;
     }
     if (pin !== confirmPin) {
-      setError("Hai mật khẩu chưa khớp nhau");
+      setError(t.profile.pin.errorMismatch);
       return;
     }
     if (!userId) return;
@@ -134,26 +143,26 @@ function PinCard({
     onSave(hash);
     setPin("");
     setConfirmPin("");
-    toast.success(hasPin ? "Đã đổi mật khẩu" : "Đã đặt mật khẩu");
+    toast.success(hasPin ? t.profile.pin.toastChanged : t.profile.pin.toastSet);
   }
 
   return (
     <Card>
       <CardHeader className="flex-row items-center gap-2">
         <KeyRound className="size-4.5 text-brand-600" />
-        <CardTitle className="text-base">Bảo mật</CardTitle>
+        <CardTitle className="text-base">{t.profile.pin.title}</CardTitle>
       </CardHeader>
       <CardContent>
         {hasPin && (
           <p className="mb-3 flex items-center gap-1.5 text-sm font-semibold text-income">
             <ShieldCheck className="size-4" />
-            Đã đặt mật khẩu 6 số
+            {t.profile.pin.hasPinBadge}
           </p>
         )}
         <form onSubmit={submit} className="flex flex-col gap-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="pin">{hasPin ? "Mật khẩu mới" : "Mật khẩu 6 số"}</Label>
+              <Label htmlFor="pin">{hasPin ? t.profile.pin.newPinLabel : t.profile.pin.pinLabel}</Label>
               <Input
                 id="pin"
                 type="password"
@@ -165,7 +174,7 @@ function PinCard({
               />
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="pin-confirm">Nhập lại mật khẩu</Label>
+              <Label htmlFor="pin-confirm">{t.profile.pin.confirmLabel}</Label>
               <Input
                 id="pin-confirm"
                 type="password"
@@ -179,7 +188,7 @@ function PinCard({
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
           <Button type="submit" disabled={saving} className="self-start">
-            {saving ? "Đang lưu..." : hasPin ? "Đổi mật khẩu" : "Đặt mật khẩu"}
+            {saving ? t.common.saving : hasPin ? t.profile.pin.changePin : t.profile.pin.setPin}
           </Button>
         </form>
       </CardContent>
@@ -188,25 +197,101 @@ function PinCard({
 }
 
 function AmountVisibilityCard() {
+  const { t } = useTranslation();
   return (
     <Card>
       <CardHeader className="flex-row items-center gap-2">
         <Eye className="size-4.5 text-brand-600" />
-        <CardTitle className="text-base">Hiển thị số tiền</CardTitle>
+        <CardTitle className="text-base">{t.profile.amountVisibility.title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="mb-3 text-sm text-muted-foreground">
-          Áp dụng cho tất cả các trang cùng lúc. Mỗi trang cũng có nút ẩn/hiện riêng ở tiêu đề.
-        </p>
+        <p className="mb-3 text-sm text-muted-foreground">{t.profile.amountVisibility.description}</p>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setAllAmountVisibility(true)}>
             <Eye className="size-4" />
-            Hiện tất cả
+            {t.profile.amountVisibility.showAll}
           </Button>
           <Button variant="outline" onClick={() => setAllAmountVisibility(false)}>
             <EyeOff className="size-4" />
-            Ẩn tất cả
+            {t.profile.amountVisibility.hideAll}
           </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function AppearanceCard() {
+  const { t } = useTranslation();
+  const [theme, setTheme] = useTheme();
+
+  const options: { value: Theme; label: string }[] = [
+    { value: "light", label: t.profile.appearance.light },
+    { value: "dark", label: t.profile.appearance.dark },
+    { value: "system", label: t.profile.appearance.system },
+  ];
+
+  return (
+    <Card>
+      <CardHeader className="flex-row items-center gap-2">
+        <Palette className="size-4.5 text-brand-600" />
+        <CardTitle className="text-base">{t.profile.appearance.title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Label className="mb-2 block">{t.profile.appearance.themeLabel}</Label>
+        <div className="grid grid-cols-3 gap-2">
+          {options.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => setTheme(option.value)}
+              className={cn(
+                "rounded-2xl border p-2.5 text-sm font-semibold transition-all active:scale-95",
+                theme === option.value
+                  ? "border-transparent bg-brand-600 text-white shadow-soft"
+                  : "border-input bg-card/60 text-muted-foreground",
+              )}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function LanguageCard() {
+  const { t, locale, setLocale } = useTranslation();
+
+  const options: { value: Locale; label: string }[] = [
+    { value: "vi", label: t.profile.language.vi },
+    { value: "en", label: t.profile.language.en },
+  ];
+
+  return (
+    <Card>
+      <CardHeader className="flex-row items-center gap-2">
+        <Languages className="size-4.5 text-brand-600" />
+        <CardTitle className="text-base">{t.profile.language.title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 gap-2">
+          {options.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => setLocale(option.value)}
+              className={cn(
+                "rounded-2xl border p-2.5 text-sm font-semibold transition-all active:scale-95",
+                locale === option.value
+                  ? "border-transparent bg-brand-600 text-white shadow-soft"
+                  : "border-input bg-card/60 text-muted-foreground",
+              )}
+            >
+              {option.label}
+            </button>
+          ))}
         </div>
       </CardContent>
     </Card>

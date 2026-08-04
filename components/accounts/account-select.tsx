@@ -11,13 +11,14 @@ import { EntityIcon } from "@/components/shared/entity-icon";
 import { AmountTextForAccount } from "@/components/shared/amount-text";
 import { ACCOUNT_TYPE_META } from "@/components/accounts/account-type";
 import { useAccountsWithBalance } from "@/lib/hooks/use-accounts";
+import { useTranslation } from "@/lib/i18n/use-translation";
 import type { AccountType } from "@/lib/types/database.types";
 
 /** Ô chọn nguồn tiền: icon + tên + số dư hiện tại, dùng chung cho form giao dịch. */
 export function AccountSelect({
   value,
   onChange,
-  placeholder = "Chọn nguồn tiền",
+  placeholder,
   excludeId,
   excludeTypes,
 }: {
@@ -28,6 +29,7 @@ export function AccountSelect({
   /** Ẩn bớt các loại nguồn tiền không phù hợp — vd "Hiện vật" chỉ dùng cho chuyển khoản. */
   excludeTypes?: AccountType[];
 }) {
+  const { t } = useTranslation();
   const { data: accounts } = useAccountsWithBalance();
   const options = (accounts ?? []).filter(
     (a) => a.id !== excludeId && !excludeTypes?.includes(a.type),
@@ -36,7 +38,7 @@ export function AccountSelect({
   return (
     <Select value={value} onValueChange={onChange}>
       <SelectTrigger className="w-full">
-        <SelectValue placeholder={placeholder} />
+        <SelectValue placeholder={placeholder ?? t.accounts.select.defaultPlaceholder} />
       </SelectTrigger>
       <SelectContent>
         {options.map((account) => {

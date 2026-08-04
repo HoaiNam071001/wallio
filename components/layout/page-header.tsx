@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useAmountVisibility, type AmountVisibilityScope } from "@/lib/hooks/use-amount-visibility";
+import { useTranslation } from "@/lib/i18n/use-translation";
 
 export function PageHeader({
   title,
@@ -32,11 +33,12 @@ export function PageHeader({
 
 function AmountVisibilityToggle({ scope }: { scope: AmountVisibilityScope }) {
   const [visible, toggle] = useAmountVisibility(scope);
+  const { t } = useTranslation();
   return (
     <button
       type="button"
       onClick={toggle}
-      aria-label={visible ? "Ẩn số tiền" : "Hiện số tiền"}
+      aria-label={visible ? t.common.hideAmount : t.common.showAmount}
       className="flex size-9 items-center justify-center rounded-full border border-border bg-card/70 text-muted-foreground transition-colors hover:bg-accent"
     >
       {visible ? <Eye className="size-4" /> : <EyeOff className="size-4" />}

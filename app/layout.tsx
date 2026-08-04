@@ -40,6 +40,25 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
+const THEME_LOCALE_BOOTSTRAP_SCRIPT = `
+(function () {
+  try {
+    var theme = localStorage.getItem("wallio:theme");
+    var resolved =
+      theme === "light" || theme === "dark"
+        ? theme
+        : window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light";
+    document.documentElement.classList.toggle("dark", resolved === "dark");
+    document.documentElement.style.colorScheme = resolved;
+
+    var locale = localStorage.getItem("wallio:locale");
+    if (locale === "en" || locale === "vi") document.documentElement.lang = locale;
+  } catch (e) {}
+})();
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -49,8 +68,12 @@ export default function RootLayout({
     <html
       lang="vi"
       className={`${beVietnam.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="flex min-h-full flex-col font-sans">
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_LOCALE_BOOTSTRAP_SCRIPT }} />
+      </head>
+      <body className="flex min-h-full flex-col font-sans" suppressHydrationWarning>
         <Providers>
           {children}
           <Toaster position="top-center" richColors />

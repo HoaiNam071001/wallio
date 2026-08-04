@@ -12,14 +12,12 @@ import { PageHeader } from "@/components/layout/page-header";
 import { AmountText } from "@/components/shared/amount-text";
 import { useAccountBreakdown, useCategoryBreakdown, usePeriodTotals } from "@/lib/hooks/use-summary";
 import { useTransactions } from "@/lib/hooks/use-transactions";
-import {
-  DATE_RANGE_PRESET_LABELS,
-  getPresetRange,
-  toQueryDate,
-  type DateRangePreset,
-} from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/use-translation";
+import type { Dictionary } from "@/lib/i18n/dictionaries/vi";
+import { DATE_RANGE_PRESET_ORDER, getPresetRange, toQueryDate, type DateRangePreset } from "@/lib/utils";
 
 function exportCsv(
+  t: Dictionary,
   rows: {
     date: string;
     type: string;
@@ -29,7 +27,7 @@ function exportCsv(
     note: string;
   }[],
 ) {
-  const header = ["Ngày", "Loại", "Số tiền", "Nguồn tiền", "Danh mục", "Ghi chú"];
+  const header = t.reports.page.csvHeader;
   const lines = rows.map((r) =>
     [r.date, r.type, r.amount, r.account, r.category, r.note]
       .map((v) => `"${String(v ?? "").replace(/"/g, '""')}"`)
@@ -40,12 +38,13 @@ function exportCsv(
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `giao-dich-${toQueryDate(new Date())}.csv`;
+  a.download = `${t.reports.page.csvFilenamePrefix}-${toQueryDate(new Date())}.csv`;
   a.click();
   URL.revokeObjectURL(url);
 }
 
 export default function ReportsPage() {
+  const { t } = useTranslation();
   const [preset, setPreset] = useState<DateRangePreset>("month");
   const [customStart, setCustomStart] = useState(toQueryDate(new Date()));
   const [customEnd, setCustomEnd] = useState(toQueryDate(new Date()));
@@ -65,16 +64,17 @@ export default function ReportsPage() {
   function handleExport() {
     if (!transactions) return;
     exportCsv(
-      transactions.map((t) => ({
-        date: t.transaction_date,
-        type: t.type,
-        amount: t.amount,
+      t,
+      transactions.map((tx) => ({
+        date: tx.transaction_date,
+        type: tx.type,
+        amount: tx.amount,
         account:
-          t.type === "transfer"
-            ? `${t.account?.name ?? ""} → ${t.to_account?.name ?? ""}`
-            : (t.account?.name ?? ""),
-        category: t.category?.name ?? "",
-        note: t.note ?? "",
+          tx.type === "transfer"
+            ? `${tx.account?.name ?? ""} → ${tx.to_account?.name ?? ""}`
+            : (tx.account?.name ?? ""),
+        category: tx.category?.name ?? "",
+        note: tx.note ?? "",
       })),
     );
   }
@@ -82,8 +82,8 @@ export default function ReportsPage() {
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
-        title="Báo cáo"
-        subtitle="Tiền của bạn đã đi đâu"
+        title={t.reports.page.title}
+        subtitle={t.reports.page.subtitle}
         amountScope="reports"
         action={
           <Button variant="outline" size="sm" onClick={handleExport}>
@@ -95,9 +95,9 @@ export default function ReportsPage() {
 
       <Tabs value={preset} onValueChange={(v) => setPreset(v as DateRangePreset)}>
         <TabsList className="grid w-full grid-cols-5">
-          {(Object.keys(DATE_RANGE_PRESET_LABELS) as DateRangePreset[]).map((p) => (
+          {DATE_RANGE_PRESET_ORDER.map((p) => (
             <TabsTrigger key={p} value={p} className="px-1 text-[11px] sm:text-sm">
-              {DATE_RANGE_PRESET_LABELS[p]}
+              {t.dateRangePreset[p]}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -114,10 +114,10 @@ export default function ReportsPage() {
       {totals && (
         <div className="grid grid-cols-3 gap-2">
           {[
-            { label: "Thu nhập", value: totals.income, className: "text-income" },
-            { label: "Chi tiêu", value: totals.expense, className: "text-expense" },
+            { label: t.reports.page.income, value: totals.income, className: "text-income" },
+            { label: t.reports.page.expense, value: totals.expense, className: "text-expense" },
             {
-              label: "Chênh lệch",
+              label: t.reports.page.net,
               value: totals.net,
               className: totals.net >= 0 ? "text-income" : "text-expense",
             },
@@ -136,14 +136,14 @@ export default function ReportsPage() {
 
       <Card>
         <CardHeader className="flex-row items-center justify-between gap-2">
-          <CardTitle className="text-base">Theo danh mục</CardTitle>
+          <CardTitle className="text-base">{t.reports.page.byCategory}</CardTitle>
           <Tabs value={kind} onValueChange={(v) => setKind(v as "income" | "expense")}>
             <TabsList className="h-9">
               <TabsTrigger value="expense" className="text-xs">
-                Chi
+                {t.transactions.page.expense}
               </TabsTrigger>
               <TabsTrigger value="income" className="text-xs">
-                Thu
+                {t.transactions.page.income}
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -155,7 +155,7 @@ export default function ReportsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Theo nguồn tiền</CardTitle>
+          <CardTitle className="text-base">{t.reports.page.byAccount}</CardTitle>
         </CardHeader>
         <CardContent>
           <AccountBreakdownChart data={accountBreakdown ?? []} scope="reports" />

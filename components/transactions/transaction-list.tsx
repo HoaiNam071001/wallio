@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { format, isToday, isYesterday, parseISO } from "date-fns";
-import { vi } from "date-fns/locale";
+import { vi, enUS } from "date-fns/locale";
 import { ArrowLeftRight, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,17 +14,20 @@ import {
 import { EntityIcon } from "@/components/shared/entity-icon";
 import { AmountText, AmountTextForAccount } from "@/components/shared/amount-text";
 import { ACCOUNT_TYPE_META } from "@/components/accounts/account-type";
+import { useTranslation } from "@/lib/i18n/use-translation";
+import type { Dictionary } from "@/lib/i18n/dictionaries/vi";
 import type { AmountVisibilityScope } from "@/lib/hooks/use-amount-visibility";
+import type { Locale } from "@/lib/i18n/locale-store";
 import type { AccountType } from "@/lib/types/database.types";
 import type { TransactionWithRelations } from "@/lib/queries/transactions";
 
 const FALLBACK_ACCOUNT = { type: "cash" as AccountType, unit: null as string | null };
 
-function dayLabel(date: string): string {
+function dayLabel(t: Dictionary, locale: Locale, date: string): string {
   const parsed = parseISO(date);
-  if (isToday(parsed)) return "Hôm nay";
-  if (isYesterday(parsed)) return "Hôm qua";
-  return format(parsed, "EEEE, dd/MM", { locale: vi });
+  if (isToday(parsed)) return t.common.today;
+  if (isYesterday(parsed)) return t.common.yesterday;
+  return format(parsed, "EEEE, dd/MM", { locale: locale === "en" ? enUS : vi });
 }
 
 /** Icon + màu của một giao dịch: theo danh mục, hoặc theo nguồn tiền nếu là chuyển khoản. */
@@ -52,6 +55,7 @@ function TransactionRow({
   onEdit?: (transaction: TransactionWithRelations) => void;
   onDelete?: (transaction: TransactionWithRelations) => void;
 }) {
+  const { t: tr } = useTranslation();
   const visuals = visualsOf(t);
   const amountClass =
     t.type === "income" ? "text-income" : t.type === "expense" ? "text-expense" : "text-transfer";
@@ -60,9 +64,9 @@ function TransactionRow({
   const title =
     t.type === "transfer"
       ? `${t.account?.name ?? "?"} → ${t.to_account?.name ?? "?"}`
-      : (t.category?.name ?? "Không phân loại");
+      : (t.category?.name ?? tr.common.uncategorized);
 
-  const subtitle = t.type === "transfer" ? "Chuyển khoản" : (t.account?.name ?? "");
+  const subtitle = t.type === "transfer" ? tr.common.transfer : (t.account?.name ?? "");
 
   // Chuyển đổi hiện vật (vd Momo -> vàng) có 2 vế số khác nhau/khác đơn vị.
   const isDualLeg = t.type === "transfer" && t.to_amount != null && t.to_amount !== t.amount;
@@ -124,13 +128,13 @@ function TransactionRow({
               {onEdit && (
                 <DropdownMenuItem onClick={() => onEdit(t)}>
                   <Pencil className="size-4" />
-                  Sửa
+                  {tr.common.edit}
                 </DropdownMenuItem>
               )}
               {onDelete && (
                 <DropdownMenuItem variant="destructive" onClick={() => onDelete(t)}>
                   <Trash2 className="size-4" />
-                  Xoá
+                  {tr.common.delete}
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
@@ -147,7 +151,7 @@ export function TransactionList({
   onView,
   onEdit,
   onDelete,
-  emptyLabel = "Chưa có khoản nào trong khoảng thời gian này.",
+  emptyLabel,
 }: {
   transactions: TransactionWithRelations[];
   scope: AmountVisibilityScope;
@@ -156,6 +160,7 @@ export function TransactionList({
   onDelete?: (transaction: TransactionWithRelations) => void;
   emptyLabel?: string;
 }) {
+  const { t, locale } = useTranslation();
   // Gom theo ngày để danh sách dễ quét mắt hơn một bảng phẳng.
   const groups = useMemo(() => {
     const byDate = new Map<string, TransactionWithRelations[]>();
@@ -176,7 +181,11 @@ export function TransactionList({
   }, [transactions]);
 
   if (transactions.length === 0) {
-    return <p className="py-6 text-center text-sm text-muted-foreground">{emptyLabel}</p>;
+    return (
+      <p className="py-6 text-center text-sm text-muted-foreground">
+        {emptyLabel ?? t.transactions.list.empty}
+      </p>
+    );
   }
 
   return (
@@ -185,7 +194,7 @@ export function TransactionList({
         <div key={group.date} className="glass overflow-hidden rounded-3xl">
           <div className="flex items-center justify-between border-b border-border/60 px-4 py-2">
             <span className="text-xs font-bold text-muted-foreground uppercase">
-              {dayLabel(group.date)}
+              {dayLabel(t, locale, group.date)}
             </span>
             <span
               className={`flex items-center text-xs font-bold tabular-nums ${

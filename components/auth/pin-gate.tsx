@@ -9,6 +9,7 @@ import { useProfile } from "@/lib/hooks/use-profile";
 import { useSupabase } from "@/lib/hooks/use-supabase";
 import { clearPinUnlocked, hashPin, isPinUnlockedInSession, isValidPin, markPinUnlocked } from "@/lib/utils/pin";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/use-translation";
 import { ROUTES } from "@/lib/constants/routes";
 
 /**
@@ -16,6 +17,7 @@ import { ROUTES } from "@/lib/constants/routes";
  * Đây là lớp tiện lợi trên một phiên Supabase đã xác thực — RLS mới là ranh giới bảo mật thật.
  */
 export function PinGate({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation();
   const { user, loading: authLoading } = useAuth();
   const { data: profile, isLoading: profileLoading } = useProfile();
   const supabase = useSupabase();
@@ -58,8 +60,8 @@ export function PinGate({ children }: { children: React.ReactNode }) {
         <div className="brand-gradient mx-auto flex size-16 items-center justify-center rounded-3xl shadow-glow">
           <LockKeyhole className="size-7 text-white" />
         </div>
-        <h1 className="mt-4 text-lg font-extrabold">Nhập mật khẩu</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Nhập mã 6 số để mở Wallio</p>
+        <h1 className="mt-4 text-lg font-extrabold">{t.auth.pinGate.title}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t.auth.pinGate.subtitle}</p>
 
         <input
           autoFocus
@@ -77,7 +79,7 @@ export function PinGate({ children }: { children: React.ReactNode }) {
             error ? "border-destructive" : "border-input",
           )}
         />
-        {error && <p className="mt-2 text-sm text-destructive">Sai mật khẩu, thử lại.</p>}
+        {error && <p className="mt-2 text-sm text-destructive">{t.auth.pinGate.wrongPin}</p>}
 
         <Button
           type="submit"
@@ -85,14 +87,14 @@ export function PinGate({ children }: { children: React.ReactNode }) {
           className="mt-6 w-full"
           disabled={pin.length !== 6 || verifying}
         >
-          {verifying ? "Đang kiểm tra..." : "Mở khoá"}
+          {verifying ? t.auth.pinGate.checking : t.auth.pinGate.unlock}
         </Button>
         <button
           type="button"
           onClick={handleForgot}
           className="mt-4 text-xs font-semibold text-muted-foreground underline-offset-2 hover:underline"
         >
-          Quên mật khẩu?
+          {t.auth.pinGate.forgot}
         </button>
       </form>
     </div>

@@ -40,6 +40,7 @@ import {
 } from "@/lib/hooks/use-transactions";
 import { useCategoryBreakdown, usePeriodTotals } from "@/lib/hooks/use-summary";
 import { getPresetRange, toQueryDate } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/use-translation";
 import type { TransactionWithRelations } from "@/lib/queries/transactions";
 
 const TODAY = toQueryDate(new Date());
@@ -54,6 +55,7 @@ const DEFAULT_FILTER: TransactionFilterState = {
 };
 
 export default function TransactionsPage() {
+  const { t } = useTranslation();
   const [filter, setFilter] = useState<TransactionFilterState>(DEFAULT_FILTER);
   const [breakdownKind, setBreakdownKind] = useState<"expense" | "income">("expense");
   const [viewing, setViewing] = useState<TransactionWithRelations | null>(null);
@@ -97,10 +99,10 @@ export default function TransactionsPage() {
       },
       {
         onSuccess: () => {
-          toast.success("Đã cập nhật giao dịch");
+          toast.success(t.transactions.page.toastUpdated);
           setEditing(null);
         },
-        onError: () => toast.error("Có lỗi xảy ra, thử lại sau"),
+        onError: () => toast.error(t.common.genericError),
       },
     );
   }
@@ -109,10 +111,10 @@ export default function TransactionsPage() {
     if (!deleting) return;
     deleteTransaction.mutate(deleting.id, {
       onSuccess: () => {
-        toast.success("Đã xoá giao dịch");
+        toast.success(t.transactions.page.toastDeleted);
         setDeleting(null);
       },
-      onError: () => toast.error("Có lỗi xảy ra, thử lại sau"),
+      onError: () => toast.error(t.common.genericError),
     });
   }
 
@@ -130,10 +132,10 @@ export default function TransactionsPage() {
       {periodTotals && (
         <div className="grid grid-cols-3 gap-2">
           {[
-            { label: "Thu", value: periodTotals.income, className: "text-income" },
-            { label: "Chi", value: periodTotals.expense, className: "text-expense" },
+            { label: t.transactions.page.income, value: periodTotals.income, className: "text-income" },
+            { label: t.transactions.page.expense, value: periodTotals.expense, className: "text-expense" },
             {
-              label: "Còn lại",
+              label: t.transactions.page.remaining,
               value: periodTotals.net,
               className: periodTotals.net >= 0 ? "text-income" : "text-expense",
             },
@@ -153,17 +155,17 @@ export default function TransactionsPage() {
       {/* Cơ cấu theo danh mục */}
       <Card>
         <CardHeader className="flex-row items-center justify-between gap-2">
-          <CardTitle className="text-base">Cơ cấu theo danh mục</CardTitle>
+          <CardTitle className="text-base">{t.transactions.page.categoryBreakdownTitle}</CardTitle>
           <Tabs
             value={breakdownKind}
             onValueChange={(v) => setBreakdownKind(v as "expense" | "income")}
           >
             <TabsList className="h-9">
               <TabsTrigger value="expense" className="text-xs">
-                Chi
+                {t.transactions.page.expense}
               </TabsTrigger>
               <TabsTrigger value="income" className="text-xs">
-                Thu
+                {t.transactions.page.income}
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -174,27 +176,27 @@ export default function TransactionsPage() {
       </Card>
 
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold">Các khoản đã ghi</h2>
+        <h2 className="text-lg font-bold">{t.transactions.page.recorded}</h2>
         <Button size="sm" asChild>
           <Link href={ROUTES.newTransaction}>
             <Plus className="size-4" />
-            Ghi khoản mới
+            {t.transactions.page.newEntry}
           </Link>
         </Button>
       </div>
 
       {isLoading ? (
-        <p className="text-muted-foreground">Đang tải...</p>
+        <p className="text-muted-foreground">{t.common.loading}</p>
       ) : transactions?.length === 0 ? (
         <EmptyState
           icon={NotebookPen}
-          title="Chưa ghi khoản nào"
-          description="Ghi lại khoản chi đầu tiên — chỉ mất vài giây thôi."
+          title={t.transactions.page.emptyTitle}
+          description={t.transactions.page.emptyDescription}
           action={
             <Button asChild>
               <Link href={ROUTES.newTransaction}>
                 <Plus className="size-4" />
-                Ghi khoản mới
+                {t.transactions.page.newEntry}
               </Link>
             </Button>
           }
@@ -227,7 +229,7 @@ export default function TransactionsPage() {
       <Dialog open={!!editing} onOpenChange={(open) => !open && setEditing(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Sửa khoản đã ghi</DialogTitle>
+            <DialogTitle>{t.transactions.page.editTitle}</DialogTitle>
           </DialogHeader>
           {editing && (
             <TransactionForm
@@ -242,12 +244,12 @@ export default function TransactionsPage() {
       <AlertDialog open={!!deleting} onOpenChange={(open) => !open && setDeleting(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Xoá khoản này?</AlertDialogTitle>
-            <AlertDialogDescription>Hành động này không thể hoàn tác.</AlertDialogDescription>
+            <AlertDialogTitle>{t.transactions.page.deleteTitle}</AlertDialogTitle>
+            <AlertDialogDescription>{t.transactions.page.deleteDescription}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Huỷ</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>Xoá</AlertDialogAction>
+            <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>{t.common.delete}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

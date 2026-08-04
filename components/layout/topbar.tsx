@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LogOut, User as UserIcon, UserCog } from "lucide-react";
+import { LogOut, Moon, Sun, User as UserIcon, UserCog } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -13,6 +13,8 @@ import {
 import { BrandMark } from "@/components/layout/brand-mark";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { useSupabase } from "@/lib/hooks/use-supabase";
+import { useTranslation } from "@/lib/i18n/use-translation";
+import { useTheme } from "@/lib/hooks/use-theme";
 import { clearPinUnlocked } from "@/lib/utils/pin";
 import { ROUTES } from "@/lib/constants/routes";
 
@@ -20,6 +22,9 @@ export function Topbar() {
   const { user } = useAuth();
   const supabase = useSupabase();
   const router = useRouter();
+  const { t } = useTranslation();
+  const [theme, setTheme] = useTheme();
+  const isDark = theme === "dark";
 
   async function handleSignOut() {
     clearPinUnlocked();
@@ -36,6 +41,15 @@ export function Topbar() {
         <BrandMark size={32} />
         <span className="text-lg font-extrabold tracking-tight">Wallio</span>
       </Link>
+
+      <button
+        type="button"
+        onClick={() => setTheme(isDark ? "light" : "dark")}
+        aria-label={isDark ? t.profile.appearance.light : t.profile.appearance.dark}
+        className="flex size-9 items-center justify-center rounded-full border border-border bg-card/70 text-muted-foreground transition-colors hover:bg-accent"
+      >
+        {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
+      </button>
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -54,12 +68,12 @@ export function Topbar() {
           <DropdownMenuItem asChild>
             <Link href={ROUTES.profile}>
               <UserCog className="size-4" />
-              Hồ sơ
+              {t.layout.profile}
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem variant="destructive" onClick={handleSignOut}>
             <LogOut className="size-4" />
-            Đăng xuất
+            {t.layout.signOut}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
