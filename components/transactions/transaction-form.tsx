@@ -209,7 +209,7 @@ export function TransactionForm({
           className="mt-1 h-14 border-0 bg-transparent px-0 text-3xl font-extrabold focus-visible:ring-0 md:text-3xl"
           style={{ color: activeType.color }}
         />
-        {fromAccount?.type !== "in_kind" && (
+        {/* {fromAccount?.type !== "in_kind" && (
           <div className="hide-scrollbar -mx-1 mt-2 flex gap-2 overflow-x-auto px-1">
             {QUICK_AMOUNTS.map((quick) => (
               <button
@@ -222,7 +222,7 @@ export function TransactionForm({
               </button>
             ))}
           </div>
-        )}
+        )} */}
         {errors.amount && (
           <p className="mt-1 text-sm text-destructive">
             {validationMessage(t, errors.amount.message)}
