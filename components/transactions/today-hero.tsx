@@ -1,14 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { format } from "date-fns";
 import { vi, enUS } from "date-fns/locale";
-import { ArrowDownLeft, ArrowUpRight, Eye, EyeOff, Plus } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Eye, EyeOff } from "lucide-react";
 import { AmountText } from "@/components/shared/amount-text";
 import { useAmountVisibility } from "@/lib/hooks/use-amount-visibility";
 import { useTranslation } from "@/lib/i18n/use-translation";
 import type { Dictionary } from "@/lib/i18n/dictionaries/vi";
-import { ROUTES } from "@/lib/constants/routes";
 
 function greeting(t: Dictionary, date: Date): string {
   const hour = date.getHours();
@@ -57,13 +55,6 @@ export function TodayHero({
           >
             {visible ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
           </button>
-          <Link
-            href={ROUTES.newTransaction}
-            className="flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1.5 text-xs font-bold backdrop-blur transition-transform active:scale-95"
-          >
-            <Plus className="size-3.5" />
-            {t.transactions.todayHero.recordNow}
-          </Link>
         </div>
       </div>
 
