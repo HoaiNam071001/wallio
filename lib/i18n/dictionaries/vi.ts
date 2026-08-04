@@ -28,8 +28,8 @@ export const vi = {
     transactions: { label: "Sổ thu chi", shortLabel: "Sổ" },
     accounts: { label: "Nguồn tiền", shortLabel: "Ví" },
     categories: { label: "Danh mục", shortLabel: "Danh mục" },
-    reports: { label: "Báo cáo", shortLabel: "Báo cáo" },
     dashboard: { label: "Tổng quan", shortLabel: "Tổng quan" },
+    profile: { label: "Hồ sơ", shortLabel: "Tôi" },
   },
 
   accountType: {
@@ -108,6 +108,10 @@ export const vi = {
       recent: "Gần đây",
       viewAll: "Xem tất cả",
       emptyRecent: "Chưa có khoản nào được ghi.",
+    },
+    tabs: {
+      overview: "Tổng quan",
+      reports: "Báo cáo",
     },
     summaryCards: {
       netWorth: "Tổng tài sản",
@@ -322,6 +326,19 @@ export const vi = {
 
   profile: {
     page: { title: "Hồ sơ" },
+    header: {
+      signOut: "Đăng xuất",
+    },
+    accountsWidget: {
+      title: "Nguồn tiền",
+      viewAll: "Xem tất cả",
+      empty: "Chưa có nguồn tiền nào",
+    },
+    categoriesWidget: {
+      title: "Danh mục",
+      viewAll: "Xem tất cả",
+      empty: "Chưa có danh mục nào",
+    },
     info: {
       title: "Thông tin cá nhân",
       nameLabel: "Tên hiển thị",

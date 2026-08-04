@@ -10,7 +10,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { BrandMark } from "@/components/layout/brand-mark";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { useSupabase } from "@/lib/hooks/use-supabase";
 import { useTranslation } from "@/lib/i18n/use-translation";
@@ -36,12 +35,7 @@ export function Topbar() {
   const initials = user?.email?.slice(0, 2).toUpperCase() ?? "??";
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-white/40 bg-white/60 px-4 backdrop-blur-xl md:justify-end dark:border-white/10 dark:bg-white/5">
-      <Link href={ROUTES.transactions} className="flex items-center gap-2 md:hidden">
-        <BrandMark size={32} />
-        <span className="text-lg font-extrabold tracking-tight">Wallio</span>
-      </Link>
-
+    <header className="sticky top-0 z-30 hidden h-16 items-center justify-end gap-3 border-b border-white/40 bg-white/60 px-4 backdrop-blur-xl md:flex dark:border-white/10 dark:bg-white/5">
       <button
         type="button"
         onClick={() => setTheme(isDark ? "light" : "dark")}

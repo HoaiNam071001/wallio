@@ -1,24 +1,45 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Eye, EyeOff, KeyRound, Languages, Palette, ShieldCheck, User as UserIcon } from "lucide-react";
+import {
+  ChevronRight,
+  Eye,
+  EyeOff,
+  KeyRound,
+  Languages,
+  LogOut,
+  Palette,
+  ShieldCheck,
+  User as UserIcon,
+} from "lucide-react";
 import { toast } from "sonner";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PageHeader } from "@/components/layout/page-header";
+import { EntityIcon } from "@/components/shared/entity-icon";
+import { AmountTextForAccount } from "@/components/shared/amount-text";
+import { ACCOUNT_TYPE_META } from "@/components/accounts/account-type";
+import { useAccountsWithBalance } from "@/lib/hooks/use-accounts";
+import { useCategories } from "@/lib/hooks/use-categories";
 import { useAuth } from "@/lib/hooks/use-auth";
+import { useSupabase } from "@/lib/hooks/use-supabase";
 import { useProfile, useUpsertProfile } from "@/lib/hooks/use-profile";
 import { setAllAmountVisibility } from "@/lib/hooks/use-amount-visibility";
 import { useTheme, type Theme } from "@/lib/hooks/use-theme";
 import { useTranslation } from "@/lib/i18n/use-translation";
 import type { Locale } from "@/lib/i18n/locale-store";
-import { hashPin, isValidPin } from "@/lib/utils/pin";
+import { clearPinUnlocked, hashPin, isValidPin } from "@/lib/utils/pin";
+import { normalizeColor } from "@/lib/theme/palette";
 import { cn } from "@/lib/utils";
+import { ROUTES } from "@/lib/constants/routes";
 
 const infoSchema = z.object({
   display_name: z.string().max(80).optional(),
@@ -40,14 +61,137 @@ export default function ProfilePage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHeader title={t.profile.page.title} subtitle={user?.email ?? undefined} />
+      <PageHeader title={t.profile.page.title} />
 
+      <ProfileHeaderCard />
+      <AccountsWidgetCard />
+      <CategoriesWidgetCard />
       <ProfileInfoCard profile={profile} onSave={(values) => upsertProfile.mutate(values)} saving={upsertProfile.isPending} />
       <PinCard hasPin={!!profile?.pin_hash} userId={user?.id} onSave={(pin_hash) => upsertProfile.mutate({ pin_hash, pin_set_at: new Date().toISOString() })} saving={upsertProfile.isPending} />
       <AmountVisibilityCard />
       <AppearanceCard />
       <LanguageCard />
     </div>
+  );
+}
+
+function ProfileHeaderCard() {
+  const { user } = useAuth();
+  const supabase = useSupabase();
+  const router = useRouter();
+  const { t } = useTranslation();
+
+  async function handleSignOut() {
+    clearPinUnlocked();
+    await supabase.auth.signOut();
+    router.replace(ROUTES.login);
+    router.refresh();
+  }
+
+  const initials = user?.email?.slice(0, 2).toUpperCase() ?? "??";
+  const name = (user?.user_metadata?.full_name as string | undefined) ?? user?.email ?? "";
+
+  return (
+    <Card>
+      <CardContent className="flex items-center gap-3">
+        <Avatar className="size-14 ring-2 ring-white/70">
+          <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.email ?? ""} />
+          <AvatarFallback>{initials}</AvatarFallback>
+        </Avatar>
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-bold">{name}</p>
+          <p className="truncate text-sm text-muted-foreground">{user?.email}</p>
+        </div>
+        <Button variant="outline" size="sm" onClick={handleSignOut}>
+          <LogOut className="size-4" />
+          {t.profile.header.signOut}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+function AccountsWidgetCard() {
+  const { t } = useTranslation();
+  const { data: accounts } = useAccountsWithBalance();
+  const top = (accounts ?? []).slice(0, 4);
+
+  return (
+    <Card>
+      <CardHeader className="flex-row items-center justify-between gap-2">
+        <CardTitle className="text-base">{t.profile.accountsWidget.title}</CardTitle>
+        <Link href={ROUTES.accounts} className="flex items-center gap-0.5 text-sm font-semibold text-primary">
+          {t.profile.accountsWidget.viewAll}
+          <ChevronRight className="size-4" />
+        </Link>
+      </CardHeader>
+      <CardContent>
+        {top.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{t.profile.accountsWidget.empty}</p>
+        ) : (
+          <ul className="flex flex-col gap-2.5">
+            {top.map((account) => {
+              const meta = ACCOUNT_TYPE_META[account.type];
+              const isDebt = account.type === "debt";
+              const displayBalance = isDebt ? Math.abs(account.current_balance) : account.current_balance;
+              return (
+                <li key={account.id} className="flex items-center gap-2.5">
+                  <EntityIcon
+                    icon={account.icon ?? meta.icon}
+                    color={account.color ?? meta.color}
+                    className="size-9 rounded-xl"
+                    iconClassName="size-4"
+                  />
+                  <span className="min-w-0 flex-1 truncate text-sm font-semibold">{account.name}</span>
+                  <span className={cn("shrink-0 text-sm font-bold tabular-nums", isDebt && "text-expense")}>
+                    {isDebt && displayBalance !== 0 ? "-" : ""}
+                    <AmountTextForAccount amount={displayBalance} account={account} scope="accounts" />
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function CategoriesWidgetCard() {
+  const { t } = useTranslation();
+  const { data: categories } = useCategories();
+  const top = (categories ?? []).slice(0, 8);
+
+  return (
+    <Card>
+      <CardHeader className="flex-row items-center justify-between gap-2">
+        <CardTitle className="text-base">{t.profile.categoriesWidget.title}</CardTitle>
+        <Link href={ROUTES.categories} className="flex items-center gap-0.5 text-sm font-semibold text-primary">
+          {t.profile.categoriesWidget.viewAll}
+          <ChevronRight className="size-4" />
+        </Link>
+      </CardHeader>
+      <CardContent>
+        {top.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{t.profile.categoriesWidget.empty}</p>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {top.map((category) => {
+              const color = normalizeColor(category.color);
+              return (
+                <span
+                  key={category.id}
+                  className="glass flex items-center gap-1.5 rounded-full py-1.5 pr-3 pl-1.5 text-xs font-semibold"
+                >
+                  <EntityIcon icon={category.icon} color={color} className="size-6" iconClassName="size-3" />
+                  {category.name}
+                </span>
+              );
+            })}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 

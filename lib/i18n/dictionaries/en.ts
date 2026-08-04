@@ -30,8 +30,8 @@ export const en: Dictionary = {
     transactions: { label: "Transactions", shortLabel: "Log" },
     accounts: { label: "Accounts", shortLabel: "Wallet" },
     categories: { label: "Categories", shortLabel: "Categories" },
-    reports: { label: "Reports", shortLabel: "Reports" },
     dashboard: { label: "Overview", shortLabel: "Overview" },
+    profile: { label: "Profile", shortLabel: "Me" },
   },
 
   accountType: {
@@ -110,6 +110,10 @@ export const en: Dictionary = {
       recent: "Recent",
       viewAll: "View all",
       emptyRecent: "No entries recorded yet.",
+    },
+    tabs: {
+      overview: "Overview",
+      reports: "Reports",
     },
     summaryCards: {
       netWorth: "Net worth",
@@ -324,6 +328,19 @@ export const en: Dictionary = {
 
   profile: {
     page: { title: "Profile" },
+    header: {
+      signOut: "Sign out",
+    },
+    accountsWidget: {
+      title: "Accounts",
+      viewAll: "View all",
+      empty: "No accounts yet",
+    },
+    categoriesWidget: {
+      title: "Categories",
+      viewAll: "View all",
+      empty: "No categories yet",
+    },
     info: {
       title: "Personal info",
       nameLabel: "Display name",

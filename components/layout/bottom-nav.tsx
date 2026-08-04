@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { NAV_ITEMS } from "@/components/layout/nav-items";
+import { MOBILE_NAV_ITEMS } from "@/components/layout/nav-items";
 import { useTranslation } from "@/lib/i18n/use-translation";
 
 export function BottomNav() {
@@ -15,7 +15,7 @@ export function BottomNav() {
       className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t border-white/50 bg-white/80 backdrop-blur-xl md:hidden dark:border-white/10 dark:bg-[oklch(0.19_0.03_266)]/85"
     >
       <div className="flex">
-        {NAV_ITEMS.map((item) => {
+        {MOBILE_NAV_ITEMS.map((item) => {
           const active = pathname.startsWith(item.href);
           const Icon = item.icon;
           return (

@@ -70,7 +70,9 @@ export function DateField({ value, onChange, className, id, max, min }: DateFiel
           <DialogHeader className="sr-only">
             <DialogTitle>{t.common.chooseDate}</DialogTitle>
           </DialogHeader>
-          {calendar}
+          <div className="mt-8">
+             {calendar}
+          </div>
         </DialogContent>
       </Dialog>
     );
