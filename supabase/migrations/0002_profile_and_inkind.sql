@@ -46,3 +46,7 @@ from accounts a
 left join transactions t
   on t.account_id = a.id or t.to_account_id = a.id
 group by a.id;
+
+-- ================= PROFILES: đổi năm sinh -> ngày sinh đầy đủ =================
+alter table profiles add column birth_date date;
+alter table profiles drop column birth_year;

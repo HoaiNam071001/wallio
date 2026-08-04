@@ -52,7 +52,7 @@ export interface Database {
         Row: {
           id: string;
           display_name: string | null;
-          birth_year: number | null;
+          birth_date: string | null;
           pin_hash: string | null;
           pin_set_at: string | null;
           updated_at: string;
@@ -60,7 +60,7 @@ export interface Database {
         Insert: {
           id: string;
           display_name?: string | null;
-          birth_year?: number | null;
+          birth_date?: string | null;
           pin_hash?: string | null;
           pin_set_at?: string | null;
           updated_at?: string;
@@ -68,7 +68,7 @@ export interface Database {
         Update: {
           id?: string;
           display_name?: string | null;
-          birth_year?: number | null;
+          birth_date?: string | null;
           pin_hash?: string | null;
           pin_set_at?: string | null;
           updated_at?: string;

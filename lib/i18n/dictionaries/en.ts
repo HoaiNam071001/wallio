@@ -328,8 +328,15 @@ export const en: Dictionary = {
 
   profile: {
     page: { title: "Profile" },
+    tabs: {
+      wallet: "Wallet",
+      user: "Account",
+    },
     header: {
       signOut: "Sign out",
+    },
+    preferences: {
+      title: "Preferences",
     },
     accountsWidget: {
       title: "Accounts",
@@ -345,8 +352,7 @@ export const en: Dictionary = {
       title: "Personal info",
       nameLabel: "Display name",
       namePlaceholder: "Your name",
-      birthYearLabel: "Birth year",
-      birthYearPlaceholder: "e.g. 1995",
+      birthDateLabel: "Date of birth",
       save: "Save profile",
       toastSaved: "Profile saved",
     },
@@ -364,8 +370,7 @@ export const en: Dictionary = {
       toastSet: "Passcode set",
     },
     amountVisibility: {
-      title: "Amount visibility",
-      description: "Applies to all pages at once. Each page also has its own show/hide button in the header.",
+      title: "Show/hide amounts",
       showAll: "Show all",
       hideAll: "Hide all",
     },

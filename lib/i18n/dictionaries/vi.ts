@@ -326,8 +326,15 @@ export const vi = {
 
   profile: {
     page: { title: "Hồ sơ" },
+    tabs: {
+      wallet: "Nguồn tiền",
+      user: "Người dùng",
+    },
     header: {
       signOut: "Đăng xuất",
+    },
+    preferences: {
+      title: "Tuỳ chọn",
     },
     accountsWidget: {
       title: "Nguồn tiền",
@@ -343,8 +350,7 @@ export const vi = {
       title: "Thông tin cá nhân",
       nameLabel: "Tên hiển thị",
       namePlaceholder: "Tên của bạn",
-      birthYearLabel: "Năm sinh",
-      birthYearPlaceholder: "VD: 1995",
+      birthDateLabel: "Ngày sinh",
       save: "Lưu hồ sơ",
       toastSaved: "Đã lưu hồ sơ",
     },
@@ -362,8 +368,7 @@ export const vi = {
       toastSet: "Đã đặt mật khẩu",
     },
     amountVisibility: {
-      title: "Hiển thị số tiền",
-      description: "Áp dụng cho tất cả các trang cùng lúc. Mỗi trang cũng có nút ẩn/hiện riêng ở tiêu đề.",
+      title: "Ẩn/hiện số tiền",
       showAll: "Hiện tất cả",
       hideAll: "Ẩn tất cả",
     },

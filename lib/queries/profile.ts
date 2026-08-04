@@ -17,7 +17,7 @@ export async function getProfile(supabase: Client, userId: string): Promise<Prof
   return {
     id: userId,
     display_name: null,
-    birth_year: null,
+    birth_date: null,
     pin_hash: null,
     pin_set_at: null,
     updated_at: new Date().toISOString(),

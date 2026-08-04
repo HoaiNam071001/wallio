@@ -11,9 +11,8 @@ import {
   Eye,
   EyeOff,
   KeyRound,
-  Languages,
   LogOut,
-  Palette,
+  SlidersHorizontal,
   ShieldCheck,
   User as UserIcon,
 } from "lucide-react";
@@ -23,6 +22,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DateField } from "@/components/ui/date-field";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeader } from "@/components/layout/page-header";
 import { EntityIcon } from "@/components/shared/entity-icon";
 import { AmountTextForAccount } from "@/components/shared/amount-text";
@@ -38,39 +39,47 @@ import { useTranslation } from "@/lib/i18n/use-translation";
 import type { Locale } from "@/lib/i18n/locale-store";
 import { clearPinUnlocked, hashPin, isValidPin } from "@/lib/utils/pin";
 import { normalizeColor } from "@/lib/theme/palette";
-import { cn } from "@/lib/utils";
+import { cn, toQueryDate } from "@/lib/utils";
 import { ROUTES } from "@/lib/constants/routes";
 
 const infoSchema = z.object({
   display_name: z.string().max(80).optional(),
-  birth_year: z
-    .number()
-    .int()
-    .min(1900)
-    .max(new Date().getFullYear())
-    .optional(),
+  birth_date: z.string().optional(),
 });
 
 type InfoFormValues = z.infer<typeof infoSchema>;
+type ProfileTab = "wallet" | "user";
 
 export default function ProfilePage() {
   const { user } = useAuth();
   const { data: profile } = useProfile();
   const upsertProfile = useUpsertProfile();
   const { t } = useTranslation();
+  const [tab, setTab] = useState<ProfileTab>("wallet");
 
   return (
     <div className="flex flex-col gap-4">
       <PageHeader title={t.profile.page.title} />
 
       <ProfileHeaderCard />
-      <AccountsWidgetCard />
-      <CategoriesWidgetCard />
-      <ProfileInfoCard profile={profile} onSave={(values) => upsertProfile.mutate(values)} saving={upsertProfile.isPending} />
-      <PinCard hasPin={!!profile?.pin_hash} userId={user?.id} onSave={(pin_hash) => upsertProfile.mutate({ pin_hash, pin_set_at: new Date().toISOString() })} saving={upsertProfile.isPending} />
-      <AmountVisibilityCard />
-      <AppearanceCard />
-      <LanguageCard />
+
+      <Tabs value={tab} onValueChange={(v) => setTab(v as ProfileTab)}>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="wallet">{t.profile.tabs.wallet}</TabsTrigger>
+          <TabsTrigger value="user">{t.profile.tabs.user}</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="wallet" className="flex flex-col gap-4">
+          <AccountsWidgetCard />
+          <CategoriesWidgetCard />
+        </TabsContent>
+
+        <TabsContent value="user" className="flex flex-col gap-4">
+          <ProfileInfoCard profile={profile} onSave={(values) => upsertProfile.mutate(values)} saving={upsertProfile.isPending} />
+          <PinCard hasPin={!!profile?.pin_hash} userId={user?.id} onSave={(pin_hash) => upsertProfile.mutate({ pin_hash, pin_set_at: new Date().toISOString() })} saving={upsertProfile.isPending} />
+          <PreferencesCard />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
@@ -200,21 +209,22 @@ function ProfileInfoCard({
   onSave,
   saving,
 }: {
-  profile: { display_name: string | null; birth_year: number | null } | undefined;
+  profile: { display_name: string | null; birth_date: string | null } | undefined;
   onSave: (values: InfoFormValues) => void;
   saving: boolean;
 }) {
   const { t } = useTranslation();
-  const { register, handleSubmit, reset } = useForm<InfoFormValues>({
+  const { register, handleSubmit, reset, watch, setValue } = useForm<InfoFormValues>({
     resolver: zodResolver(infoSchema),
-    defaultValues: { display_name: "", birth_year: undefined },
+    defaultValues: { display_name: "", birth_date: undefined },
   });
+  const birthDate = watch("birth_date");
 
   useEffect(() => {
     if (!profile) return;
     reset({
       display_name: profile.display_name ?? "",
-      birth_year: profile.birth_year ?? undefined,
+      birth_date: profile.birth_date ?? undefined,
     });
   }, [profile, reset]);
 
@@ -236,12 +246,12 @@ function ProfileInfoCard({
             <Input id="display_name" placeholder={t.profile.info.namePlaceholder} {...register("display_name")} />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="birth_year">{t.profile.info.birthYearLabel}</Label>
-            <Input
-              id="birth_year"
-              type="number"
-              placeholder={t.profile.info.birthYearPlaceholder}
-              {...register("birth_year", { valueAsNumber: true })}
+            <Label htmlFor="birth_date">{t.profile.info.birthDateLabel}</Label>
+            <DateField
+              id="birth_date"
+              value={birthDate ?? ""}
+              max={toQueryDate(new Date())}
+              onChange={(next) => setValue("birth_date", next, { shouldValidate: true })}
             />
           </div>
           <Button type="submit" disabled={saving} className="self-start">
@@ -340,75 +350,17 @@ function PinCard({
   );
 }
 
-function AmountVisibilityCard() {
-  const { t } = useTranslation();
-  return (
-    <Card>
-      <CardHeader className="flex-row items-center gap-2">
-        <Eye className="size-4.5 text-brand-600" />
-        <CardTitle className="text-base">{t.profile.amountVisibility.title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="mb-3 text-sm text-muted-foreground">{t.profile.amountVisibility.description}</p>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setAllAmountVisibility(true)}>
-            <Eye className="size-4" />
-            {t.profile.amountVisibility.showAll}
-          </Button>
-          <Button variant="outline" onClick={() => setAllAmountVisibility(false)}>
-            <EyeOff className="size-4" />
-            {t.profile.amountVisibility.hideAll}
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function AppearanceCard() {
-  const { t } = useTranslation();
+/** Gộp chủ đề / ngôn ngữ / ẩn-hiện số tiền thành 1 card gọn dạng danh sách, thay vì 3 card riêng — đỡ cuộn dài trên mobile. */
+function PreferencesCard() {
+  const { t, locale, setLocale } = useTranslation();
   const [theme, setTheme] = useTheme();
 
-  const options: { value: Theme; label: string }[] = [
+  const themeOptions: { value: Theme; label: string }[] = [
     { value: "light", label: t.profile.appearance.light },
     { value: "dark", label: t.profile.appearance.dark },
     { value: "system", label: t.profile.appearance.system },
   ];
-
-  return (
-    <Card>
-      <CardHeader className="flex-row items-center gap-2">
-        <Palette className="size-4.5 text-brand-600" />
-        <CardTitle className="text-base">{t.profile.appearance.title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Label className="mb-2 block">{t.profile.appearance.themeLabel}</Label>
-        <div className="grid grid-cols-3 gap-2">
-          {options.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => setTheme(option.value)}
-              className={cn(
-                "rounded-2xl border p-2.5 text-sm font-semibold transition-all active:scale-95",
-                theme === option.value
-                  ? "border-transparent bg-brand-600 text-white shadow-soft"
-                  : "border-input bg-card/60 text-muted-foreground",
-              )}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function LanguageCard() {
-  const { t, locale, setLocale } = useTranslation();
-
-  const options: { value: Locale; label: string }[] = [
+  const localeOptions: { value: Locale; label: string }[] = [
     { value: "vi", label: t.profile.language.vi },
     { value: "en", label: t.profile.language.en },
   ];
@@ -416,28 +368,78 @@ function LanguageCard() {
   return (
     <Card>
       <CardHeader className="flex-row items-center gap-2">
-        <Languages className="size-4.5 text-brand-600" />
-        <CardTitle className="text-base">{t.profile.language.title}</CardTitle>
+        <SlidersHorizontal className="size-4.5 text-brand-600" />
+        <CardTitle className="text-base">{t.profile.preferences.title}</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 gap-2">
-          {options.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => setLocale(option.value)}
-              className={cn(
-                "rounded-2xl border p-2.5 text-sm font-semibold transition-all active:scale-95",
-                locale === option.value
-                  ? "border-transparent bg-brand-600 text-white shadow-soft"
-                  : "border-input bg-card/60 text-muted-foreground",
-              )}
+      <CardContent className="flex flex-col gap-3.5">
+        <PreferenceRow label={t.profile.appearance.themeLabel}>
+          <SegmentedControl value={theme} options={themeOptions} onChange={setTheme} />
+        </PreferenceRow>
+        <PreferenceRow label={t.profile.language.title}>
+          <SegmentedControl value={locale} options={localeOptions} onChange={setLocale} />
+        </PreferenceRow>
+        <PreferenceRow label={t.profile.amountVisibility.title}>
+          <div className="flex gap-1.5">
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-9"
+              aria-label={t.profile.amountVisibility.showAll}
+              onClick={() => setAllAmountVisibility(true)}
             >
-              {option.label}
-            </button>
-          ))}
-        </div>
+              <Eye className="size-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-9"
+              aria-label={t.profile.amountVisibility.hideAll}
+              onClick={() => setAllAmountVisibility(false)}
+            >
+              <EyeOff className="size-4" />
+            </Button>
+          </div>
+        </PreferenceRow>
       </CardContent>
     </Card>
+  );
+}
+
+function PreferenceRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <Label className="shrink-0">{label}</Label>
+      {children}
+    </div>
+  );
+}
+
+function SegmentedControl<T extends string>({
+  value,
+  options,
+  onChange,
+}: {
+  value: T;
+  options: { value: T; label: string }[];
+  onChange: (value: T) => void;
+}) {
+  return (
+    <div className="flex gap-1 rounded-full border border-input bg-card/60 p-1">
+      {options.map((option) => (
+        <button
+          key={option.value}
+          type="button"
+          onClick={() => onChange(option.value)}
+          className={cn(
+            "rounded-full px-2.5 py-1 text-xs font-semibold transition-all active:scale-95",
+            value === option.value
+              ? "bg-brand-600 text-white shadow-soft"
+              : "text-muted-foreground",
+          )}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
   );
 }
