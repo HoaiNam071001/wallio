@@ -50,3 +50,10 @@ group by a.id;
 -- ================= PROFILES: đổi năm sinh -> ngày sinh đầy đủ =================
 alter table profiles add column birth_date date;
 alter table profiles drop column birth_year;
+
+-- ================= PROFILES: đơn vị tiền =================
+-- currency_code: mã ISO chọn từ danh sách dựng sẵn (xem lib/constants/currencies.ts), mặc định VNĐ.
+-- currency_symbol: ký hiệu tự đặt để hiển thị toàn hệ thống thay cho ký hiệu mặc định của currency_code;
+-- null/rỗng = dùng ký hiệu mặc định (VNĐ giữ nguyên "₫" như trước khi có tính năng này).
+alter table profiles add column currency_code text not null default 'VND';
+alter table profiles add column currency_symbol text;

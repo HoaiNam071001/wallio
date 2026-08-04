@@ -41,6 +41,15 @@ import { clearPinUnlocked, hashPin, isValidPin } from "@/lib/utils/pin";
 import { normalizeColor } from "@/lib/theme/palette";
 import { cn, toQueryDate } from "@/lib/utils";
 import { ROUTES } from "@/lib/constants/routes";
+import { CURRENCIES, DEFAULT_CURRENCY_CODE, symbolForCurrency } from "@/lib/constants/currencies";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { Profile } from "@/lib/types/database.types";
 
 const infoSchema = z.object({
   display_name: z.string().max(80).optional(),
@@ -77,7 +86,7 @@ export default function ProfilePage() {
         <TabsContent value="user" className="flex flex-col gap-4">
           <ProfileInfoCard profile={profile} onSave={(values) => upsertProfile.mutate(values)} saving={upsertProfile.isPending} />
           <PinCard hasPin={!!profile?.pin_hash} userId={user?.id} onSave={(pin_hash) => upsertProfile.mutate({ pin_hash, pin_set_at: new Date().toISOString() })} saving={upsertProfile.isPending} />
-          <PreferencesCard />
+          <PreferencesCard profile={profile} onSave={(values) => upsertProfile.mutate(values)} />
         </TabsContent>
       </Tabs>
     </div>
@@ -350,8 +359,14 @@ function PinCard({
   );
 }
 
-/** Gộp chủ đề / ngôn ngữ / ẩn-hiện số tiền thành 1 card gọn dạng danh sách, thay vì 3 card riêng — đỡ cuộn dài trên mobile. */
-function PreferencesCard() {
+/** Gộp chủ đề / ngôn ngữ / đơn vị tiền / ẩn-hiện số tiền thành 1 card gọn dạng danh sách, thay vì nhiều card riêng — đỡ cuộn dài trên mobile. */
+function PreferencesCard({
+  profile,
+  onSave,
+}: {
+  profile: Pick<Profile, "currency_code" | "currency_symbol"> | undefined;
+  onSave: (values: { currency_code?: string; currency_symbol?: string | null }) => void;
+}) {
   const { t, locale, setLocale } = useT();
   const [theme, setTheme] = useTheme();
 
@@ -378,6 +393,28 @@ function PreferencesCard() {
         <PreferenceRow label={t("profile.language.title")}>
           <SegmentedControl value={locale} options={localeOptions} onChange={setLocale} />
         </PreferenceRow>
+        <PreferenceRow label={t("profile.currency.title")}>
+          <Select
+            value={profile?.currency_code ?? DEFAULT_CURRENCY_CODE}
+            onValueChange={(code) => onSave({ currency_code: code })}
+          >
+            <SelectTrigger size="sm" className="w-47.5">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {CURRENCIES.map((c) => (
+                <SelectItem key={c.code} value={c.code}>
+                  {t(`currency.${c.code}.name`)} ({c.symbol})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </PreferenceRow>
+        <CurrencySymbolRow
+          currencyCode={profile?.currency_code ?? DEFAULT_CURRENCY_CODE}
+          currentSymbol={profile?.currency_symbol ?? ""}
+          onSave={(symbol) => onSave({ currency_symbol: symbol })}
+        />
         <PreferenceRow label={t("profile.amountVisibility.title")}>
           <div className="flex gap-1.5">
             <Button
@@ -402,6 +439,47 @@ function PreferencesCard() {
         </PreferenceRow>
       </CardContent>
     </Card>
+  );
+}
+
+/** Ký hiệu tuỳ chỉnh hiển thị toàn hệ thống thay ký hiệu mặc định của đơn vị tiền đang chọn; rỗng = dùng mặc định. */
+function CurrencySymbolRow({
+  currencyCode,
+  currentSymbol,
+  onSave,
+}: {
+  currencyCode: string;
+  currentSymbol: string;
+  onSave: (symbol: string | null) => void;
+}) {
+  const { t } = useT();
+  const [value, setValue] = useState(currentSymbol);
+
+  // Đồng bộ khi giá trị bị đổi từ bên ngoài (đổi đơn vị tiền, tải lại hồ sơ) — điều chỉnh ngay trong lúc
+  // render, không dùng effect, để tránh render thừa (giống CurrencyInput).
+  const [lastSymbol, setLastSymbol] = useState(currentSymbol);
+  if (currentSymbol !== lastSymbol) {
+    setLastSymbol(currentSymbol);
+    setValue(currentSymbol);
+  }
+
+  function commit() {
+    const trimmed = value.trim();
+    if (trimmed === currentSymbol) return;
+    onSave(trimmed || null);
+  }
+
+  return (
+    <PreferenceRow label={t("profile.currency.customSymbolLabel")}>
+      <Input
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={commit}
+        placeholder={symbolForCurrency(currencyCode)}
+        maxLength={8}
+        className="h-9 w-24 text-right"
+      />
+    </PreferenceRow>
   );
 }
 

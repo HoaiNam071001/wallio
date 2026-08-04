@@ -83,12 +83,19 @@ create table profiles (
   birth_date date,
   pin_hash text,           -- SHA-256(salt=user_id : pin), null = chưa đặt PIN
   pin_set_at timestamptz,
+  currency_code text not null default 'VND',  -- mã trong danh sách dựng sẵn, xem lib/constants/currencies.ts
+  currency_symbol text,    -- ký hiệu tự đặt hiển thị toàn hệ thống; null/rỗng = dùng ký hiệu mặc định của currency_code
   updated_at timestamptz not null default now()
 );
 ```
 
-Nếu user chưa từng lưu hồ sơ, coi như **hồ sơ rỗng** (`pin_hash: null`) chứ không lỗi — dùng `maybeSingle()` +
-fallback object phía client (xem `lib/queries/profile.ts`).
+Nếu user chưa từng lưu hồ sơ, coi như **hồ sơ rỗng** (`pin_hash: null`, `currency_code: 'VND'`, `currency_symbol: null`)
+chứ không lỗi — dùng `maybeSingle()` + fallback object phía client (xem `lib/queries/profile.ts`).
+
+`currency_code` + `currency_symbol` quyết định ký hiệu tiền dùng để format MỌI số tiền trong app (trừ account
+`in_kind` vẫn dùng `accounts.unit` riêng của nó) — ký hiệu hiệu lực là `currency_symbol` nếu có, không thì tra
+mặc định theo `currency_code` trong danh sách dựng sẵn (VND, USD, EUR, JPY, GBP, AUD, CAD, CHF, CNY, HKD, SGD,
+THB, KRW, MYR, IDR, PHP, INR, TWD).
 
 ## 5. View `account_balances`
 

@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Profile, ProfileUpdate } from "@/lib/types/database.types";
+import { DEFAULT_CURRENCY_CODE } from "@/lib/constants/currencies";
 
 type Client = SupabaseClient<Database>;
 
@@ -20,6 +21,8 @@ export async function getProfile(supabase: Client, userId: string): Promise<Prof
     birth_date: null,
     pin_hash: null,
     pin_set_at: null,
+    currency_code: DEFAULT_CURRENCY_CODE,
+    currency_symbol: null,
     updated_at: new Date().toISOString(),
   };
 }

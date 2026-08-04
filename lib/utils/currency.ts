@@ -1,8 +1,4 @@
-const vndFormatter = new Intl.NumberFormat("vi-VN", {
-  style: "currency",
-  currency: "VND",
-  maximumFractionDigits: 0,
-});
+import { getCurrentCurrency } from "@/lib/hooks/use-currency";
 
 const numberFormatter = new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 0 });
 
@@ -11,9 +7,9 @@ const compactFormatter = new Intl.NumberFormat("vi-VN", {
   maximumFractionDigits: 1,
 });
 
-/** 1250000 -> "1.250.000 ₫" */
+/** 1250000 -> "1.250.000 ₫" (ký hiệu theo đơn vị tiền người dùng chọn ở trang Hồ sơ, mặc định VNĐ) */
 export function formatCurrency(amount: number): string {
-  return vndFormatter.format(amount);
+  return `${numberFormatter.format(amount)} ${getCurrentCurrency().symbol}`;
 }
 
 /** 1250000 -> "1.250.000" (không kèm ký hiệu tiền tệ) */

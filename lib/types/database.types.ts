@@ -55,6 +55,8 @@ export interface Database {
           birth_date: string | null;
           pin_hash: string | null;
           pin_set_at: string | null;
+          currency_code: string;
+          currency_symbol: string | null;
           updated_at: string;
         };
         Insert: {
@@ -63,6 +65,8 @@ export interface Database {
           birth_date?: string | null;
           pin_hash?: string | null;
           pin_set_at?: string | null;
+          currency_code?: string;
+          currency_symbol?: string | null;
           updated_at?: string;
         };
         Update: {
@@ -71,6 +75,8 @@ export interface Database {
           birth_date?: string | null;
           pin_hash?: string | null;
           pin_set_at?: string | null;
+          currency_code?: string;
+          currency_symbol?: string | null;
           updated_at?: string;
         };
         Relationships: [];

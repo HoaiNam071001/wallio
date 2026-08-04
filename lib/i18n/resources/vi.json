@@ -46,6 +46,27 @@
     "other": { "label": "Khác", "hint": "Loại khác" }
   },
 
+  "currency": {
+    "VND": { "name": "Việt Nam Đồng" },
+    "USD": { "name": "Đô la Mỹ" },
+    "EUR": { "name": "Euro" },
+    "JPY": { "name": "Yên Nhật" },
+    "GBP": { "name": "Bảng Anh" },
+    "AUD": { "name": "Đô la Úc" },
+    "CAD": { "name": "Đô la Canada" },
+    "CHF": { "name": "Franc Thuỵ Sĩ" },
+    "CNY": { "name": "Nhân dân tệ" },
+    "HKD": { "name": "Đô la Hồng Kông" },
+    "SGD": { "name": "Đô la Singapore" },
+    "THB": { "name": "Baht Thái" },
+    "KRW": { "name": "Won Hàn Quốc" },
+    "MYR": { "name": "Ringgit Malaysia" },
+    "IDR": { "name": "Rupiah Indonesia" },
+    "PHP": { "name": "Peso Philippines" },
+    "INR": { "name": "Rupee Ấn Độ" },
+    "TWD": { "name": "Đô la Đài Loan" }
+  },
+
   "dateRangePreset": {
     "custom": "Tuỳ chọn",
     "today": "Hôm nay",
@@ -422,6 +443,10 @@
       "title": "Ngôn ngữ",
       "vi": "Tiếng Việt",
       "en": "Tiếng Anh"
+    },
+    "currency": {
+      "title": "Đơn vị tiền",
+      "customSymbolLabel": "Ký hiệu tuỳ chỉnh"
     }
   }
 }

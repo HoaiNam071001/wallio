@@ -46,6 +46,27 @@
     "other": { "label": "Other", "hint": "Other type" }
   },
 
+  "currency": {
+    "VND": { "name": "Vietnamese Dong" },
+    "USD": { "name": "US Dollar" },
+    "EUR": { "name": "Euro" },
+    "JPY": { "name": "Japanese Yen" },
+    "GBP": { "name": "British Pound" },
+    "AUD": { "name": "Australian Dollar" },
+    "CAD": { "name": "Canadian Dollar" },
+    "CHF": { "name": "Swiss Franc" },
+    "CNY": { "name": "Chinese Yuan" },
+    "HKD": { "name": "Hong Kong Dollar" },
+    "SGD": { "name": "Singapore Dollar" },
+    "THB": { "name": "Thai Baht" },
+    "KRW": { "name": "South Korean Won" },
+    "MYR": { "name": "Malaysian Ringgit" },
+    "IDR": { "name": "Indonesian Rupiah" },
+    "PHP": { "name": "Philippine Peso" },
+    "INR": { "name": "Indian Rupee" },
+    "TWD": { "name": "Taiwan Dollar" }
+  },
+
   "dateRangePreset": {
     "custom": "Custom",
     "today": "Today",
@@ -422,6 +443,10 @@
       "title": "Language",
       "vi": "Vietnamese",
       "en": "English"
+    },
+    "currency": {
+      "title": "Currency",
+      "customSymbolLabel": "Custom symbol"
     }
   }
 }

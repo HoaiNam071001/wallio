@@ -22,6 +22,13 @@ trên cùng, luôn hiện; bên dưới là **2 tab con**:
 - **Preferences** (gộp 1 card, không tách 3 card riêng — đỡ dài trên mobile):
   - Theme: segmented control 3 nút Sáng/Tối/Hệ thống.
   - Ngôn ngữ: segmented control 2 nút Tiếng Việt/English.
+  - **Đơn vị tiền**: dropdown chọn từ danh sách dựng sẵn (`lib/constants/currencies.ts`, ~18 đơn vị hay dùng —
+    VND, USD, EUR, JPY, GBP...), mỗi lựa chọn hiện tên (theo ngôn ngữ đang chọn, khoá i18n `currency.<code>.name`)
+    + ký hiệu mặc định. Chọn xong lưu ngay vào `profiles.currency_code` (không cần nút Lưu riêng). Bên dưới có ô
+    **ký hiệu tuỳ chỉnh** (`profiles.currency_symbol`) để ghi đè ký hiệu mặc định — để trống thì dùng lại ký hiệu
+    mặc định của đơn vị đang chọn (VND để trống thì ký hiệu vẫn là "₫" như cũ, không đổi hành vi mặc định). Ký
+    hiệu hiệu lực áp dụng cho **mọi nơi hiển thị số tiền trong app** (dashboard, danh sách giao dịch, form nhập,
+    báo cáo...) — chỉ account loại `in_kind` là ngoại lệ, vẫn hiển thị theo `accounts.unit` riêng.
   - Ẩn/hiện số tiền: 2 nút icon (mắt mở/đóng) — **áp dụng cho TẤT CẢ scope cùng lúc** (`setAllAmountVisibility`),
     khác với nút mắt lẻ ở Today Hero (chỉ đổi 1 scope).
 
@@ -60,7 +67,8 @@ kích thước cần thiết theo yêu cầu iOS/Android hoặc Flutter).
 
 ## 5.6 Checklist release
 
-- [ ] Profile: sửa tên/ngày sinh, đặt/đổi PIN, đổi theme/ngôn ngữ/ẩn-hiện số tiền — tất cả áp dụng ngay, không cần khởi động lại app
+- [ ] Profile: sửa tên/ngày sinh, đặt/đổi PIN, đổi theme/ngôn ngữ/đơn vị tiền/ẩn-hiện số tiền — tất cả áp dụng ngay, không cần khởi động lại app
+- [ ] Đổi đơn vị tiền (hoặc ký hiệu tuỳ chỉnh) cập nhật ngay lập tức ở mọi màn hình đang hiển thị số tiền
 - [ ] Đăng xuất xoá sạch trạng thái PIN-unlock, đăng nhập lại (kể cả khác tài khoản) không bị rò trạng thái cũ
 - [ ] Ẩn/hiện số tiền hoạt động độc lập theo từng scope, đúng mặc định "ẩn" lần đầu
 - [ ] App icon, splash screen, tên app ("Wallio") đúng branding

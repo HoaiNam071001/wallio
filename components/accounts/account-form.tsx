@@ -132,7 +132,7 @@ export function AccountForm({
         <CurrencyInput
           id="initial_balance"
           allowNegative
-          suffix={isInKind ? "" : "đ"}
+          suffix={isInKind ? "" : undefined}
           value={initialBalance}
           onValueChange={(next) => setValue("initial_balance", next ?? 0)}
         />

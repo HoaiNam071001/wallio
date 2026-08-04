@@ -4,6 +4,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { formatAmount, parseAmount } from "@/lib/utils/currency";
+import { useCurrency } from "@/lib/hooks/use-currency";
 
 type CurrencyInputProps = Omit<
   React.ComponentProps<"input">,
@@ -12,6 +13,7 @@ type CurrencyInputProps = Omit<
   value?: number | null;
   onValueChange: (value: number | undefined) => void;
   allowNegative?: boolean;
+  /** Mặc định lấy theo ký hiệu tiền của người dùng (đặt ở trang Hồ sơ); truyền "" để ẩn hẳn. */
   suffix?: string;
 };
 
@@ -27,11 +29,13 @@ export function CurrencyInput({
   value,
   onValueChange,
   allowNegative = false,
-  suffix = "đ",
+  suffix,
   className,
   onBlur,
   ...props
 }: CurrencyInputProps) {
+  const { symbol } = useCurrency();
+  const resolvedSuffix = suffix ?? symbol;
   const [text, setText] = React.useState(() => toText(value));
 
   // Đồng bộ khi giá trị bị đổi từ bên ngoài (reset form, nạp dữ liệu để sửa...).
@@ -75,7 +79,7 @@ export function CurrencyInput({
         className={cn("pr-9 font-semibold tabular-nums px-4", className)}
       />
       <span className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-sm font-semibold text-muted-foreground">
-        {suffix}
+        {resolvedSuffix}
       </span>
     </div>
   );
