@@ -14,3 +14,23 @@ export async function hashPin(pin: string, salt: string): Promise<string> {
 export function isValidPin(pin: string): boolean {
   return /^\d{6}$/.test(pin);
 }
+
+/**
+ * Trạng thái "đã mở khoá PIN" lưu ở sessionStorage — sống sót qua pull-to-refresh /
+ * reload trang (khác với biến trong bộ nhớ JS), nhưng tự xoá khi đóng hẳn tab/app,
+ * và bị xoá chủ động khi đăng xuất — nên chỉ cần nhập PIN lại mỗi phiên đăng nhập mới.
+ */
+const PIN_UNLOCK_KEY = "wallio:pin-unlocked";
+
+export function isPinUnlockedInSession(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.sessionStorage.getItem(PIN_UNLOCK_KEY) === "1";
+}
+
+export function markPinUnlocked(): void {
+  window.sessionStorage.setItem(PIN_UNLOCK_KEY, "1");
+}
+
+export function clearPinUnlocked(): void {
+  window.sessionStorage.removeItem(PIN_UNLOCK_KEY);
+}

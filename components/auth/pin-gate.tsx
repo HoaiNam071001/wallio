@@ -7,15 +7,8 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { useProfile } from "@/lib/hooks/use-profile";
 import { useSupabase } from "@/lib/hooks/use-supabase";
-import { hashPin, isValidPin } from "@/lib/utils/pin";
+import { clearPinUnlocked, hashPin, isPinUnlockedInSession, isValidPin, markPinUnlocked } from "@/lib/utils/pin";
 import { cn } from "@/lib/utils";
-
-/**
- * Cờ trong bộ nhớ — KHÔNG lưu vào localStorage/sessionStorage. Điều hướng trong app
- * (client-side) giữ nguyên trạng thái mở khoá, nhưng tải lại trang / mở app lại sẽ
- * xoá module này khỏi bộ nhớ, buộc nhập PIN lại — đúng yêu cầu "mỗi lần mở/tải lại app".
- */
-let unlockedForThisLoad = false;
 
 /**
  * Khoá toàn màn hình sau khi đã đăng nhập Google, nếu người dùng đã đặt PIN 6 số.
@@ -26,7 +19,7 @@ export function PinGate({ children }: { children: React.ReactNode }) {
   const { data: profile, isLoading: profileLoading } = useProfile();
   const supabase = useSupabase();
   const router = useRouter();
-  const [unlocked, setUnlocked] = useState(unlockedForThisLoad);
+  const [unlocked, setUnlocked] = useState(isPinUnlockedInSession);
   const [pin, setPin] = useState("");
   const [error, setError] = useState(false);
   const [verifying, setVerifying] = useState(false);
@@ -44,7 +37,7 @@ export function PinGate({ children }: { children: React.ReactNode }) {
     setVerifying(false);
 
     if (hash === profile.pin_hash) {
-      unlockedForThisLoad = true;
+      markPinUnlocked();
       setUnlocked(true);
     } else {
       setError(true);
@@ -53,6 +46,7 @@ export function PinGate({ children }: { children: React.ReactNode }) {
   }
 
   async function handleForgot() {
+    clearPinUnlocked();
     await supabase.auth.signOut();
     router.replace("/login");
   }

@@ -13,6 +13,7 @@ import {
 import { BrandMark } from "@/components/layout/brand-mark";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { useSupabase } from "@/lib/hooks/use-supabase";
+import { clearPinUnlocked } from "@/lib/utils/pin";
 
 export function Topbar() {
   const { user } = useAuth();
@@ -20,6 +21,7 @@ export function Topbar() {
   const router = useRouter();
 
   async function handleSignOut() {
+    clearPinUnlocked();
     await supabase.auth.signOut();
     router.replace("/login");
     router.refresh();

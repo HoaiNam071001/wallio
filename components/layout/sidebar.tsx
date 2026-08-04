@@ -8,6 +8,7 @@ import { NAV_ITEMS } from "@/components/layout/nav-items";
 import { BrandMark } from "@/components/layout/brand-mark";
 import { Button } from "@/components/ui/button";
 import { useSupabase } from "@/lib/hooks/use-supabase";
+import { clearPinUnlocked } from "@/lib/utils/pin";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -15,6 +16,7 @@ export function Sidebar() {
   const router = useRouter();
 
   async function handleSignOut() {
+    clearPinUnlocked();
     await supabase.auth.signOut();
     router.replace("/login");
     router.refresh();
