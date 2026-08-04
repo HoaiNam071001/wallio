@@ -54,21 +54,21 @@
 .dark {
   --background: oklch(0.14 0.032 266);
   --foreground: oklch(0.965 0.012 250);
-  --card: oklch(0.19 0.045 266);
+  --card: oklch(0.24 0.05 266);
   --card-foreground: var(--foreground);
-  --popover: oklch(0.19 0.045 266);
+  --popover: oklch(0.24 0.05 266);
   --popover-foreground: var(--foreground);
   --primary: var(--brand-500);
   --primary-foreground: oklch(0.98 0.006 250);
-  --secondary: oklch(0.235 0.05 266);
+  --secondary: oklch(0.29 0.056 266);
   --secondary-foreground: oklch(0.94 0.02 255);
-  --muted: oklch(0.235 0.05 266);
-  --muted-foreground: oklch(0.71 0.032 258);
-  --accent: oklch(0.27 0.058 266);
+  --muted: oklch(0.26 0.046 266);
+  --muted-foreground: oklch(0.74 0.032 258);
+  --accent: oklch(0.33 0.062 266);
   --accent-foreground: oklch(0.95 0.02 255);
   --destructive: oklch(0.66 0.2 24);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 14%);
+  --border: oklch(1 0 0 / 15%);
+  --input: oklch(1 0 0 / 19%);
   --ring: var(--brand-500);
 
   --income: oklch(0.72 0.165 158);
@@ -174,8 +174,8 @@
   }
 
   .dark .glass {
-    background-color: color-mix(in oklab, var(--card) 72%, transparent);
-    border-color: color-mix(in oklab, white 12%, transparent);
+    background-color: color-mix(in oklab, var(--card) 86%, transparent);
+    border-color: color-mix(in oklab, white 16%, transparent);
   }
 
   /* Nền gradient thương hiệu cho hero / nút nổi bật */
@@ -185,6 +185,16 @@
       var(--brand-700) 0%,
       var(--brand-500) 48%,
       oklch(0.74 0.14 232) 100%
+    );
+  }
+
+  /* Bản tối hơn cho darkmode: giảm độ chói của gradient xanh chính */
+  .dark .brand-gradient {
+    background-image: linear-gradient(
+      135deg,
+      var(--brand-900) 0%,
+      var(--brand-700) 50%,
+      oklch(0.46 0.13 235) 100%
     );
   }
 
