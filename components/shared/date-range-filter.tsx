@@ -4,7 +4,7 @@ import { useState } from "react";
 import { format, parseISO } from "date-fns";
 import { vi, enUS } from "date-fns/locale";
 import { CalendarRange, Check } from "lucide-react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { useT } from "@/lib/i18n/use-t";
@@ -117,67 +117,71 @@ export function DateRangeFilter({
         </div>
 
         {draft.preset === "custom" && (
-          <div className="flex flex-col gap-3 border-t border-border/60 pt-3">
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => jumpTo("today")}
-                className="shrink-0 rounded-full border border-border px-3 py-2 text-xs font-bold text-muted-foreground transition-colors"
-              >
-                {t("common.today")}
-              </button>
-              <button
-                type="button"
-                onClick={() => jumpTo("start")}
-                className={cn(
-                  "min-w-0 flex-1 truncate rounded-full border px-3 py-2 text-xs font-bold transition-colors",
-                  editingField === "start"
-                    ? "border-transparent bg-brand-500/15 text-brand-700 dark:text-brand-300"
-                    : "border-border text-muted-foreground",
-                )}
-              >
-                {t("dateRangeFilter.fromDate", { date: formatDraftDate(draft.customStart, dateLocale) })}
-              </button>
-              <button
-                type="button"
-                onClick={() => jumpTo("end")}
-                className={cn(
-                  "min-w-0 flex-1 truncate rounded-full border px-3 py-2 text-xs font-bold transition-colors",
-                  editingField === "end"
-                    ? "border-transparent bg-brand-500/15 text-brand-700 dark:text-brand-300"
-                    : "border-border text-muted-foreground",
-                )}
-              >
-                {t("dateRangeFilter.toDate", { date: formatDraftDate(draft.customEnd, dateLocale) })}
-              </button>
+          <>
+            <div className="flex flex-col gap-3 border-t border-border/60 pt-3">
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => jumpTo("today")}
+                  className="shrink-0 rounded-full border border-border px-3 py-2 text-xs font-bold text-muted-foreground transition-colors"
+                >
+                  {t("common.today")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => jumpTo("start")}
+                  className={cn(
+                    "min-w-0 flex-1 truncate rounded-full border px-3 py-2 text-xs font-bold transition-colors",
+                    editingField === "start"
+                      ? "border-transparent bg-brand-500/15 text-brand-700 dark:text-brand-300"
+                      : "border-border text-muted-foreground",
+                  )}
+                >
+                  {t("dateRangeFilter.fromDate", { date: formatDraftDate(draft.customStart, dateLocale) })}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => jumpTo("end")}
+                  className={cn(
+                    "min-w-0 flex-1 truncate rounded-full border px-3 py-2 text-xs font-bold transition-colors",
+                    editingField === "end"
+                      ? "border-transparent bg-brand-500/15 text-brand-700 dark:text-brand-300"
+                      : "border-border text-muted-foreground",
+                  )}
+                >
+                  {t("dateRangeFilter.toDate", { date: formatDraftDate(draft.customEnd, dateLocale) })}
+                </button>
+              </div>
+
+              <div className="flex justify-center">
+                <Calendar
+                  value={editingField === "start" ? draft.customStart : draft.customEnd}
+                  onSelect={(next) => {
+                    if (editingField === "start") {
+                      setDraft((prev) => ({
+                        ...prev,
+                        customStart: next,
+                        customEnd: prev.customEnd < next ? next : prev.customEnd,
+                      }));
+                      setEditingField("end");
+                    } else {
+                      setDraft((prev) => ({
+                        ...prev,
+                        customEnd: next < prev.customStart ? prev.customStart : next,
+                      }));
+                    }
+                  }}
+                  cursor={cursor}
+                  onCursorChange={setCursor}
+                  maxDate={toQueryDate(new Date())}
+                />
+              </div>
             </div>
 
-            <div className="flex justify-center">
-              <Calendar
-                value={editingField === "start" ? draft.customStart : draft.customEnd}
-                onSelect={(next) => {
-                  if (editingField === "start") {
-                    setDraft((prev) => ({
-                      ...prev,
-                      customStart: next,
-                      customEnd: prev.customEnd < next ? next : prev.customEnd,
-                    }));
-                    setEditingField("end");
-                  } else {
-                    setDraft((prev) => ({
-                      ...prev,
-                      customEnd: next < prev.customStart ? prev.customStart : next,
-                    }));
-                  }
-                }}
-                cursor={cursor}
-                onCursorChange={setCursor}
-                maxDate={toQueryDate(new Date())}
-              />
-            </div>
-
-            <Button onClick={applyCustom}>{t("dateRangeFilter.apply")}</Button>
-          </div>
+            <SheetFooter>
+              <Button onClick={applyCustom}>{t("dateRangeFilter.apply")}</Button>
+            </SheetFooter>
+          </>
         )}
       </SheetContent>
     </Sheet>

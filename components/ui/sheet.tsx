@@ -59,7 +59,7 @@ function SheetContent({
         {/* min-h-0 bắt buộc để flex item co lại được thay vì đẩy tràn khỏi max-h của sheet */}
         <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">{children}</div>
         {showCloseButton && (
-          <DialogPrimitive.Close className="absolute top-4 right-4 rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:pointer-events-none">
+          <DialogPrimitive.Close className="absolute top-4 right-4 z-20 rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:pointer-events-none">
             <XIcon />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
@@ -69,8 +69,14 @@ function SheetContent({
   );
 }
 
+/**
+ * Sticky ở đầu vùng scroll (không phải đầu sheet) vì padding nằm ở SheetContent chứ
+ * không phải div scroll — nhờ vậy title luôn hiện dù nội dung bên dưới dài và cuộn.
+ */
 function SheetHeader({ className, ...props }: React.ComponentProps<"div">) {
-  return <div data-slot="sheet-header" className={cn("flex flex-col gap-1", className)} {...props} />;
+  return (
+    <div data-slot="sheet-header" className={cn("sticky top-0 z-10 flex flex-col gap-1 bg-card pb-3", className)} {...props} />
+  );
 }
 
 function SheetTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>) {
@@ -83,4 +89,25 @@ function SheetTitle({ className, ...props }: React.ComponentProps<typeof DialogP
   );
 }
 
-export { Sheet, SheetTrigger, SheetPortal, SheetClose, SheetOverlay, SheetContent, SheetHeader, SheetTitle };
+/** Sticky ở cuối vùng scroll — dùng cho nút hành động chính (VD: "Áp dụng") luôn hiện sẵn. */
+function SheetFooter({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="sheet-footer"
+      className={cn("sticky bottom-0 z-10 flex flex-col gap-2 border-t border-border/60 bg-card pt-3", className)}
+      {...props}
+    />
+  );
+}
+
+export {
+  Sheet,
+  SheetTrigger,
+  SheetPortal,
+  SheetClose,
+  SheetOverlay,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetFooter,
+};
