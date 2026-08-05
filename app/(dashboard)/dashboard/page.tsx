@@ -16,6 +16,14 @@ export default function DashboardPage() {
   const [section, setSection] = useState<Section>("overview");
   const online = useOnlineStatus();
 
+  if (!online) {
+    return (
+      <div className="flex flex-col gap-4">
+        <OfflineUnavailable />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
@@ -31,10 +39,10 @@ export default function DashboardPage() {
         </TabsList>
 
         <TabsContent value="overview">
-          {online ? <OverviewTab /> : <OfflineUnavailable />}
+          <OverviewTab />
         </TabsContent>
         <TabsContent value="reports">
-          {online ? <ReportsTab /> : <OfflineUnavailable />}
+          <ReportsTab />
         </TabsContent>
       </Tabs>
     </div>
