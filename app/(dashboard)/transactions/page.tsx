@@ -44,6 +44,8 @@ import { useOnlineStatus } from "@/lib/hooks/use-online-status";
 import { openNewTransactionModal } from "@/lib/hooks/use-new-transaction-modal";
 import { getPresetRange, toQueryDate } from "@/lib/utils";
 import { useT } from "@/lib/i18n/use-t";
+import { SkeletonView } from "@/components/ui/skeleton";
+import { transactionRowsSkeleton } from "@/lib/skeleton/shapes";
 import type { TransactionWithRelations } from "@/lib/queries/transactions";
 
 const TODAY = toQueryDate(new Date());
@@ -96,6 +98,7 @@ export default function TransactionsPage() {
     search: filter.search || undefined,
   });
   const transactions = useMemo(() => transactionPages?.pages.flat() ?? [], [transactionPages]);
+  const rowsShape = useMemo(() => transactionRowsSkeleton(5), []);
 
   if (!online) {
     return (
@@ -205,7 +208,7 @@ export default function TransactionsPage() {
       </div>
 
       {isLoading ? (
-        <p className="text-muted-foreground">{t("common.loading")}</p>
+        <SkeletonView loading instance={rowsShape} />
       ) : transactions.length === 0 ? (
         <EmptyState
           icon={NotebookPen}

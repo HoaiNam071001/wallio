@@ -20,6 +20,8 @@ import { CategoryForm, type CategoryFormValues } from "@/components/categories/c
 import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { EntityIcon } from "@/components/shared/entity-icon";
+import { SkeletonView } from "@/components/ui/skeleton";
+import { categoryChipsSkeleton } from "@/lib/skeleton/shapes";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { useOnlineStatus } from "@/lib/hooks/use-online-status";
 import {
@@ -37,6 +39,7 @@ export default function CategoriesPage() {
   const { user } = useAuth();
   const online = useOnlineStatus();
   const { data: categories, isLoading } = useCategories();
+  const chipsShape = useMemo(() => categoryChipsSkeleton(6), []);
   const createCategory = useCreateCategory();
   const updateCategory = useUpdateCategory();
   const deleteCategory = useDeleteCategory();
@@ -132,7 +135,7 @@ export default function CategoriesPage() {
         </TabsList>
       </Tabs>
 
-      {isLoading && <p className="text-muted-foreground">{t("common.loading")}</p>}
+      {isLoading && <SkeletonView loading instance={chipsShape} />}
 
       {!isLoading && filtered.length === 0 && (
         <EmptyState

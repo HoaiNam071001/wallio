@@ -26,6 +26,8 @@ import { BalanceAdjustDialog } from "@/components/accounts/balance-adjust-dialog
 import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { AmountText } from "@/components/shared/amount-text";
+import { SkeletonView } from "@/components/ui/skeleton";
+import { accountCardsSkeleton } from "@/lib/skeleton/shapes";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { useOnlineStatus } from "@/lib/hooks/use-online-status";
 import {
@@ -44,6 +46,7 @@ export default function AccountsPage() {
   const { user } = useAuth();
   const online = useOnlineStatus();
   const { data: accounts, isLoading } = useAccountsWithBalance();
+  const cardsShape = useMemo(() => accountCardsSkeleton(4), []);
   const createAccount = useCreateAccount();
   const updateAccount = useUpdateAccount();
   const deleteAccount = useDeleteAccount();
@@ -140,7 +143,7 @@ export default function AccountsPage() {
         }
       />
 
-      {isLoading && <p className="text-muted-foreground">{t("common.loading")}</p>}
+      {isLoading && <SkeletonView loading instance={cardsShape} />}
 
       {!isLoading && accounts?.length === 0 && (
         <EmptyState

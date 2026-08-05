@@ -10,6 +10,8 @@ import { IncomeExpenseChart } from "@/components/charts/income-expense-chart";
 import { AccountBreakdownChart } from "@/components/charts/account-breakdown-chart";
 import { TransactionList } from "@/components/transactions/transaction-list";
 import { TransactionDetailDialog } from "@/components/transactions/transaction-detail-dialog";
+import { SkeletonView } from "@/components/ui/skeleton";
+import { transactionRowsSkeleton } from "@/lib/skeleton/shapes";
 import { EntityIcon } from "@/components/shared/entity-icon";
 import { AmountTextForAccount } from "@/components/shared/amount-text";
 import { ACCOUNT_TYPE_META } from "@/components/accounts/account-type";
@@ -30,6 +32,7 @@ export function OverviewTab() {
   const [customStart, setCustomStart] = useState(toQueryDate(new Date()));
   const [customEnd, setCustomEnd] = useState(toQueryDate(new Date()));
   const [viewing, setViewing] = useState<TransactionWithRelations | null>(null);
+  const rowsShape = useMemo(() => transactionRowsSkeleton(3), []);
 
   const { startDate, endDate } = useMemo(() => {
     if (preset === "custom") return { startDate: customStart, endDate: customEnd };
@@ -121,7 +124,7 @@ export function OverviewTab() {
       </div>
 
       {loadingTransactions ? (
-        <p className="text-muted-foreground">{t("common.loading")}</p>
+        <SkeletonView loading instance={rowsShape} />
       ) : (
         <TransactionList
           transactions={recentTransactions ?? []}
