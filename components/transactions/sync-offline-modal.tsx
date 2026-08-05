@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
 import { vi, enUS } from "date-fns/locale";
-import { ArrowDownLeft, ArrowUpRight, ArrowLeftRight } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, ArrowLeftRight, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -14,13 +14,28 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { TransactionForm, type TransactionFormValues } from "@/components/transactions/transaction-form";
 import { useSupabase } from "@/lib/hooks/use-supabase";
 import { useOnlineStatus } from "@/lib/hooks/use-online-status";
 import {
   usePendingTransactions,
   type PendingTransactionView,
 } from "@/lib/hooks/use-pending-transactions";
-import { removePendingTransaction } from "@/lib/offline/pending-transactions";
+import {
+  clearPendingTransactions,
+  removePendingTransaction,
+  updatePendingTransaction,
+} from "@/lib/offline/pending-transactions";
 import { createTransaction } from "@/lib/queries/transactions";
 import { formatCurrency } from "@/lib/utils";
 import { useT } from "@/lib/i18n/use-t";
@@ -46,11 +61,15 @@ function SyncRow({
   item,
   checked,
   onToggle,
+  onEdit,
+  onDelete,
   locale,
 }: {
   item: PendingTransactionView;
   checked: boolean;
   onToggle: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
   locale: Locale;
 }) {
   const { t } = useT();
@@ -62,21 +81,42 @@ function SyncRow({
   const subtitle = item.input.type === "transfer" ? t("common.transfer") : item.accountName;
 
   return (
-    <label className="flex items-center gap-3 rounded-2xl px-2 py-2 hover:bg-accent/40">
-      <Checkbox checked={checked} onCheckedChange={onToggle} />
-      <span className={`flex size-9 shrink-0 items-center justify-center rounded-xl ${TYPE_COLOR[item.input.type]}`}>
-        <Icon className="size-4" />
-      </span>
-      <span className="min-w-0 flex-1">
-        <p className="truncate text-sm font-bold">{title}</p>
-        <p className="truncate text-xs text-muted-foreground">
-          {subtitle} · {format(parseISO(item.input.transaction_date ?? item.createdAt), "dd/MM/yyyy", {
-            locale: locale === "en" ? enUS : vi,
-          })}
-        </p>
-      </span>
-      <span className="shrink-0 text-sm font-bold">{formatCurrency(item.input.amount)}</span>
-    </label>
+    <div className="flex min-w-0 flex-col gap-2.5 rounded-2xl border border-border/60 bg-card/40 p-3">
+      <div className="flex min-w-0 items-center gap-3">
+        <Checkbox checked={checked} onCheckedChange={onToggle} className="shrink-0" />
+        <span
+          className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${TYPE_COLOR[item.input.type]}`}
+        >
+          <Icon className="size-4.5" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-bold">{title}</p>
+          <p className="truncate text-xs text-muted-foreground">
+            {subtitle} ·{" "}
+            {format(parseISO(item.input.transaction_date ?? item.createdAt), "dd/MM/yyyy", {
+              locale: locale === "en" ? enUS : vi,
+            })}
+          </p>
+        </div>
+        <span className="shrink-0 text-sm font-bold">{formatCurrency(item.input.amount)}</span>
+      </div>
+
+      <div className="flex items-center justify-end gap-1 border-t border-border/40 pt-2">
+        <Button variant="ghost" size="sm" className="h-8 gap-1.5 px-2 text-xs" onClick={onEdit}>
+          <Pencil className="size-3.5" />
+          {t("common.edit")}
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 gap-1.5 px-2 text-xs text-destructive hover:text-destructive"
+          onClick={onDelete}
+        >
+          <Trash2 className="size-3.5" />
+          {t("common.delete")}
+        </Button>
+      </div>
+    </div>
   );
 }
 
@@ -92,6 +132,9 @@ function SyncOfflineModalBody({ items }: { items: PendingTransactionView[] }) {
     () => new Set(items.map((item) => item.localId)),
   );
   const [syncing, setSyncing] = useState(false);
+  const [editing, setEditing] = useState<PendingTransactionView | null>(null);
+  const [deleting, setDeleting] = useState<PendingTransactionView | null>(null);
+  const [clearingAll, setClearingAll] = useState(false);
 
   const allSelected = items.length > 0 && selected.size === items.length;
 
@@ -133,27 +176,67 @@ function SyncOfflineModalBody({ items }: { items: PendingTransactionView[] }) {
     }
   }
 
+  function handleEditSubmit(values: TransactionFormValues) {
+    if (!editing) return;
+    updatePendingTransaction(editing.localId, {
+      ...editing.input,
+      ...values,
+      category_id: values.category_id ?? null,
+      to_account_id: values.to_account_id ?? null,
+      to_amount: values.to_amount ?? null,
+    });
+    setEditing(null);
+  }
+
+  function handleDeleteConfirm() {
+    if (!deleting) return;
+    removePendingTransaction(deleting.localId);
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.delete(deleting.localId);
+      return next;
+    });
+    setDeleting(null);
+  }
+
+  function handleClearAllConfirm() {
+    clearPendingTransactions(items.map((item) => item.localId));
+    setSelected(new Set());
+    setClearingAll(false);
+  }
+
   if (items.length === 0) {
     return <p className="py-6 text-center text-sm text-muted-foreground">{t("offline.sync.empty")}</p>;
   }
 
   return (
-    <>
-      <button
-        type="button"
-        onClick={toggleAll}
-        className="self-start text-xs font-semibold text-brand-600 hover:underline"
-      >
-        {allSelected ? t("offline.sync.deselectAll") : t("offline.sync.selectAll")}
-      </button>
+    <div className="flex min-w-0 flex-col gap-4">
+      <div className="flex items-center justify-between gap-2">
+        <button
+          type="button"
+          onClick={toggleAll}
+          className="text-xs font-semibold text-brand-600 hover:underline"
+        >
+          {allSelected ? t("offline.sync.deselectAll") : t("offline.sync.selectAll")}
+        </button>
+        <button
+          type="button"
+          onClick={() => setClearingAll(true)}
+          className="text-xs font-semibold text-destructive hover:underline"
+        >
+          {t("offline.sync.clearAll")}
+        </button>
+      </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex min-w-0 flex-col gap-2">
         {items.map((item) => (
           <SyncRow
             key={item.localId}
             item={item}
             checked={selected.has(item.localId)}
             onToggle={() => toggleOne(item.localId)}
+            onEdit={() => setEditing(item)}
+            onDelete={() => setDeleting(item)}
             locale={locale}
           />
         ))}
@@ -168,13 +251,49 @@ function SyncOfflineModalBody({ items }: { items: PendingTransactionView[] }) {
           {syncing ? t("common.saving") : t("offline.sync.syncButton", { count: selected.size })}
         </Button>
       </DialogFooter>
-    </>
+
+      <Dialog open={!!editing} onOpenChange={(next) => !next && setEditing(null)}>
+        <DialogContent className="max-h-[90dvh] overflow-y-auto overflow-x-hidden">
+          <DialogHeader>
+            <DialogTitle>{t("offline.sync.editTitle")}</DialogTitle>
+          </DialogHeader>
+          {editing && <TransactionForm defaultValues={editing.input} onSubmit={handleEditSubmit} />}
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={!!deleting} onOpenChange={(next) => !next && setDeleting(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("offline.sync.deleteConfirmTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("offline.sync.deleteConfirmDescription")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm}>{t("common.delete")}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={clearingAll} onOpenChange={setClearingAll}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("offline.sync.clearAllConfirmTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("offline.sync.clearAllConfirmDescription")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleClearAllConfirm}>{t("offline.sync.clearAll")}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 }
 
 /**
  * Modal đồng bộ các giao dịch đã ghi khi offline — chọn từng khoản (hoặc chọn hết) rồi đẩy lên
- * Supabase. Mount 1 lần ở layout, mở từ `SyncFab` qua `openSyncOfflineModal()`.
+ * Supabase; mỗi khoản còn sửa/xoá được tại chỗ trước khi đồng bộ. Mount 1 lần ở layout, mở từ
+ * `SyncFab` (hoặc tự mở khi có mạng lại, xem `SyncReconnectWatcher`) qua `openSyncOfflineModal()`.
  */
 export function SyncOfflineModal() {
   const open = useSyncOfflineModalOpen();
@@ -183,7 +302,7 @@ export function SyncOfflineModal() {
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && closeSyncOfflineModal()}>
-      <DialogContent className="max-h-[90dvh] overflow-y-auto">
+      <DialogContent className="max-h-[90dvh] overflow-y-auto overflow-x-hidden">
         <DialogHeader>
           <DialogTitle>{t("offline.sync.title")}</DialogTitle>
         </DialogHeader>

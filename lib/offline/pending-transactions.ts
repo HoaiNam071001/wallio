@@ -56,9 +56,30 @@ export async function addPendingTransaction(input: TransactionInsert): Promise<P
   return record;
 }
 
+export async function updatePendingTransaction(
+  localId: string,
+  input: TransactionInsert,
+): Promise<void> {
+  await hydrate();
+  const existing = cached.find((record) => record.localId === localId);
+  if (!existing) return;
+  const updated: PendingTransaction = { ...existing, input };
+  cached = cached.map((record) => (record.localId === localId ? updated : record));
+  notify();
+  await pendingTransactionPut(updated);
+}
+
 export async function removePendingTransaction(localId: string): Promise<void> {
   await hydrate();
   cached = cached.filter((record) => record.localId !== localId);
   notify();
   await pendingTransactionDelete(localId);
+}
+
+export async function clearPendingTransactions(localIds: string[]): Promise<void> {
+  await hydrate();
+  const toRemove = new Set(localIds);
+  cached = cached.filter((record) => !toRemove.has(record.localId));
+  notify();
+  await Promise.all(localIds.map((localId) => pendingTransactionDelete(localId)));
 }
