@@ -27,6 +27,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { AmountText } from "@/components/shared/amount-text";
 import { useAuth } from "@/lib/hooks/use-auth";
+import { useOnlineStatus } from "@/lib/hooks/use-online-status";
 import {
   useAccountsWithBalance,
   useCreateAccount,
@@ -41,6 +42,7 @@ const LIQUID_TYPES = new Set(["cash", "ewallet", "bank"]);
 export default function AccountsPage() {
   const { t } = useT();
   const { user } = useAuth();
+  const online = useOnlineStatus();
   const { data: accounts, isLoading } = useAccountsWithBalance();
   const createAccount = useCreateAccount();
   const updateAccount = useUpdateAccount();
@@ -59,12 +61,21 @@ export default function AccountsPage() {
     [accounts],
   );
 
+  /** Chặn các hành động ghi khi offline — accounts chỉ đọc từ cache, chưa nằm trong hàng đợi sync. */
+  function guardOnline(): boolean {
+    if (online) return true;
+    toast.error(t("common.offlineActionBlocked"));
+    return false;
+  }
+
   function openCreate() {
+    if (!guardOnline()) return;
     setEditing(null);
     setFormOpen(true);
   }
 
   function openEdit(account: AccountWithBalance) {
+    if (!guardOnline()) return;
     setEditing(account);
     setFormOpen(true);
   }
@@ -151,8 +162,8 @@ export default function AccountsPage() {
             key={account.id}
             account={account}
             onEdit={() => openEdit(account)}
-            onDelete={() => setDeleting(account)}
-            onAdjust={() => setAdjusting(account)}
+            onDelete={() => guardOnline() && setDeleting(account)}
+            onAdjust={() => guardOnline() && setAdjusting(account)}
           />
         ))}
       </div>

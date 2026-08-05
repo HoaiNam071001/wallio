@@ -15,7 +15,8 @@
     "hideAmount": "Ẩn số tiền",
     "showAmount": "Hiện số tiền",
     "close": "Đóng",
-    "chooseDate": "Chọn ngày"
+    "chooseDate": "Chọn ngày",
+    "offlineActionBlocked": "Cần có mạng để thực hiện thao tác này"
   },
 
   "calendar": {
@@ -85,7 +86,8 @@
   "layout": {
     "profile": "Hồ sơ",
     "signOut": "Đăng xuất",
-    "newEntry": "Ghi khoản mới"
+    "newEntry": "Ghi khoản mới",
+    "sync": "Đồng bộ {{count}} khoản offline"
   },
 
   "auth": {
@@ -128,7 +130,24 @@
   "offline": {
     "metaTitle": "Ngoại tuyến — Wallio",
     "title": "Đang ngoại tuyến",
-    "description": "Có vẻ bạn đang mất kết nối. Kiểm tra mạng rồi thử lại nhé — dữ liệu đã lưu vẫn còn nguyên."
+    "description": "Có vẻ bạn đang mất kết nối. Kiểm tra mạng rồi thử lại nhé — dữ liệu đã lưu vẫn còn nguyên.",
+    "banner": {
+      "message": "Đang ngoại tuyến — một số dữ liệu có thể chưa cập nhật mới nhất"
+    },
+    "unavailable": {
+      "title": "Cần có mạng để xem mục này",
+      "description": "Kết nối lại mạng để xem tổng quan, báo cáo và toàn bộ danh sách giao dịch."
+    },
+    "sync": {
+      "title": "Đồng bộ giao dịch offline",
+      "empty": "Không có giao dịch nào đang chờ đồng bộ",
+      "selectAll": "Chọn tất cả",
+      "deselectAll": "Bỏ chọn tất cả",
+      "syncButton": "Đồng bộ ({{count}})",
+      "needsNetwork": "Cần có mạng để đồng bộ",
+      "toastSuccess": "Đã đồng bộ {{count}} khoản thành công",
+      "toastPartial": "Đã đồng bộ {{synced}}/{{total}} khoản, một số khoản lỗi vẫn còn trong hàng đợi"
+    }
   },
 
   "dashboard": {
@@ -231,7 +250,8 @@
     "new": {
       "backAria": "Quay lại",
       "title": "Ghi khoản mới",
-      "toastSaved": "Đã lưu vào sổ 🎉"
+      "toastSaved": "Đã lưu vào sổ 🎉",
+      "toastSavedOffline": "Đã lưu offline, sẽ tự đồng bộ khi có mạng"
     },
     "form": {
       "validation": {

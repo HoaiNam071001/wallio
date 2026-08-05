@@ -2,19 +2,26 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSupabase } from "@/lib/hooks/use-supabase";
+import { useAuth } from "@/lib/hooks/use-auth";
 import {
   createCategory,
   deleteCategory,
   listCategories,
   updateCategory,
 } from "@/lib/queries/categories";
+import { categoriesCacheKey, withOfflineCache } from "@/lib/offline/cache";
 import type { CategoryInsert, CategoryUpdate } from "@/lib/types/database.types";
 
+/** Cache lại danh mục để xem offline (dùng cho trang Categories và form ghi giao dịch). */
 export function useCategories() {
   const supabase = useSupabase();
+  const { user } = useAuth();
   return useQuery({
     queryKey: ["categories"],
-    queryFn: () => listCategories(supabase),
+    queryFn: () =>
+      withOfflineCache(categoriesCacheKey(user!.id), () => listCategories(supabase)),
+    enabled: !!user,
+    retry: false,
   });
 }
 

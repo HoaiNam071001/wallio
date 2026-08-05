@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSupabase } from "@/lib/hooks/use-supabase";
+import { useAuth } from "@/lib/hooks/use-auth";
 import {
   createAccount,
   deleteAccount,
@@ -15,6 +16,7 @@ import {
   adjustAccountBalance,
   type AdjustBalanceInput,
 } from "@/lib/queries/balance-adjustment";
+import { accountsWithBalanceCacheKey, withOfflineCache } from "@/lib/offline/cache";
 import type { AccountInsert, AccountUpdate } from "@/lib/types/database.types";
 
 export function useAccounts() {
@@ -22,6 +24,7 @@ export function useAccounts() {
   return useQuery({
     queryKey: ["accounts"],
     queryFn: () => listAccounts(supabase),
+    retry: false,
   });
 }
 
@@ -30,15 +33,22 @@ export function useAccountBalances() {
   return useQuery({
     queryKey: ["account-balances"],
     queryFn: () => listAccountBalances(supabase),
+    retry: false,
   });
 }
 
-/** Account đầy đủ (icon, color, initial_balance) kèm số dư hiện tại. */
+/** Account đầy đủ (icon, color, initial_balance) kèm số dư hiện tại — cache lại để xem offline. */
 export function useAccountsWithBalance() {
   const supabase = useSupabase();
+  const { user } = useAuth();
   return useQuery({
     queryKey: ["accounts", "with-balance"],
-    queryFn: () => listAccountsWithBalance(supabase),
+    queryFn: () =>
+      withOfflineCache(accountsWithBalanceCacheKey(user!.id), () =>
+        listAccountsWithBalance(supabase),
+      ),
+    enabled: !!user,
+    retry: false,
   });
 }
 

@@ -37,8 +37,12 @@ export function NewTransactionModal() {
         user_id: user.id,
       },
       {
-        onSuccess: () => {
-          toast.success(t("transactions.new.toastSaved"));
+        onSuccess: (result) => {
+          toast.success(
+            "queued" in result
+              ? t("transactions.new.toastSavedOffline")
+              : t("transactions.new.toastSaved"),
+          );
           closeNewTransactionModal();
         },
         onError: () => toast.error(t("common.genericError")),

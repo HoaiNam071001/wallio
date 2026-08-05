@@ -15,7 +15,8 @@
     "hideAmount": "Hide amount",
     "showAmount": "Show amount",
     "close": "Close",
-    "chooseDate": "Choose date"
+    "chooseDate": "Choose date",
+    "offlineActionBlocked": "You need to be online to do this"
   },
 
   "calendar": {
@@ -85,7 +86,8 @@
   "layout": {
     "profile": "Profile",
     "signOut": "Sign out",
-    "newEntry": "New entry"
+    "newEntry": "New entry",
+    "sync": "Sync {{count}} offline entries"
   },
 
   "auth": {
@@ -128,7 +130,24 @@
   "offline": {
     "metaTitle": "Offline — Wallio",
     "title": "You're offline",
-    "description": "Looks like you've lost connection. Check your network and try again — your saved data is still safe."
+    "description": "Looks like you've lost connection. Check your network and try again — your saved data is still safe.",
+    "banner": {
+      "message": "You're offline — some data may not be up to date"
+    },
+    "unavailable": {
+      "title": "This needs an internet connection",
+      "description": "Reconnect to view the overview, reports, and the full transaction list."
+    },
+    "sync": {
+      "title": "Sync offline entries",
+      "empty": "No entries waiting to sync",
+      "selectAll": "Select all",
+      "deselectAll": "Deselect all",
+      "syncButton": "Sync ({{count}})",
+      "needsNetwork": "You need to be online to sync",
+      "toastSuccess": "Synced {{count}} entries",
+      "toastPartial": "Synced {{synced}}/{{total}} entries — the rest stayed queued after an error"
+    }
   },
 
   "dashboard": {
@@ -231,7 +250,8 @@
     "new": {
       "backAria": "Back",
       "title": "New entry",
-      "toastSaved": "Saved 🎉"
+      "toastSaved": "Saved 🎉",
+      "toastSavedOffline": "Saved offline, will sync automatically once you're back online"
     },
     "form": {
       "validation": {

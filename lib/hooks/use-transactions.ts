@@ -2,6 +2,8 @@
 
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSupabase } from "@/lib/hooks/use-supabase";
+import { isOnline } from "@/lib/hooks/use-online-status";
+import { addPendingTransaction } from "@/lib/offline/pending-transactions";
 import {
   createTransaction,
   deleteTransaction,
@@ -9,13 +11,20 @@ import {
   updateTransaction,
   type TransactionFilters,
 } from "@/lib/queries/transactions";
-import type { TransactionInsert, TransactionUpdate } from "@/lib/types/database.types";
+import type { Transaction, TransactionInsert, TransactionUpdate } from "@/lib/types/database.types";
 
 function invalidateAll(queryClient: ReturnType<typeof useQueryClient>) {
   queryClient.invalidateQueries({ queryKey: ["transactions"] });
   queryClient.invalidateQueries({ queryKey: ["account-balances"] });
   queryClient.invalidateQueries({ queryKey: ["summary"] });
 }
+
+/** Lỗi do mất mạng giữa chừng (khác lỗi nghiệp vụ từ Supabase, vd RLS/validation). */
+function isNetworkError(error: unknown): boolean {
+  return error instanceof TypeError && /fetch/i.test(error.message);
+}
+
+export type CreateTransactionResult = Transaction | { queued: true; localId: string };
 
 export function useTransactions(filters: TransactionFilters = {}) {
   const supabase = useSupabase();
@@ -43,12 +52,30 @@ export function useInfiniteTransactions(
   });
 }
 
+/**
+ * Offline (hoặc mất mạng giữa chừng) thì xếp vào hàng đợi local thay vì báo lỗi — đồng bộ lại sau
+ * qua màn hình Sync (`components/transactions/sync-offline-modal.tsx`).
+ */
 export function useCreateTransaction() {
   const supabase = useSupabase();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: TransactionInsert) => createTransaction(supabase, input),
-    onSuccess: () => invalidateAll(queryClient),
+    mutationFn: async (input: TransactionInsert): Promise<CreateTransactionResult> => {
+      if (!isOnline()) {
+        const record = await addPendingTransaction(input);
+        return { queued: true, localId: record.localId };
+      }
+      try {
+        return await createTransaction(supabase, input);
+      } catch (error) {
+        if (!isNetworkError(error)) throw error;
+        const record = await addPendingTransaction(input);
+        return { queued: true, localId: record.localId };
+      }
+    },
+    onSuccess: (result) => {
+      if (!("queued" in result)) invalidateAll(queryClient);
+    },
   });
 }
 

@@ -32,6 +32,7 @@ import { CategoryBreakdownChart } from "@/components/charts/category-breakdown-c
 import { ChartTypeToggle } from "@/components/charts/chart-type-toggle";
 import { EmptyState } from "@/components/shared/empty-state";
 import { AmountText } from "@/components/shared/amount-text";
+import { OfflineUnavailable } from "@/components/shared/offline-unavailable";
 import {
   useInfiniteTransactions,
   useUpdateTransaction,
@@ -39,6 +40,7 @@ import {
 } from "@/lib/hooks/use-transactions";
 import { useCategoryBreakdown, usePeriodTotals } from "@/lib/hooks/use-summary";
 import { useChartType } from "@/lib/hooks/use-chart-type";
+import { useOnlineStatus } from "@/lib/hooks/use-online-status";
 import { openNewTransactionModal } from "@/lib/hooks/use-new-transaction-modal";
 import { getPresetRange, toQueryDate } from "@/lib/utils";
 import { useT } from "@/lib/i18n/use-t";
@@ -57,6 +59,7 @@ const DEFAULT_FILTER: TransactionFilterState = {
 
 export default function TransactionsPage() {
   const { t } = useT();
+  const online = useOnlineStatus();
   const [filter, setFilter] = useState<TransactionFilterState>(DEFAULT_FILTER);
   const [breakdownKind, setBreakdownKind] = useState<"expense" | "income">("expense");
   const [chartType, setChartType] = useChartType("transactions");
@@ -93,6 +96,14 @@ export default function TransactionsPage() {
     search: filter.search || undefined,
   });
   const transactions = useMemo(() => transactionPages?.pages.flat() ?? [], [transactionPages]);
+
+  if (!online) {
+    return (
+      <div className="flex flex-col gap-4">
+        <OfflineUnavailable />
+      </div>
+    );
+  }
 
   function handleUpdate(values: TransactionFormValues) {
     if (!editing) return;

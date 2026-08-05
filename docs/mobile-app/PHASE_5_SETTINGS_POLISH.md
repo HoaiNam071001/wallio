@@ -50,18 +50,37 @@ nhập lại tiếp theo (kể cả cùng tài khoản) phải nhập PIN lại 
 
 ## 5.4 Offline & đồng bộ (khác biệt quan trọng so với web PWA)
 
-Web hiện là PWA: có `manifest.ts`, `sw.js` (service worker), trang `/offline` fallback, install prompt. Trên
-native mobile, các khái niệm này **không áp dụng trực tiếp** — cần thiết kế lại:
+Web hiện là PWA: có `manifest.ts`, `sw.js` (service worker), trang `/offline` fallback, install prompt — và từ
+bản offline-first, còn có cache local (IndexedDB) cho account/category/profile + hàng đợi giao dịch offline. Trên
+native mobile, khái niệm "service worker" **không áp dụng trực tiếp** nhưng phần offline-first thì có logic gốc
+để port thẳng:
 
 - App native không cần "install prompt" hay web manifest — icon/splash screen định nghĩa theo chuẩn RN/Flutter
   (asset `app.json`/`pubspec.yaml`).
-- **Offline-first thật sự** (khác PWA chỉ có 1 trang fallback tĩnh) là cải tiến tự nhiên nên cân nhắc cho mobile:
-  cache danh sách account/category/transaction gần nhất bằng local DB (RN: `expo-sqlite`/WatermelonDB; Flutter:
-  `drift`/`sqflite`), cho phép xem (và có thể ghi tạm — queue để sync khi có mạng) khi mất kết nối. Đây là quyết
-  định phạm vi (scope) cần **thống nhất với người yêu cầu** trước khi làm — không nằm trong app web hiện tại nên
-  không có logic gốc để port, phải thiết kế mới.
-- Nếu chỉ muốn tương đương "offline fallback" đơn giản như web (không phải offline-first), chỉ cần: hiện thông
-  báo/màn hình rõ ràng khi mất mạng, không crash khi query lỗi vì network.
+- **Offline-first đã có trên web**, không còn là quyết định bỏ ngỏ — port lại đúng phạm vi này cho mobile:
+  - **Vào app được khi offline**: session đọc từ storage local (không revalidate qua mạng mỗi lần mở app —
+    web đổi từ `getUser()` sang `getSession()` ở `lib/hooks/use-auth.ts` để tránh app bị "treo" chờ mạng lúc
+    khởi động); PIN gate đọc `profile.pin_hash` từ cache thay vì chờ fetch xong mới hiện được màn nhập PIN
+    (`lib/hooks/use-profile.ts`).
+  - **Cache đọc**: accounts (kèm balance), categories, profile — cache-aside theo kiểu "gọi API trước, lỗi thì
+    đọc cache, không có cache thì mới báo lỗi" (web dùng `lib/offline/cache.ts` + `lib/offline/db.ts`, lưu trong
+    IndexedDB, key theo `user_id` để không lẫn dữ liệu giữa các tài khoản trên cùng máy). Mobile port bằng local
+    DB tương đương (`expo-sqlite`/WatermelonDB cho RN, `drift`/`sqflite` cho Flutter).
+  - **Ghi tạm khi offline**: chỉ áp dụng cho **giao dịch thu/chi** (`lib/hooks/use-transactions.ts` —
+    `useCreateTransaction`) — offline hoặc lỗi mạng giữa chừng thì lưu vào hàng đợi local
+    (`lib/offline/pending-transactions.ts`) thay vì báo lỗi, kèm toast riêng báo "đã lưu offline". Accounts/
+    Categories **không** có hàng đợi ghi offline — các nút thêm/sửa/xoá bị chặn (toast báo cần mạng) khi offline,
+    chỉ đọc từ cache.
+  - **Màn hình Sync**: nút nổi phụ cạnh nút "+" (chỉ hiện khi có giao dịch đang chờ, kèm badge số lượng) mở modal
+    liệt kê từng giao dịch offline với checkbox chọn từng khoản + "chọn tất cả/bỏ chọn tất cả", đồng bộ tuần tự
+    từng khoản đã chọn lên server, khoản nào lỗi thì giữ lại trong hàng đợi (xem
+    `components/transactions/sync-offline-modal.tsx`, `components/layout/sync-fab.tsx`).
+  - **Các màn cần API** (Tổng quan, Báo cáo/cơ cấu danh mục, danh sách giao dịch đầy đủ) không cố hiển thị dữ
+    liệu cũ — thay bằng thông báo rõ ràng "cần có mạng" (`components/shared/offline-unavailable.tsx`), cộng 1
+    dải banner nhỏ dính đầu trang báo đang offline (`components/shared/offline-banner.tsx`).
+- Nếu mobile muốn tối giản hơn bản web (không cần hàng đợi/sync UI), vẫn có thể chỉ làm phần "xem cache +
+  thông báo rõ ràng khi mất mạng" — nhưng nên giữ nguyên quyết định "chỉ giao dịch thu/chi mới queue, accounts/
+  categories chỉ đọc" để nhất quán hành vi với web.
 
 ## 5.5 App icon / splash / branding
 
@@ -80,4 +99,6 @@ kích thước cần thiết theo yêu cầu iOS/Android hoặc Flutter).
 - [ ] Ẩn/hiện số tiền hoạt động độc lập theo từng scope, đúng mặc định "ẩn" lần đầu
 - [ ] App icon, splash screen, tên app ("Wallio") đúng branding
 - [ ] Test trên cả 2 nền tảng iOS/Android (đăng nhập Google, PIN, toàn bộ CRUD)
-- [ ] Quyết định rõ phạm vi offline trước khi launch — không để mơ hồ giữa "chỉ web PWA có" và "cần offline-first thật"
+- [ ] Offline-first: vào app được khi mất mạng, xem được accounts/categories/profile từ cache, ghi được giao
+      dịch thu/chi vào hàng đợi local, đồng bộ lại qua màn Sync có chọn từng khoản — đúng phạm vi đã port từ
+      web (xem 5.4), không tự mở rộng thêm phạm vi khi chưa thống nhất lại

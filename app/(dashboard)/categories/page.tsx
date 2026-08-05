@@ -21,6 +21,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { EntityIcon } from "@/components/shared/entity-icon";
 import { useAuth } from "@/lib/hooks/use-auth";
+import { useOnlineStatus } from "@/lib/hooks/use-online-status";
 import {
   useCategories,
   useCreateCategory,
@@ -34,6 +35,7 @@ import type { Category, CategoryKind } from "@/lib/types/database.types";
 export default function CategoriesPage() {
   const { t } = useT();
   const { user } = useAuth();
+  const online = useOnlineStatus();
   const { data: categories, isLoading } = useCategories();
   const createCategory = useCreateCategory();
   const updateCategory = useUpdateCategory();
@@ -49,12 +51,21 @@ export default function CategoriesPage() {
     [categories, tab],
   );
 
+  /** Chặn các hành động ghi khi offline — categories chỉ đọc từ cache. */
+  function guardOnline(): boolean {
+    if (online) return true;
+    toast.error(t("common.offlineActionBlocked"));
+    return false;
+  }
+
   function openCreate() {
+    if (!guardOnline()) return;
     setEditing(null);
     setFormOpen(true);
   }
 
   function openEdit(category: Category) {
+    if (!guardOnline()) return;
     setEditing(category);
     setFormOpen(true);
   }
@@ -168,7 +179,7 @@ export default function CategoriesPage() {
                   size="icon"
                   className="size-8 text-destructive"
                   aria-label={t("common.delete")}
-                  onClick={() => setDeleting(category)}
+                  onClick={() => guardOnline() && setDeleting(category)}
                 >
                   <Trash2 className="size-4" />
                 </Button>

@@ -1,10 +1,13 @@
 import { Sidebar } from "@/components/layout/sidebar";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { QuickAddFab } from "@/components/layout/quick-add-fab";
+import { SyncFab } from "@/components/layout/sync-fab";
 import { Topbar } from "@/components/layout/topbar";
 import { PinGate } from "@/components/auth/pin-gate";
 import { PinReminderModal } from "@/components/auth/pin-reminder-modal";
 import { NewTransactionModal } from "@/components/transactions/new-transaction-modal";
+import { SyncOfflineModal } from "@/components/transactions/sync-offline-modal";
+import { OfflineBanner } from "@/components/shared/offline-banner";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -12,6 +15,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="flex min-h-screen flex-1">
         <Sidebar />
         <div className="flex min-w-0 flex-1 flex-col">
+          <OfflineBanner />
           <Topbar />
           {/* pb đủ lớn để nội dung không bị bottom nav + nút (+) nổi che — FAB nằm ở
               bottom-24 (mobile) / bottom-6 (desktop), cao 56px, nên padding phải vượt qua mép trên của nó. */}
@@ -21,9 +25,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
         <BottomNav />
         <QuickAddFab />
+        <SyncFab />
       </div>
       <PinReminderModal />
       <NewTransactionModal />
+      <SyncOfflineModal />
     </PinGate>
   );
 }

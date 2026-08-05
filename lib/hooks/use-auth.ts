@@ -10,8 +10,10 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user);
+    // getSession() đọc từ storage local, không cần mạng (trừ khi cần refresh token) — để app vào
+    // được khi offline. RLS phía Supabase mới là ranh giới bảo mật thật, xem PinGate.
+    supabase.auth.getSession().then(({ data }) => {
+      setUser(data.session?.user ?? null);
       setLoading(false);
     });
 

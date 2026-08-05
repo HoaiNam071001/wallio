@@ -5,6 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeader } from "@/components/layout/page-header";
 import { OverviewTab } from "@/components/dashboard/overview-tab";
 import { ReportsTab } from "@/components/dashboard/reports-tab";
+import { OfflineUnavailable } from "@/components/shared/offline-unavailable";
+import { useOnlineStatus } from "@/lib/hooks/use-online-status";
 import { useT } from "@/lib/i18n/use-t";
 
 type Section = "overview" | "reports";
@@ -12,6 +14,7 @@ type Section = "overview" | "reports";
 export default function DashboardPage() {
   const { t } = useT();
   const [section, setSection] = useState<Section>("overview");
+  const online = useOnlineStatus();
 
   return (
     <div className="flex flex-col gap-4">
@@ -28,10 +31,10 @@ export default function DashboardPage() {
         </TabsList>
 
         <TabsContent value="overview">
-          <OverviewTab />
+          {online ? <OverviewTab /> : <OfflineUnavailable />}
         </TabsContent>
         <TabsContent value="reports">
-          <ReportsTab />
+          {online ? <ReportsTab /> : <OfflineUnavailable />}
         </TabsContent>
       </Tabs>
     </div>
