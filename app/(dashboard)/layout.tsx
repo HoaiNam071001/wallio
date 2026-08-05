@@ -7,6 +7,7 @@ import { PinGate } from "@/components/auth/pin-gate";
 import { PinReminderModal } from "@/components/auth/pin-reminder-modal";
 import { NewTransactionModal } from "@/components/transactions/new-transaction-modal";
 import { SyncOfflineModal } from "@/components/transactions/sync-offline-modal";
+import { SyncReconnectWatcher } from "@/components/transactions/sync-reconnect-watcher";
 import { OfflineBanner } from "@/components/shared/offline-banner";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -30,6 +31,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <PinReminderModal />
       <NewTransactionModal />
       <SyncOfflineModal />
+      <SyncReconnectWatcher />
     </PinGate>
   );
 }
