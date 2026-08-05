@@ -224,7 +224,7 @@ export function TransactionForm({
 
       {/* Số tiền */}
       <div
-        className="rounded-3xl p-4"
+        className="rounded-xl p-4"
         style={{
           backgroundColor: `color-mix(in oklab, ${activeType.color} 10%, transparent)`,
         }}

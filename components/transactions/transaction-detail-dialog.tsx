@@ -53,7 +53,7 @@ export function TransactionDetailDialog({
 
         <div className="flex flex-col items-center gap-1 py-2 text-center">
           {isTransfer ? (
-            <span className="flex size-14 items-center justify-center rounded-3xl bg-transfer/14 text-transfer">
+            <span className="flex size-14 items-center justify-center rounded-xl bg-transfer/14 text-transfer">
               <ArrowLeftRight className="size-6" />
             </span>
           ) : (

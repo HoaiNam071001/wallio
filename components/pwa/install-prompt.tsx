@@ -47,7 +47,7 @@ export function InstallPrompt() {
   }
 
   return (
-    <div className="fixed inset-x-3 bottom-24 z-50 flex items-center gap-3 rounded-3xl border border-white/50 bg-linear-to-r from-brand-600 to-brand-400 p-3 text-white shadow-glow md:right-6 md:bottom-6 md:left-auto md:w-96">
+    <div className="fixed inset-x-3 bottom-24 z-50 flex items-center gap-3 rounded-xl border border-white/50 bg-linear-to-r from-brand-600 to-brand-400 p-3 text-white shadow-glow md:right-6 md:bottom-6 md:left-auto md:w-96">
       <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-white/20">
         <Download className="size-5" />
       </div>

@@ -121,8 +121,8 @@ export function PinGate({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen flex-1 items-center justify-center p-4">
-      <form onSubmit={handleSubmit} className="glass w-full max-w-xs rounded-3xl p-7 text-center">
-        <div className="brand-gradient mx-auto flex size-16 items-center justify-center rounded-3xl shadow-glow">
+      <form onSubmit={handleSubmit} className="glass w-full max-w-xs rounded-xl p-7 text-center">
+        <div className="brand-gradient mx-auto flex size-16 items-center justify-center rounded-xl shadow-glow">
           <LockKeyhole className="size-7 text-white" />
         </div>
         <h1 className="mt-4 text-lg font-extrabold">{t("auth.pinGate.title")}</h1>
@@ -210,8 +210,8 @@ function ResetPinForm({ userId, onDone }: { userId: string | undefined; onDone: 
 
   return (
     <div className="flex min-h-screen flex-1 items-center justify-center p-4">
-      <form onSubmit={handleSubmit} className="glass w-full max-w-xs rounded-3xl p-7 text-center">
-        <div className="brand-gradient mx-auto flex size-16 items-center justify-center rounded-3xl shadow-glow">
+      <form onSubmit={handleSubmit} className="glass w-full max-w-xs rounded-xl p-7 text-center">
+        <div className="brand-gradient mx-auto flex size-16 items-center justify-center rounded-xl shadow-glow">
           <KeyRound className="size-7 text-white" />
         </div>
         <h1 className="mt-4 text-lg font-extrabold">{t("auth.pinGate.resetTitle")}</h1>

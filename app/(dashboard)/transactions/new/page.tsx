@@ -54,7 +54,7 @@ export default function NewTransactionPage() {
         <h1 className="text-xl font-extrabold">{t("transactions.new.title")}</h1>
       </div>
 
-      <div className="glass rounded-3xl p-4">
+      <div className="glass rounded-xl p-4">
         <TransactionForm onSubmit={handleSubmit} submitting={createTransaction.isPending} />
       </div>
     </div>

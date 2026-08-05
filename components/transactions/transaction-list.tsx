@@ -191,7 +191,7 @@ export function TransactionList({
   return (
     <div className="flex flex-col gap-3">
       {groups.map((group) => (
-        <div key={group.date} className="glass overflow-hidden rounded-3xl">
+        <div key={group.date} className="glass overflow-hidden rounded-xl">
           <div className="flex items-center justify-between border-b border-border/60 px-4 py-2">
             <span className="text-xs font-bold text-muted-foreground uppercase">
               {dayLabel(t, locale, group.date)}

@@ -36,7 +36,7 @@ export function PinReminderModal() {
     <Dialog open={open} onOpenChange={(next) => !next && dismiss()}>
       <DialogContent className="text-center sm:max-w-sm">
         <DialogHeader className="items-center text-center sm:text-center">
-          <div className="mx-auto flex size-14 items-center justify-center rounded-3xl bg-amber-500/15 text-amber-600 dark:text-amber-400">
+          <div className="mx-auto flex size-14 items-center justify-center rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400">
             <ShieldAlert className="size-6" />
           </div>
           <DialogTitle>{t("auth.pinReminder.title")}</DialogTitle>

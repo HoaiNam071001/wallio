@@ -49,7 +49,7 @@ export function AccountCard({
 
   return (
     <div
-      className="glass relative overflow-hidden rounded-3xl p-4"
+      className="glass relative overflow-hidden rounded-xl p-4"
       style={{ backgroundImage: `linear-gradient(135deg, ${withAlpha(color, 0.16)}, transparent 65%)` }}
     >
       <div className="flex items-start justify-between gap-2">

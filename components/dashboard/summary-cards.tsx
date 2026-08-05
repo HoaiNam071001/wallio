@@ -25,7 +25,7 @@ export function SummaryCards({ summary }: { summary: NetWorthSummary }) {
         return (
           <div
             key={item.label}
-            className={`glass flex flex-col gap-2 rounded-3xl p-4 ${
+            className={`glass flex flex-col gap-2 rounded-xl p-4 ${
               item.wide ? "col-span-2 lg:col-span-1" : ""
             }`}
             style={{

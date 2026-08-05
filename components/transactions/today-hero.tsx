@@ -34,7 +34,7 @@ export function TodayHero({
   const { t, locale } = useT();
 
   return (
-    <section className="brand-gradient relative overflow-hidden rounded-3xl p-4 text-white shadow-glow">
+    <section className="brand-gradient relative overflow-hidden rounded-xl p-4 text-white shadow-glow">
       {/* Đốm sáng trang trí */}
       <div className="pointer-events-none absolute -top-16 -right-10 size-44 rounded-full bg-white/15 blur-2xl" />
       <div className="pointer-events-none absolute -bottom-20 -left-12 size-48 rounded-full bg-white/10 blur-2xl" />

@@ -80,7 +80,7 @@ export function TransactionFilterBar({
       </div>
 
       {expanded && (
-        <div className="glass flex flex-col gap-2 rounded-3xl p-3 sm:flex-row">
+        <div className="glass flex flex-col gap-2 rounded-xl p-3 sm:flex-row">
           <Select
             value={value.accountId || "all"}
             onValueChange={(v) => update("accountId", v === "all" ? "" : v)}

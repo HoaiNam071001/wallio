@@ -160,7 +160,7 @@ export default function CategoriesPage() {
           return (
             <div
               key={category.id}
-              className="glass flex items-center gap-3 rounded-3xl p-3"
+              className="glass flex items-center gap-3 rounded-xl p-3"
               style={{
                 backgroundImage: `linear-gradient(135deg, ${withAlpha(color, 0.14)}, transparent 70%)`,
               }}
