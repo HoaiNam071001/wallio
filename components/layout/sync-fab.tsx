@@ -26,7 +26,7 @@ export function SyncFab() {
       type="button"
       onClick={openSyncOfflineModal}
       aria-label={t("layout.sync", { count })}
-      className="fixed right-4 bottom-44 z-40 flex size-12 items-center justify-center rounded-full border border-brand-600/30 bg-card text-brand-600 shadow-lg transition-transform active:scale-90 md:right-6 md:bottom-24"
+      className="fixed right-24 bottom-24 z-40 flex size-12 items-center justify-center rounded-full border border-brand-600/30 bg-card text-brand-600 shadow-lg transition-transform active:scale-90 md:right-6 md:bottom-24"
     >
       <CloudUpload className="size-5" strokeWidth={2.5} />
       <span
