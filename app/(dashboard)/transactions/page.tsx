@@ -174,7 +174,7 @@ export default function TransactionsPage() {
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           {periodTotals && (
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3">
               {[
                 { label: t("transactions.page.income"), value: periodTotals.income, className: "text-income" },
                 { label: t("transactions.page.expense"), value: periodTotals.expense, className: "text-expense" },
@@ -184,7 +184,7 @@ export default function TransactionsPage() {
                   className: periodTotals.net >= 0 ? "text-income" : "text-expense",
                 },
               ].map((item) => (
-                <div key={item.label} className="min-w-0 rounded-2xl bg-muted/50 px-2.5 py-2">
+                <div key={item.label} className="min-w-0 bg-muted/50 py-2">
                   <p className="truncate text-[11px] font-semibold text-muted-foreground">{item.label}</p>
                   <AmountText
                     amount={item.value}
