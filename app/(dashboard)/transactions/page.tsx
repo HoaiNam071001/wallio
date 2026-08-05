@@ -174,7 +174,7 @@ export default function TransactionsPage() {
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           {periodTotals && (
-            <div className="grid bg-muted/50 grid-cols-3 rounded-lg overflow-hidden px-3">
+            <div className="grid grid-cols-3 gap-1 overflow-hidden">
               {[
                 { label: t("transactions.page.income"), value: periodTotals.income, className: "text-income" },
                 { label: t("transactions.page.expense"), value: periodTotals.expense, className: "text-expense" },
