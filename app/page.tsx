@@ -1,6 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
-import { BarChart3, LayoutDashboard, Receipt, Wallet, WifiOff, Zap } from "lucide-react";
+import { BarChart3, Wallet, WifiOff, Zap } from "lucide-react";
 import { BrandMark } from "@/components/layout/brand-mark";
 import { Button } from "@/components/ui/button";
 import { I18n } from "@/lib/i18n/I18n";
@@ -84,10 +85,9 @@ export default async function HomePage() {
             </p>
           </div>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-            {/* TODO: thay các ô placeholder này bằng ảnh chụp màn hình thật (vd <Image src="/screenshots/transactions.png" .../>) khi có source. */}
-            <ScreenshotPlaceholder icon={Receipt} labelKey="home.screenshots.transactions" />
-            <ScreenshotPlaceholder icon={LayoutDashboard} labelKey="home.screenshots.dashboard" />
-            <ScreenshotPlaceholder icon={BarChart3} labelKey="home.screenshots.reports" />
+            <ScreenshotCard src="/home-1.png" alt="Màn hình Sổ thu chi" labelKey="home.screenshots.transactions" />
+            <ScreenshotCard src="/home-2.png" alt="Màn hình Tổng quan" labelKey="home.screenshots.dashboard" />
+            <ScreenshotCard src="/home-3.png" alt="Màn hình Hồ sơ" labelKey="home.screenshots.profile" />
           </div>
         </section>
 
@@ -160,17 +160,20 @@ function FeatureCard({
   );
 }
 
-function ScreenshotPlaceholder({ icon: Icon, labelKey }: { icon: LucideIcon; labelKey: string }) {
+function ScreenshotCard({ src, alt, labelKey }: { src: string; alt: string; labelKey: string }) {
   return (
-    <div className="flex aspect-9/16 w-full flex-col items-center justify-center gap-3 rounded-3xl border-2 border-dashed border-brand-300/60 bg-brand-500/5 p-6 text-center dark:border-brand-500/25 dark:bg-brand-500/10">
-      <span className="brand-gradient flex size-12 items-center justify-center rounded-2xl shadow-glow">
-        <Icon className="size-6 text-white" />
-      </span>
+    <div className="flex flex-col items-center gap-3">
+      <div className="glass mx-auto w-full max-w-60 overflow-hidden rounded-4xl p-1.5 shadow-glow">
+        <Image
+          src={src}
+          alt={alt}
+          width={372}
+          height={810}
+          className="w-full rounded-3xl"
+        />
+      </div>
       <p className="text-sm font-bold">
         <I18n k={labelKey} />
-      </p>
-      <p className="text-xs text-muted-foreground">
-        <I18n k="home.screenshots.comingSoon" />
       </p>
     </div>
   );

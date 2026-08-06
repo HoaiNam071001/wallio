@@ -126,11 +126,10 @@
     },
     "screenshots": {
       "title": "Clean, easy-to-use interface",
-      "subtitle": "Screenshots are coming soon.",
+      "subtitle": "A quick look at Wallio's main screens.",
       "transactions": "Transactions",
       "dashboard": "Overview",
-      "reports": "Reports",
-      "comingSoon": "Screenshot coming soon"
+      "profile": "Profile"
     },
     "cta": {
       "title": "Start managing your money today",

@@ -126,11 +126,10 @@
     },
     "screenshots": {
       "title": "Giao diện gọn gàng, dễ dùng",
-      "subtitle": "Ảnh chụp màn hình sẽ sớm được cập nhật.",
+      "subtitle": "Xem nhanh những màn hình chính của Wallio.",
       "transactions": "Sổ thu chi",
       "dashboard": "Tổng quan",
-      "reports": "Báo cáo",
-      "comingSoon": "Ảnh sẽ được thêm sau"
+      "profile": "Hồ sơ"
     },
     "cta": {
       "title": "Bắt đầu quản lý tiền của bạn ngay hôm nay",
