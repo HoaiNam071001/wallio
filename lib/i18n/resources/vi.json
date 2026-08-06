@@ -87,7 +87,59 @@
     "profile": "Hồ sơ",
     "signOut": "Đăng xuất",
     "newEntry": "Ghi khoản mới",
-    "sync": "Đồng bộ {{count}} khoản offline"
+    "sync": "Đồng bộ {{count}} khoản offline",
+    "backToHome": "Về trang chủ"
+  },
+
+  "home": {
+    "nav": {
+      "login": "Đăng nhập",
+      "openApp": "Mở ứng dụng"
+    },
+    "hero": {
+      "badge": "Sổ thu chi cá nhân",
+      "title": "Quản lý thu chi, rõ ràng từng đồng",
+      "subtitle": "Wallio giúp bạn ghi chép thu chi hằng ngày, quản lý nhiều nguồn tiền và xem báo cáo tài chính chỉ trong vài chạm.",
+      "ctaLogin": "Đăng nhập với Google",
+      "ctaOpenApp": "Mở ứng dụng",
+      "freeHint": "Miễn phí · Không quảng cáo"
+    },
+    "features": {
+      "title": "Mọi thứ bạn cần để quản lý tiền",
+      "subtitle": "Gọn gàng, nhanh chóng, dùng được cả khi mất mạng.",
+      "quick": {
+        "title": "Ghi chép nhanh",
+        "description": "Thêm khoản thu chi chỉ trong vài giây, mọi lúc mọi nơi."
+      },
+      "accounts": {
+        "title": "Nhiều nguồn tiền",
+        "description": "Tiền mặt, ví điện tử, ngân hàng, khoản cho mượn hay nợ — quản lý tất cả trong một nơi."
+      },
+      "reports": {
+        "title": "Báo cáo trực quan",
+        "description": "Biểu đồ thu chi theo danh mục, theo nguồn tiền và theo thời gian."
+      },
+      "offline": {
+        "title": "Dùng được khi mất mạng",
+        "description": "Ghi chép ngay cả khi offline, tự động đồng bộ khi có mạng trở lại."
+      }
+    },
+    "screenshots": {
+      "title": "Giao diện gọn gàng, dễ dùng",
+      "subtitle": "Ảnh chụp màn hình sẽ sớm được cập nhật.",
+      "transactions": "Sổ thu chi",
+      "dashboard": "Tổng quan",
+      "reports": "Báo cáo",
+      "comingSoon": "Ảnh sẽ được thêm sau"
+    },
+    "cta": {
+      "title": "Bắt đầu quản lý tiền của bạn ngay hôm nay",
+      "subtitle": "Đăng nhập với Google, không cần đặt mật khẩu.",
+      "button": "Đăng nhập với Google"
+    },
+    "footer": {
+      "tagline": "Sổ thu chi cá nhân, gọn và vui"
+    }
   },
 
   "auth": {

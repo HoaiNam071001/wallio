@@ -87,7 +87,59 @@
     "profile": "Profile",
     "signOut": "Sign out",
     "newEntry": "New entry",
-    "sync": "Sync {{count}} offline entries"
+    "sync": "Sync {{count}} offline entries",
+    "backToHome": "Back to home"
+  },
+
+  "home": {
+    "nav": {
+      "login": "Sign in",
+      "openApp": "Open app"
+    },
+    "hero": {
+      "badge": "Personal finance tracker",
+      "title": "Track every dollar, with total clarity",
+      "subtitle": "Wallio helps you log daily income and expenses, manage multiple accounts, and see financial reports in just a few taps.",
+      "ctaLogin": "Sign in with Google",
+      "ctaOpenApp": "Open app",
+      "freeHint": "Free · No ads"
+    },
+    "features": {
+      "title": "Everything you need to manage your money",
+      "subtitle": "Simple, fast, and works even when you're offline.",
+      "quick": {
+        "title": "Quick logging",
+        "description": "Add income and expenses in seconds, anytime, anywhere."
+      },
+      "accounts": {
+        "title": "Multiple accounts",
+        "description": "Cash, e-wallets, banks, lending, or debt — manage them all in one place."
+      },
+      "reports": {
+        "title": "Clear reports",
+        "description": "Charts by category, by account, and over time."
+      },
+      "offline": {
+        "title": "Works offline",
+        "description": "Keep logging even without a connection — it syncs automatically once you're back online."
+      }
+    },
+    "screenshots": {
+      "title": "Clean, easy-to-use interface",
+      "subtitle": "Screenshots are coming soon.",
+      "transactions": "Transactions",
+      "dashboard": "Overview",
+      "reports": "Reports",
+      "comingSoon": "Screenshot coming soon"
+    },
+    "cta": {
+      "title": "Start managing your money today",
+      "subtitle": "Sign in with Google, no password needed.",
+      "button": "Sign in with Google"
+    },
+    "footer": {
+      "tagline": "Personal finance tracking, simple and fun"
+    }
   },
 
   "auth": {

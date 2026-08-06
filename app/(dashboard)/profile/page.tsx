@@ -11,6 +11,7 @@ import {
   Coins,
   Eye,
   EyeOff,
+  Home,
   KeyRound,
   LogOut,
   SlidersHorizontal,
@@ -122,10 +123,18 @@ function ProfileHeaderCard() {
           <p className="truncate font-bold">{name}</p>
           <p className="truncate text-sm text-muted-foreground">{user?.email}</p>
         </div>
-        <Button variant="outline" size="sm" onClick={handleSignOut}>
-          <LogOut className="size-4" />
-          {t("profile.header.signOut")}
-        </Button>
+        <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+          <Button variant="outline" size="sm" asChild>
+            <Link href={ROUTES.home}>
+              <Home className="size-4" />
+              {t("layout.backToHome")}
+            </Link>
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleSignOut}>
+            <LogOut className="size-4" />
+            {t("profile.header.signOut")}
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

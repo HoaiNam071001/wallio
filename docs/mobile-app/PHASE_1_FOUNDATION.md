@@ -32,6 +32,14 @@ const { data, error } = await supabase.auth.signInWithIdToken({
 - Sau khi có session, **middleware bảo vệ route** của web (`lib/supabase/middleware.ts`, redirect `/login` nếu
   chưa đăng nhập) tương đương với: kiểm tra `supabase.auth.getSession()` lúc app khởi động, điều hướng tới màn
   Login nếu null, lắng nghe `onAuthStateChange` để tự chuyển màn khi session đổi (login/logout).
+- **Trang chủ marketing (chỉ web, không áp dụng cho mobile)**: web hiện có route `/` (`app/page.tsx`) là một
+  landing page công khai (không cần đăng nhập) giới thiệu app, hiện ra trước khi user vào `/login`. Route này tự
+  redirect thẳng vào app (bỏ qua landing page) nếu phát hiện đang chạy dưới dạng PWA đã cài (`display-mode:
+  standalone` hoặc `navigator.standalone`) — tức là hành vi y hệt bản cũ (vào thẳng Login/app) khi mở từ icon đã
+  cài trên máy. Vì app native (RN/Flutter) *luôn* ở trạng thái "đã cài" tương đương, mobile **không cần port landing
+  page này** — cứ giữ nguyên logic route guard ở trên: kiểm tra session xong vào thẳng Login hoặc màn chính.
+  Đã đăng nhập trên web có nút "Về trang chủ" (`layout.backToHome`, ở menu Topbar và màn Profile) để quay lại xem
+  landing page — không có tương đương cần thiết trên mobile.
 
 ## 1.3 PIN Gate (khoá màn hình)
 

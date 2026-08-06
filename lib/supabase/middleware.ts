@@ -39,7 +39,12 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isPublicPath = PUBLIC_PATHS.some((path) => request.nextUrl.pathname.startsWith(path));
+  // Trang chủ ("/") luôn public — tự quyết định hiển thị marketing page hay đẩy vào app dựa
+  // trên session, không chặn ở middleware. Không cho vào PUBLIC_PATHS vì startsWith("/") sẽ khớp
+  // mọi route.
+  const isPublicPath =
+    request.nextUrl.pathname === ROUTES.home ||
+    PUBLIC_PATHS.some((path) => request.nextUrl.pathname.startsWith(path));
 
   if (!user && !isPublicPath) {
     const redirectUrl = request.nextUrl.clone();

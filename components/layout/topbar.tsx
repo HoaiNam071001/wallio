@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LogOut, Moon, Sun, User as UserIcon, UserCog } from "lucide-react";
+import { Home, LogOut, Moon, Sun, User as UserIcon, UserCog } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -63,6 +63,12 @@ export function Topbar() {
             <Link href={ROUTES.profile}>
               <UserCog className="size-4" />
               {t("layout.profile")}
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href={ROUTES.home}>
+              <Home className="size-4" />
+              {t("layout.backToHome")}
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem variant="destructive" onClick={handleSignOut}>
