@@ -1,6 +1,6 @@
 /* Wallio service worker — app shell caching + offline fallback */
 
-const VERSION = "wallio-v1";
+const VERSION = "wallio-mshd70ji";
 const PRECACHE = `${VERSION}-precache`;
 const RUNTIME = `${VERSION}-runtime`;
 
