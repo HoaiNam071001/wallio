@@ -20,6 +20,7 @@ export interface Database {
           icon: string | null;
           color: string | null;
           unit: string | null;
+          sort_order: number;
           created_at: string;
         };
         Insert: {
@@ -32,6 +33,7 @@ export interface Database {
           icon?: string | null;
           color?: string | null;
           unit?: string | null;
+          sort_order?: number;
           created_at?: string;
         };
         Update: {
@@ -44,6 +46,7 @@ export interface Database {
           icon?: string | null;
           color?: string | null;
           unit?: string | null;
+          sort_order?: number;
           created_at?: string;
         };
         Relationships: [];

@@ -10,6 +10,7 @@ import {
   listAccountBalances,
   listAccounts,
   listAccountsWithBalance,
+  reorderAccounts,
   updateAccount,
 } from "@/lib/queries/accounts";
 import {
@@ -17,7 +18,11 @@ import {
   type AdjustBalanceInput,
 } from "@/lib/queries/balance-adjustment";
 import { accountsWithBalanceCacheKey, withOfflineCache } from "@/lib/offline/cache";
-import type { AccountInsert, AccountUpdate } from "@/lib/types/database.types";
+import type {
+  AccountInsert,
+  AccountUpdate,
+  AccountWithBalance,
+} from "@/lib/types/database.types";
 
 export function useAccounts() {
   const supabase = useSupabase();
@@ -99,6 +104,38 @@ export function useUpdateAccount() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["accounts"] });
       queryClient.invalidateQueries({ queryKey: ["account-balances"] });
+    },
+  });
+}
+
+/**
+ * Lưu thứ tự mới sau khi kéo-thả sắp xếp lại account. Cập nhật cache ["accounts", "with-balance"]
+ * ngay lập tức (optimistic) để UI không nháy về thứ tự cũ trong lúc chờ request, rollback nếu lỗi.
+ */
+export function useReorderAccounts() {
+  const supabase = useSupabase();
+  const queryClient = useQueryClient();
+  const queryKey = ["accounts", "with-balance"];
+
+  return useMutation({
+    mutationFn: (orderedIds: string[]) => reorderAccounts(supabase, orderedIds),
+    onMutate: async (orderedIds: string[]) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previous = queryClient.getQueryData<AccountWithBalance[]>(queryKey);
+
+      if (previous) {
+        const byId = new Map(previous.map((a) => [a.id, a]));
+        const reordered = orderedIds.map((id) => byId.get(id)).filter((a) => !!a);
+        queryClient.setQueryData<AccountWithBalance[]>(queryKey, reordered);
+      }
+
+      return { previous };
+    },
+    onError: (_err, _orderedIds, context) => {
+      if (context?.previous) queryClient.setQueryData(queryKey, context.previous);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
     },
   });
 }

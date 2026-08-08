@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Plus, WalletMinimal } from "lucide-react";
+import { ArrowUpDown, Check, Plus, WalletMinimal } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AccountCard } from "@/components/accounts/account-card";
 import { AccountForm, type AccountFormValues } from "@/components/accounts/account-form";
+import { AccountReorderList } from "@/components/accounts/account-reorder-list";
 import { BalanceAdjustDialog } from "@/components/accounts/balance-adjust-dialog";
 import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -34,6 +35,7 @@ import {
   useAccountsWithBalance,
   useCreateAccount,
   useDeleteAccount,
+  useReorderAccounts,
   useUpdateAccount,
 } from "@/lib/hooks/use-accounts";
 import { useT } from "@/lib/i18n/use-t";
@@ -50,11 +52,13 @@ export default function AccountsPage() {
   const createAccount = useCreateAccount();
   const updateAccount = useUpdateAccount();
   const deleteAccount = useDeleteAccount();
+  const reorderAccounts = useReorderAccounts();
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<AccountWithBalance | null>(null);
   const [deleting, setDeleting] = useState<AccountWithBalance | null>(null);
   const [adjusting, setAdjusting] = useState<AccountWithBalance | null>(null);
+  const [reordering, setReordering] = useState(false);
 
   const total = useMemo(
     () =>
@@ -125,6 +129,17 @@ export default function AccountsPage() {
     });
   }
 
+  function toggleReorder() {
+    if (!reordering && !guardOnline()) return;
+    setReordering((prev) => !prev);
+  }
+
+  function handleOrderChange(orderedIds: string[]) {
+    reorderAccounts.mutate(orderedIds, {
+      onError: () => toast.error(t("common.genericError")),
+    });
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
@@ -136,10 +151,25 @@ export default function AccountsPage() {
         }
         amountScope="accounts"
         action={
-          <Button onClick={openCreate} size="sm">
-            <Plus className="size-4" />
-            {t("common.add")}
-          </Button>
+          reordering ? (
+            <Button onClick={toggleReorder} size="sm">
+              <Check className="size-4" />
+              {t("accounts.page.doneReorder")}
+            </Button>
+          ) : (
+            <div className="flex items-center gap-2">
+              {accounts && accounts.length > 1 && (
+                <Button onClick={toggleReorder} size="sm" variant="outline">
+                  <ArrowUpDown className="size-4" />
+                  {t("accounts.page.reorder")}
+                </Button>
+              )}
+              <Button onClick={openCreate} size="sm">
+                <Plus className="size-4" />
+                {t("common.add")}
+              </Button>
+            </div>
+          )
         }
       />
 
@@ -159,17 +189,23 @@ export default function AccountsPage() {
         />
       )}
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {accounts?.map((account) => (
-          <AccountCard
-            key={account.id}
-            account={account}
-            onEdit={() => openEdit(account)}
-            onDelete={() => guardOnline() && setDeleting(account)}
-            onAdjust={() => guardOnline() && setAdjusting(account)}
-          />
-        ))}
-      </div>
+      {!isLoading && accounts && accounts.length > 0 && reordering && (
+        <AccountReorderList accounts={accounts} onOrderChange={handleOrderChange} />
+      )}
+
+      {!isLoading && accounts && !reordering && (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {accounts.map((account) => (
+            <AccountCard
+              key={account.id}
+              account={account}
+              onEdit={() => openEdit(account)}
+              onDelete={() => guardOnline() && setDeleting(account)}
+              onAdjust={() => guardOnline() && setAdjusting(account)}
+            />
+          ))}
+        </div>
+      )}
 
       <BalanceAdjustDialog
         account={adjusting}

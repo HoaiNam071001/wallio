@@ -6,7 +6,7 @@ import { Sparkles, PieChart, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSupabase } from "@/lib/hooks/use-supabase";
 import { useT } from "@/lib/i18n/use-t";
-import { ROUTES } from "@/lib/constants/routes";
+import { ROUTE_PARAMS, ROUTES } from "@/lib/constants/routes";
 
 export default function LoginPage() {
   const supabase = useSupabase();
@@ -21,9 +21,16 @@ export default function LoginPage() {
 
   async function handleGoogleLogin() {
     setLoading(true);
+    // App đã cài (PWA standalone / iOS "Add to Home Screen") → vào thẳng app như cũ. Mở từ
+    // trình duyệt thường (không standalone) → quay ra trang chủ, bấm "Vào app" mới vào.
+    const isStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+    const next = isStandalone ? ROUTES.transactions : ROUTES.home;
+    const redirectTo = `${window.location.origin}${ROUTES.authCallback}?${ROUTE_PARAMS.next}=${encodeURIComponent(next)}`;
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}${ROUTES.authCallback}` },
+      options: { redirectTo },
     });
   }
 

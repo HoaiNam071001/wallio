@@ -14,6 +14,7 @@ export async function listAccounts(supabase: Client): Promise<Account[]> {
   const { data, error } = await supabase
     .from("accounts")
     .select("*")
+    .order("sort_order", { ascending: true })
     .order("created_at", { ascending: true });
 
   if (error) throw error;
@@ -140,6 +141,17 @@ export async function updateAccount(
 
   if (error) throw error;
   return data;
+}
+
+/** Ghi lại thứ tự hiển thị sau khi kéo-thả sắp xếp lại — `orderedIds` là thứ tự mới từ trên xuống. */
+export async function reorderAccounts(supabase: Client, orderedIds: string[]): Promise<void> {
+  const results = await Promise.all(
+    orderedIds.map((id, index) =>
+      supabase.from("accounts").update({ sort_order: index }).eq("id", id),
+    ),
+  );
+  const failed = results.find((r) => r.error);
+  if (failed?.error) throw failed.error;
 }
 
 export async function deleteAccount(supabase: Client, id: string): Promise<void> {

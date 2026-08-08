@@ -40,6 +40,12 @@ const { data, error } = await supabase.auth.signInWithIdToken({
   page này** — cứ giữ nguyên logic route guard ở trên: kiểm tra session xong vào thẳng Login hoặc màn chính.
   Đã đăng nhập trên web có nút "Về trang chủ" (`layout.backToHome`, ở menu Topbar và màn Profile) để quay lại xem
   landing page — không có tương đương cần thiết trên mobile.
+- **⚠️ Đích đến sau khi đăng nhập (web) phụ thuộc standalone hay không**: `app/(auth)/login/page.tsx` tự kiểm
+  tra `display-mode: standalone` / `navigator.standalone` ngay trước khi gọi `signInWithOAuth`, rồi gắn kết quả
+  vào query `next` của `redirectTo` (`/auth/callback?next=...`) — standalone (PWA đã cài) → vào thẳng
+  `/transactions` như cũ; trình duyệt thường → về `/` (trang chủ) để user tự bấm "Vào app". Route
+  `/auth/callback` đọc `next` đó, mặc định về `/` nếu thiếu. Vì mobile native luôn coi như "đã cài", flow tương
+  đương là vào thẳng màn chính sau khi có session — không cần khái niệm `next` này.
 
 ## 1.3 PIN Gate (khoá màn hình)
 

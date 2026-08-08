@@ -7,7 +7,10 @@ dịch cần chọn account/category có sẵn.
 
 Từ `lib/queries/accounts.ts` — port các hàm:
 
-- `listAccounts()` — tất cả account của user, sort theo `created_at`.
+- `listAccounts()` — tất cả account của user, sort theo `sort_order` rồi `created_at` (⚠️ đổi từ chỉ
+  `created_at` — xem `sort_order` ở [DATA_MODEL.md](./DATA_MODEL.md#1-bảng-accounts-nguồn-tiền)).
+- `reorderAccounts(orderedIds)` — ghi lại `sort_order` (0, 1, 2...) theo thứ tự mới sau khi kéo-thả; mỗi id một
+  `update` riêng chạy song song qua `Promise.all` (số account thường nhỏ nên không cần RPC/bulk update).
 - `listAccountBalances()` — đọc view `account_balances`.
 - `listAccountsWithBalance()` — **ghép 3 nguồn song song**: `listAccounts` + `listAccountBalances` +
   `listLastActivityDates` (tự tính `max(transaction_date)` theo từng account từ toàn bộ transactions, vì cột này
@@ -37,6 +40,19 @@ Form thêm/sửa account (`AccountForm`):
 - `is_active`: ẩn account khỏi các danh sách chọn mới nhưng giữ lại lịch sử giao dịch cũ (soft toggle, không xoá).
 - Xoá account: `on delete restrict` ở FK — **không xoá được nếu còn giao dịch tham chiếu**; UI cần báo lỗi rõ
   ràng thay vì crash, gợi ý xoá/chuyển giao dịch trước.
+
+### 2.2.1 Sắp xếp lại thứ tự (reorder) — ⚠️ mới, không có trong spec gốc
+
+Nút "Sắp xếp" ở header (chỉ hiện khi có ≥ 2 account) chuyển màn hình từ grid card sang **list gọn kiểu ví điện
+tử** (mỗi dòng chỉ có icon nhỏ, tên, số dư, tay cầm kéo bên phải) để kéo-thả đổi thứ tự — xem
+`AccountReorderList` (`components/accounts/account-reorder-list.tsx`, dùng `@dnd-kit/core` +
+`@dnd-kit/sortable`). Chỉ kéo được qua tay cầm (grip icon), không phải cả dòng, để không xung đột với việc cuộn
+trang trên mobile.
+
+Mỗi lần thả (drop) gọi `useReorderAccounts()` ngay — không đợi bấm "Xong": mutation update lạc quan
+(optimistic) cache `["accounts", "with-balance"]` trước, rollback nếu request lỗi. Bấm "Xong" chỉ đổi UI về lại
+dạng card, thứ tự đã lưu từ trước đó rồi. Danh sách account ở mọi nơi khác trong app (grid, dropdown chọn
+account...) tự động theo `sort_order` vì đều dùng chung `listAccounts` / `listAccountsWithBalance`.
 
 ## 2.3 Hiển thị số tiền theo loại account
 

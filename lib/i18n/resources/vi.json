@@ -383,7 +383,10 @@
       "toastUpdated": "Đã cập nhật nguồn tiền",
       "toastAdded": "Đã thêm nguồn tiền",
       "toastDeleted": "Đã xoá nguồn tiền",
-      "toastDeleteError": "Không thể xoá — có thể còn giao dịch liên quan"
+      "toastDeleteError": "Không thể xoá — có thể còn giao dịch liên quan",
+      "reorder": "Sắp xếp",
+      "doneReorder": "Xong",
+      "dragHandle": "Kéo để sắp xếp"
     },
     "form": {
       "validation": { "nameRequired": "Nhập tên nguồn tiền" },

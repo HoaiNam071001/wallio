@@ -16,9 +16,13 @@ create table accounts (
   icon text,       -- tên icon Lucide, vd "Wallet" — xem registry ở PHASE_2
   color text,       -- hex #rrggbb
   unit text,        -- ⚠️ mới: chỉ dùng khi type = 'in_kind', vd "chỉ", "cổ phiếu"
+  sort_order integer not null default 0, -- ⚠️ mới: thứ tự hiển thị, chỉnh bằng kéo-thả ở màn Accounts
   created_at timestamptz not null default now()
 );
 ```
+
+Danh sách accounts luôn `order by sort_order asc, created_at asc` — không phải `created_at` như spec gốc.
+`sort_order` chỉ đổi qua tính năng "Sắp xếp" (reorder) ở màn Accounts, xem [PHASE_2_ACCOUNTS_CATEGORIES.md](PHASE_2_ACCOUNTS_CATEGORIES.md).
 
 Loại tài khoản (`AccountType`) và ý nghĩa:
 

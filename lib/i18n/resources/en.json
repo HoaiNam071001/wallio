@@ -383,7 +383,10 @@
       "toastUpdated": "Account updated",
       "toastAdded": "Account added",
       "toastDeleted": "Account deleted",
-      "toastDeleteError": "Couldn't delete — it may still have related transactions"
+      "toastDeleteError": "Couldn't delete — it may still have related transactions",
+      "reorder": "Reorder",
+      "doneReorder": "Done",
+      "dragHandle": "Drag to reorder"
     },
     "form": {
       "validation": { "nameRequired": "Enter an account name" },
