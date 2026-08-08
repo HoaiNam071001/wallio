@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -188,7 +189,7 @@ export function CsvImportDialog() {
             <DialogDescription>{t("reports.import.dialogDescription")}</DialogDescription>
           </DialogHeader>
 
-          <div className="flex max-h-[60vh] flex-col gap-4 overflow-y-auto pr-1">
+          <DialogBody className="flex flex-col gap-4 pr-1">
             <div className="flex flex-col gap-2">
               <h3 className="text-sm font-bold text-muted-foreground">
                 {t("reports.import.accountsSection")}
@@ -295,7 +296,7 @@ export function CsvImportDialog() {
                 })}
               </div>
             </div>
-          </div>
+          </DialogBody>
 
           <DialogFooter className="items-center gap-3 sm:justify-between">
             <p className="text-xs text-muted-foreground">

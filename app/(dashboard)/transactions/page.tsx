@@ -268,6 +268,7 @@ export default function TransactionsPage() {
               defaultValues={editing}
               onSubmit={handleUpdate}
               submitting={updateTransaction.isPending}
+              className="min-h-0 flex-1"
             />
           )}
         </DialogContent>

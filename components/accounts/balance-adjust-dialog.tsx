@@ -6,8 +6,10 @@ import { ArrowDownLeft, ArrowUpRight, Check, Scale } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -101,89 +103,94 @@ function AdjustForm({
         <DialogDescription>{t("accounts.balanceAdjust.description")}</DialogDescription>
       </DialogHeader>
 
-      <div className="flex items-center gap-3 rounded-2xl bg-muted/50 p-3">
-        <EntityIcon
-          icon={account.icon ?? meta.icon}
-          color={account.color ?? meta.color}
-          className="size-12"
-          iconClassName="size-6"
-        />
-        <div className="min-w-0">
-          <p className="truncate font-bold">{account.name}</p>
-          <p className="text-xs text-muted-foreground">{t(`accountType.${account.type}.label`)}</p>
+      <DialogBody className="flex flex-col gap-4">
+        <div className="flex items-center gap-3 rounded-2xl bg-muted/50 p-3">
+          <EntityIcon
+            icon={account.icon ?? meta.icon}
+            color={account.color ?? meta.color}
+            className="size-12"
+            iconClassName="size-6"
+          />
+          <div className="min-w-0">
+            <p className="truncate font-bold">{account.name}</p>
+            <p className="text-xs text-muted-foreground">{t(`accountType.${account.type}.label`)}</p>
+          </div>
         </div>
-      </div>
 
-      <div className="flex flex-col gap-2">
-        <Label>{t("accounts.balanceAdjust.adjustOnDate")}</Label>
-        <DateField value={date} onChange={setDate} max={format(new Date(), "yyyy-MM-dd")} />
-      </div>
+        <div className="flex flex-col gap-2">
+          <Label>{t("accounts.balanceAdjust.adjustOnDate")}</Label>
+          <DateField value={date} onChange={setDate} max={format(new Date(), "yyyy-MM-dd")} />
+        </div>
 
-      <div className="flex items-center justify-between rounded-2xl border border-border/70 px-4 py-3">
-        <span className="text-sm font-semibold text-muted-foreground">
-          {t("accounts.balanceAdjust.calculating")}
-        </span>
-        <span className="text-sm font-extrabold tabular-nums">
-          {isLoading || expected === undefined ? "..." : formatCurrency(expected)}
-        </span>
-      </div>
+        <div className="flex items-center justify-between rounded-2xl border border-border/70 px-4 py-3">
+          <span className="text-sm font-semibold text-muted-foreground">
+            {t("accounts.balanceAdjust.calculating")}
+          </span>
+          <span className="text-sm font-extrabold tabular-nums">
+            {isLoading || expected === undefined ? "..." : formatCurrency(expected)}
+          </span>
+        </div>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="actual">{t("accounts.balanceAdjust.actualAmount")}</Label>
-        <CurrencyInput
-          id="actual"
-          allowNegative
-          value={actual}
-          onValueChange={setTypedActual}
-          className="h-12 text-lg"
-        />
-      </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="actual">{t("accounts.balanceAdjust.actualAmount")}</Label>
+          <CurrencyInput
+            id="actual"
+            allowNegative
+            value={actual}
+            onValueChange={setTypedActual}
+            className="h-12 text-lg"
+          />
+        </div>
 
-      {/* Xem trước bút toán sẽ được ghi */}
-      <div
-        className={`flex items-center gap-2.5 rounded-2xl px-4 py-3 ${
-          difference === 0
-            ? "bg-muted/60"
-            : difference > 0
-              ? "bg-income/12 text-income"
-              : "bg-expense/12 text-expense"
-        }`}
-      >
-        {difference === 0 ? (
-          <Check className="size-4 shrink-0 text-muted-foreground" />
-        ) : difference > 0 ? (
-          <ArrowDownLeft className="size-4 shrink-0" />
-        ) : (
-          <ArrowUpRight className="size-4 shrink-0" />
-        )}
-        <span className="text-sm font-semibold">
-          {difference === 0
-            ? t("accounts.balanceAdjust.matched")
-            : difference > 0
-              ? t("accounts.balanceAdjust.addIncome", { amount: formatCurrency(difference) })
-              : t("accounts.balanceAdjust.addExpense", {
-                  amount: formatCurrency(Math.abs(difference)),
-                })}
-        </span>
-      </div>
+        {/* Xem trước bút toán sẽ được ghi */}
+        <div
+          className={`flex items-center gap-2.5 rounded-2xl px-4 py-3 ${
+            difference === 0
+              ? "bg-muted/60"
+              : difference > 0
+                ? "bg-income/12 text-income"
+                : "bg-expense/12 text-expense"
+          }`}
+        >
+          {difference === 0 ? (
+            <Check className="size-4 shrink-0 text-muted-foreground" />
+          ) : difference > 0 ? (
+            <ArrowDownLeft className="size-4 shrink-0" />
+          ) : (
+            <ArrowUpRight className="size-4 shrink-0" />
+          )}
+          <span className="text-sm font-semibold">
+            {difference === 0
+              ? t("accounts.balanceAdjust.matched")
+              : difference > 0
+                ? t("accounts.balanceAdjust.addIncome", { amount: formatCurrency(difference) })
+                : t("accounts.balanceAdjust.addExpense", {
+                    amount: formatCurrency(Math.abs(difference)),
+                  })}
+          </span>
+        </div>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="adjust-note">{t("transactions.form.note")}</Label>
-        <Input
-          id="adjust-note"
-          placeholder={t("accounts.balanceAdjust.notePlaceholder")}
-          value={note}
-          onChange={(event) => setNote(event.target.value)}
-        />
-      </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="adjust-note">{t("transactions.form.note")}</Label>
+          <Input
+            id="adjust-note"
+            placeholder={t("accounts.balanceAdjust.notePlaceholder")}
+            value={note}
+            onChange={(event) => setNote(event.target.value)}
+          />
+        </div>
+      </DialogBody>
 
-      <Button
-        size="lg"
-        onClick={handleSubmit}
-        disabled={adjust.isPending || actual === undefined || isLoading}
-      >
-        {adjust.isPending ? t("common.saving") : t("accounts.balanceAdjust.submit")}
-      </Button>
+      <DialogFooter>
+        <Button
+          size="lg"
+          onClick={handleSubmit}
+          disabled={adjust.isPending || actual === undefined || isLoading}
+          className="w-full"
+        >
+          {adjust.isPending ? t("common.saving") : t("accounts.balanceAdjust.submit")}
+        </Button>
+      </DialogFooter>
     </>
   );
 }

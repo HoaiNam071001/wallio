@@ -67,10 +67,17 @@ export function TransactionForm({
   defaultValues,
   onSubmit,
   submitting,
+  className,
 }: {
   defaultValues?: Partial<Transaction>;
   onSubmit: (values: TransactionFormValues) => void;
   submitting?: boolean;
+  /**
+   * Áp cho <form> gốc — truyền "min-h-0 flex-1" khi đặt trong modal có chiều cao giới hạn (xem
+   * DialogContent) để phần field cuộn được còn nút submit đứng yên ở đáy; trang full-page không
+   * cần vì không có ancestor giới hạn chiều cao nên các class này không có tác dụng.
+   */
+  className?: string;
 }) {
   const { t } = useT();
   const { data: categories } = useCategories();
@@ -193,263 +200,265 @@ export function TransactionForm({
   return (
     <form
       onSubmit={handleSubmit(handleFormSubmit)}
-      className="flex flex-col gap-5"
+      className={cn("flex min-h-0 flex-col gap-5", className)}
     >
-      {/* Chọn loại giao dịch */}
-      <div className="flex gap-2">
-        {TYPE_OPTIONS.map((option) => {
-          const Icon = option.icon;
-          const active = type === option.value;
-          return (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => setValue("type", option.value as TransactionType)}
-              className={cn(
-                "flex min-w-0 flex-1 basis-0 flex-col items-center gap-1.5 rounded-2xl border p-3 text-xs font-bold transition-all active:scale-95",
-                active
-                  ? "border-transparent text-white shadow-soft"
-                  : "border-input bg-card/60 text-muted-foreground",
-              )}
-              style={active ? { backgroundColor: option.color } : undefined}
-            >
-              <Icon className="size-5 shrink-0" />
-              <span className="w-full truncate text-center">
-                {option.label}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Số tiền */}
-      <div
-        className="rounded-xl p-4"
-        style={{
-          backgroundColor: `color-mix(in oklab, ${activeType.color} 10%, transparent)`,
-        }}
-      >
-        <Label
-          htmlFor="amount"
-          className="text-xs font-bold tracking-wide uppercase opacity-70"
-        >
-          {isDualAmount
-            ? t("transactions.form.amountWithAccount", { account: fromAccount?.name ?? "" })
-            : t("transactions.form.amountLabel")}
-        </Label>
-        <CurrencyInput
-          id="amount"
-          autoFocus
-          placeholder="0"
-          suffix={fromUnit}
-          value={amount}
-          onValueChange={(next) =>
-            setValue("amount", next as number, {
-              shouldValidate: !!errors.amount,
-            })
-          }
-          className="mt-1 h-14 border-0 bg-transparent px-4 text-3xl font-extrabold focus-visible:ring-0 md:text-3xl"
-          style={{ color: activeType.color }}
-        />
-        {/* {fromAccount?.type !== "in_kind" && (
-          <div className="hide-scrollbar -mx-1 mt-2 flex gap-2 overflow-x-auto px-1">
-            {QUICK_AMOUNTS.map((quick) => (
+      <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto">
+        {/* Chọn loại giao dịch */}
+        <div className="flex gap-2">
+          {TYPE_OPTIONS.map((option) => {
+            const Icon = option.icon;
+            const active = type === option.value;
+            return (
               <button
-                key={quick}
+                key={option.value}
                 type="button"
-                onClick={() => setValue("amount", quick, { shouldValidate: true })}
-                className="shrink-0 rounded-full bg-white/70 px-3 py-1 text-xs font-semibold text-foreground/80 transition-transform active:scale-95 dark:bg-white/10"
+                onClick={() => setValue("type", option.value as TransactionType)}
+                className={cn(
+                  "flex min-w-0 flex-1 basis-0 flex-col items-center gap-1.5 rounded-2xl border p-3 text-xs font-bold transition-all active:scale-95",
+                  active
+                    ? "border-transparent text-white shadow-soft"
+                    : "border-input bg-card/60 text-muted-foreground",
+                )}
+                style={active ? { backgroundColor: option.color } : undefined}
               >
-                {formatAmount(quick)}
+                <Icon className="size-5 shrink-0" />
+                <span className="w-full truncate text-center">
+                  {option.label}
+                </span>
               </button>
-            ))}
-          </div>
-        )} */}
-        {errors.amount && (
-          <p className="mt-1 text-sm text-destructive">
-            {validationMessage(t, errors.amount.message)}
-          </p>
-        )}
+            );
+          })}
+        </div>
 
-        {isDualAmount && (
-          <div className="mt-4 border-t border-black/10 pt-4 dark:border-white/10">
-            <Label
-              htmlFor="to_amount"
-              className="text-xs font-bold tracking-wide uppercase opacity-70"
-            >
-              {t("transactions.form.receivedWithAccount", { account: toAccount?.name ?? "" })}
-            </Label>
-            <CurrencyInput
-              id="to_amount"
-              placeholder="0"
-              suffix={toUnit}
-              value={toAmount}
-              onValueChange={(next) =>
-                setValue("to_amount", next as number, {
-                  shouldValidate: !!errors.to_amount,
-                })
-              }
-              className="mt-1 h-12 border-0 bg-transparent px-0 text-2xl font-extrabold focus-visible:ring-0"
-              style={{ color: activeType.color }}
-            />
-            {errors.to_amount && (
-              <p className="mt-1 text-sm text-destructive">
-                {validationMessage(t, errors.to_amount.message)}
+        {/* Số tiền */}
+        <div
+          className="rounded-xl p-4"
+          style={{
+            backgroundColor: `color-mix(in oklab, ${activeType.color} 10%, transparent)`,
+          }}
+        >
+          <Label
+            htmlFor="amount"
+            className="text-xs font-bold tracking-wide uppercase opacity-70"
+          >
+            {isDualAmount
+              ? t("transactions.form.amountWithAccount", { account: fromAccount?.name ?? "" })
+              : t("transactions.form.amountLabel")}
+          </Label>
+          <CurrencyInput
+            id="amount"
+            autoFocus
+            placeholder="0"
+            suffix={fromUnit}
+            value={amount}
+            onValueChange={(next) =>
+              setValue("amount", next as number, {
+                shouldValidate: !!errors.amount,
+              })
+            }
+            className="mt-1 h-14 border-0 bg-transparent px-4 text-3xl font-extrabold focus-visible:ring-0 md:text-3xl"
+            style={{ color: activeType.color }}
+          />
+          {/* {fromAccount?.type !== "in_kind" && (
+            <div className="hide-scrollbar -mx-1 mt-2 flex gap-2 overflow-x-auto px-1">
+              {QUICK_AMOUNTS.map((quick) => (
+                <button
+                  key={quick}
+                  type="button"
+                  onClick={() => setValue("amount", quick, { shouldValidate: true })}
+                  className="shrink-0 rounded-full bg-white/70 px-3 py-1 text-xs font-semibold text-foreground/80 transition-transform active:scale-95 dark:bg-white/10"
+                >
+                  {formatAmount(quick)}
+                </button>
+              ))}
+            </div>
+          )} */}
+          {errors.amount && (
+            <p className="mt-1 text-sm text-destructive">
+              {validationMessage(t, errors.amount.message)}
+            </p>
+          )}
+
+          {isDualAmount && (
+            <div className="mt-4 border-t border-black/10 pt-4 dark:border-white/10">
+              <Label
+                htmlFor="to_amount"
+                className="text-xs font-bold tracking-wide uppercase opacity-70"
+              >
+                {t("transactions.form.receivedWithAccount", { account: toAccount?.name ?? "" })}
+              </Label>
+              <CurrencyInput
+                id="to_amount"
+                placeholder="0"
+                suffix={toUnit}
+                value={toAmount}
+                onValueChange={(next) =>
+                  setValue("to_amount", next as number, {
+                    shouldValidate: !!errors.to_amount,
+                  })
+                }
+                className="mt-1 h-12 border-0 bg-transparent px-0 text-2xl font-extrabold focus-visible:ring-0"
+                style={{ color: activeType.color }}
+              />
+              {errors.to_amount && (
+                <p className="mt-1 text-sm text-destructive">
+                  {validationMessage(t, errors.to_amount.message)}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Danh mục dạng chip */}
+        {type !== "transfer" && (
+          <div className="flex flex-col gap-2">
+            <Label>{t("transactions.form.category")}</Label>
+            {relevantCategories.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                {t("transactions.form.noCategoryOf", {
+                  kind:
+                    type === "income"
+                      ? t("transactions.form.kindIncomeLower")
+                      : t("transactions.form.kindExpenseLower"),
+                })}
               </p>
+            ) : (
+              <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
+                {relevantCategories.map((category) => {
+                  const active = categoryId === category.id;
+                  const color = normalizeColor(category.color);
+                  return (
+                    <button
+                      key={category.id}
+                      type="button"
+                      onClick={() =>
+                        setValue("category_id", active ? undefined : category.id)
+                      }
+                      className={cn(
+                        "flex min-w-0 flex-col items-center gap-1 rounded-2xl border p-2 transition-all active:scale-95",
+                        active ? "border-transparent" : "border-transparent",
+                      )}
+                      style={
+                        active
+                          ? { backgroundColor: withAlpha(color, 0.14) }
+                          : undefined
+                      }
+                    >
+                      <EntityIcon
+                        icon={category.icon}
+                        color={category.color}
+                        className={cn("size-10", active && "ring-2")}
+                      />
+                      <span
+                        className={cn(
+                          "line-clamp-1 text-[11px] font-semibold",
+                          active ? "" : "text-muted-foreground",
+                        )}
+                        style={active ? { color } : undefined}
+                      >
+                        {category.name}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             )}
           </div>
         )}
-      </div>
 
-      {/* Danh mục dạng chip */}
-      {type !== "transfer" && (
-        <div className="flex flex-col gap-2">
-          <Label>{t("transactions.form.category")}</Label>
-          {relevantCategories.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              {t("transactions.form.noCategoryOf", {
-                kind:
-                  type === "income"
-                    ? t("transactions.form.kindIncomeLower")
-                    : t("transactions.form.kindExpenseLower"),
-              })}
-            </p>
-          ) : (
-            <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
-              {relevantCategories.map((category) => {
-                const active = categoryId === category.id;
-                const color = normalizeColor(category.color);
+        {/* Nguồn tiền */}
+        <div
+          className={`grid gap-4 ${type === "transfer" ? "grid-cols-2" : "grid-cols-1"}`}
+        >
+          <div className="flex min-w-0 flex-col gap-2">
+            <Label>
+              {type === "transfer"
+                ? t("transactions.form.fromAccount")
+                : t("transactions.form.account")}
+            </Label>
+            <AccountSelect
+              value={accountId}
+              onChange={(v) => setValue("account_id", v)}
+              excludeTypes={type !== "transfer" ? ["in_kind"] : undefined}
+            />
+            {errors.account_id && (
+              <p className="text-sm text-destructive">
+                {validationMessage(t, errors.account_id.message)}
+              </p>
+            )}
+          </div>
+
+          {type === "transfer" && (
+            <div className="flex min-w-0 flex-col gap-2">
+              <Label>{t("transactions.form.toAccount")}</Label>
+              <AccountSelect
+                value={toAccountId}
+                onChange={(v) => setValue("to_account_id", v)}
+                placeholder={t("transactions.form.toAccountPlaceholder")}
+                excludeId={accountId}
+              />
+              {errors.to_account_id && (
+                <p className="text-sm text-destructive">
+                  {validationMessage(t, errors.to_account_id.message)}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="flex min-w-0 flex-col gap-2">
+            <Label htmlFor="transaction_date">{t("transactions.form.date")}</Label>
+            <div className="flex flex-wrap items-center gap-2">
+              <DateField
+                id="transaction_date"
+                value={transactionDate}
+                onChange={(next) =>
+                  setValue("transaction_date", next, { shouldValidate: true })
+                }
+              />
+              {DATE_SHORTCUTS.map((shortcut) => {
+                const target = shortcut.value();
                 return (
                   <button
-                    key={category.id}
+                    key={shortcut.label}
                     type="button"
                     onClick={() =>
-                      setValue("category_id", active ? undefined : category.id)
+                      setValue("transaction_date", target, {
+                        shouldValidate: true,
+                      })
                     }
                     className={cn(
-                      "flex min-w-0 flex-col items-center gap-1 rounded-2xl border p-2 transition-all active:scale-95",
-                      active ? "border-transparent" : "border-transparent",
+                      "rounded-full border px-3 py-1.5 text-xs font-bold transition-all active:scale-95",
+                      transactionDate === target
+                        ? "border-transparent bg-brand-500/15 text-brand-700"
+                        : "border-border bg-card/70 text-muted-foreground",
                     )}
-                    style={
-                      active
-                        ? { backgroundColor: withAlpha(color, 0.14) }
-                        : undefined
-                    }
                   >
-                    <EntityIcon
-                      icon={category.icon}
-                      color={category.color}
-                      className={cn("size-10", active && "ring-2")}
-                    />
-                    <span
-                      className={cn(
-                        "line-clamp-1 text-[11px] font-semibold",
-                        active ? "" : "text-muted-foreground",
-                      )}
-                      style={active ? { color } : undefined}
-                    >
-                      {category.name}
-                    </span>
+                    {shortcut.label}
                   </button>
                 );
               })}
             </div>
-          )}
-        </div>
-      )}
-
-      {/* Nguồn tiền */}
-      <div
-        className={`grid gap-4 ${type === "transfer" ? "grid-cols-2" : "grid-cols-1"}`}
-      >
-        <div className="flex min-w-0 flex-col gap-2">
-          <Label>
-            {type === "transfer"
-              ? t("transactions.form.fromAccount")
-              : t("transactions.form.account")}
-          </Label>
-          <AccountSelect
-            value={accountId}
-            onChange={(v) => setValue("account_id", v)}
-            excludeTypes={type !== "transfer" ? ["in_kind"] : undefined}
-          />
-          {errors.account_id && (
-            <p className="text-sm text-destructive">
-              {validationMessage(t, errors.account_id.message)}
-            </p>
-          )}
-        </div>
-
-        {type === "transfer" && (
-          <div className="flex min-w-0 flex-col gap-2">
-            <Label>{t("transactions.form.toAccount")}</Label>
-            <AccountSelect
-              value={toAccountId}
-              onChange={(v) => setValue("to_account_id", v)}
-              placeholder={t("transactions.form.toAccountPlaceholder")}
-              excludeId={accountId}
-            />
-            {errors.to_account_id && (
+            {errors.transaction_date && (
               <p className="text-sm text-destructive">
-                {validationMessage(t, errors.to_account_id.message)}
+                {validationMessage(t, errors.transaction_date.message)}
               </p>
             )}
           </div>
-        )}
-      </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="flex min-w-0 flex-col gap-2">
-          <Label htmlFor="transaction_date">{t("transactions.form.date")}</Label>
-          <div className="flex flex-wrap items-center gap-2">
-            <DateField
-              id="transaction_date"
-              value={transactionDate}
-              onChange={(next) =>
-                setValue("transaction_date", next, { shouldValidate: true })
-              }
+          <div className="flex min-w-0 flex-col gap-2">
+            <Label htmlFor="note">{t("transactions.form.note")}</Label>
+            <Textarea
+              id="note"
+              placeholder={t("transactions.form.notePlaceholder")}
+              {...register("note")}
             />
-            {DATE_SHORTCUTS.map((shortcut) => {
-              const target = shortcut.value();
-              return (
-                <button
-                  key={shortcut.label}
-                  type="button"
-                  onClick={() =>
-                    setValue("transaction_date", target, {
-                      shouldValidate: true,
-                    })
-                  }
-                  className={cn(
-                    "rounded-full border px-3 py-1.5 text-xs font-bold transition-all active:scale-95",
-                    transactionDate === target
-                      ? "border-transparent bg-brand-500/15 text-brand-700"
-                      : "border-border bg-card/70 text-muted-foreground",
-                  )}
-                >
-                  {shortcut.label}
-                </button>
-              );
-            })}
           </div>
-          {errors.transaction_date && (
-            <p className="text-sm text-destructive">
-              {validationMessage(t, errors.transaction_date.message)}
-            </p>
-          )}
-        </div>
-
-        <div className="flex min-w-0 flex-col gap-2">
-          <Label htmlFor="note">{t("transactions.form.note")}</Label>
-          <Textarea
-            id="note"
-            placeholder={t("transactions.form.notePlaceholder")}
-            {...register("note")}
-          />
         </div>
       </div>
 
-      <Button type="submit" size="lg" disabled={submitting}>
+      <Button type="submit" size="lg" disabled={submitting} className="shrink-0">
         {submitting ? t("common.saving") : t("transactions.form.submit")}
       </Button>
     </form>

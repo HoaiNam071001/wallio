@@ -201,6 +201,7 @@ export default function CategoriesPage() {
             defaultValues={editing ?? { kind: tab }}
             onSubmit={handleSubmit}
             submitting={createCategory.isPending || updateCategory.isPending}
+            className="min-h-0 flex-1"
           />
         </DialogContent>
       </Dialog>

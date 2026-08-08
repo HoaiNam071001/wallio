@@ -5,7 +5,7 @@ import { vi, enUS } from "date-fns/locale";
 import { ArrowLeftRight, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EntityIcon } from "@/components/shared/entity-icon";
 import { AmountTextForAccount } from "@/components/shared/amount-text";
 import { ACCOUNT_TYPE_META } from "@/components/accounts/account-type";
@@ -51,6 +51,7 @@ export function TransactionDetailDialog({
           <DialogTitle>{tr("transactions.detail.title")}</DialogTitle>
         </DialogHeader>
 
+        <DialogBody className="flex flex-col gap-4">
         <div className="flex flex-col items-center gap-1 py-2 text-center">
           {isTransfer ? (
             <span className="flex size-14 items-center justify-center rounded-xl bg-transfer/14 text-transfer">
@@ -108,9 +109,10 @@ export function TransactionDetailDialog({
           )}
           {t.note && <Row label={tr("transactions.detail.note")} value={t.note} />}
         </dl>
+        </DialogBody>
 
         {(onEdit || onDelete || editHref) && (
-          <div className="flex gap-2">
+          <DialogFooter className="flex-row gap-2">
             {editHref && (
               <Button variant="outline" className="flex-1" asChild>
                 <Link href={editHref}>
@@ -131,7 +133,7 @@ export function TransactionDetailDialog({
                 {tr("common.delete")}
               </Button>
             )}
-          </div>
+          </DialogFooter>
         )}
       </DialogContent>
     </Dialog>

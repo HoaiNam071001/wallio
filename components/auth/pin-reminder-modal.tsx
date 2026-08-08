@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useProfile } from "@/lib/hooks/use-profile";
 import { toQueryDate } from "@/lib/utils";
 import { useT } from "@/lib/i18n/use-t";
@@ -41,8 +41,10 @@ export function PinReminderModal() {
           </div>
           <DialogTitle>{t("auth.pinReminder.title")}</DialogTitle>
         </DialogHeader>
-        <p className="text-sm text-muted-foreground">{t("auth.pinReminder.description")}</p>
-        <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
+        <DialogBody>
+          <p className="text-sm text-muted-foreground">{t("auth.pinReminder.description")}</p>
+        </DialogBody>
+        <DialogFooter className="sm:justify-center">
           <Button variant="outline" onClick={dismiss} className="sm:flex-1">
             {t("auth.pinReminder.later")}
           </Button>
@@ -55,7 +57,7 @@ export function PinReminderModal() {
           >
             {t("auth.pinReminder.setNow")}
           </Button>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

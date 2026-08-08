@@ -52,13 +52,17 @@ export function NewTransactionModal() {
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && closeNewTransactionModal()}>
-      <DialogContent className="max-h-[90dvh] overflow-y-auto">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("transactions.new.title")}</DialogTitle>
         </DialogHeader>
         {/* Mount lại mỗi lần mở nên state của form luôn sạch, không cần effect reset */}
         {open && (
-          <TransactionForm onSubmit={handleSubmit} submitting={createTransaction.isPending} />
+          <TransactionForm
+            onSubmit={handleSubmit}
+            submitting={createTransaction.isPending}
+            className="min-h-0 flex-1"
+          />
         )}
       </DialogContent>
     </Dialog>

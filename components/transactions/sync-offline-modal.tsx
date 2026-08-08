@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogFooter,
   DialogHeader,
@@ -210,41 +211,43 @@ function SyncOfflineModalBody({ items }: { items: PendingTransactionView[] }) {
   }
 
   return (
-    <div className="flex min-w-0 flex-col gap-4">
-      <div className="flex items-center justify-between gap-2">
-        <button
-          type="button"
-          onClick={toggleAll}
-          className="text-xs font-semibold text-brand-600 hover:underline"
-        >
-          {allSelected ? t("offline.sync.deselectAll") : t("offline.sync.selectAll")}
-        </button>
-        <button
-          type="button"
-          onClick={() => setClearingAll(true)}
-          className="text-xs font-semibold text-destructive hover:underline"
-        >
-          {t("offline.sync.clearAll")}
-        </button>
-      </div>
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4">
+      <DialogBody className="flex min-w-0 flex-col gap-4">
+        <div className="flex items-center justify-between gap-2">
+          <button
+            type="button"
+            onClick={toggleAll}
+            className="text-xs font-semibold text-brand-600 hover:underline"
+          >
+            {allSelected ? t("offline.sync.deselectAll") : t("offline.sync.selectAll")}
+          </button>
+          <button
+            type="button"
+            onClick={() => setClearingAll(true)}
+            className="text-xs font-semibold text-destructive hover:underline"
+          >
+            {t("offline.sync.clearAll")}
+          </button>
+        </div>
 
-      <div className="flex min-w-0 flex-col gap-2">
-        {items.map((item) => (
-          <SyncRow
-            key={item.localId}
-            item={item}
-            checked={selected.has(item.localId)}
-            onToggle={() => toggleOne(item.localId)}
-            onEdit={() => setEditing(item)}
-            onDelete={() => setDeleting(item)}
-            locale={locale}
-          />
-        ))}
-      </div>
+        <div className="flex min-w-0 flex-col gap-2">
+          {items.map((item) => (
+            <SyncRow
+              key={item.localId}
+              item={item}
+              checked={selected.has(item.localId)}
+              onToggle={() => toggleOne(item.localId)}
+              onEdit={() => setEditing(item)}
+              onDelete={() => setDeleting(item)}
+              locale={locale}
+            />
+          ))}
+        </div>
 
-      {!online && (
-        <p className="text-center text-xs text-muted-foreground">{t("offline.sync.needsNetwork")}</p>
-      )}
+        {!online && (
+          <p className="text-center text-xs text-muted-foreground">{t("offline.sync.needsNetwork")}</p>
+        )}
+      </DialogBody>
 
       <DialogFooter>
         <Button onClick={handleSync} disabled={!online || syncing || selected.size === 0} className="w-full">
@@ -253,11 +256,17 @@ function SyncOfflineModalBody({ items }: { items: PendingTransactionView[] }) {
       </DialogFooter>
 
       <Dialog open={!!editing} onOpenChange={(next) => !next && setEditing(null)}>
-        <DialogContent className="max-h-[90dvh] overflow-y-auto overflow-x-hidden">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("offline.sync.editTitle")}</DialogTitle>
           </DialogHeader>
-          {editing && <TransactionForm defaultValues={editing.input} onSubmit={handleEditSubmit} />}
+          {editing && (
+            <TransactionForm
+              defaultValues={editing.input}
+              onSubmit={handleEditSubmit}
+              className="min-h-0 flex-1"
+            />
+          )}
         </DialogContent>
       </Dialog>
 
@@ -302,7 +311,7 @@ export function SyncOfflineModal() {
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && closeSyncOfflineModal()}>
-      <DialogContent className="max-h-[90dvh] overflow-y-auto overflow-x-hidden">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("offline.sync.title")}</DialogTitle>
         </DialogHeader>

@@ -157,7 +157,7 @@ export default function AccountsPage() {
               {t("accounts.page.doneReorder")}
             </Button>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col items-center gap-2">
               {accounts && accounts.length > 1 && (
                 <Button onClick={toggleReorder} size="sm" variant="outline">
                   <ArrowUpDown className="size-4" />
@@ -222,6 +222,7 @@ export default function AccountsPage() {
             defaultValues={editing ?? undefined}
             onSubmit={handleSubmit}
             submitting={createAccount.isPending || updateAccount.isPending}
+            className="min-h-0 flex-1"
           />
         </DialogContent>
       </Dialog>

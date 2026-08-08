@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogBody, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EntityIcon } from "@/components/shared/entity-icon";
 import { AmountText } from "@/components/shared/amount-text";
 import { useAmountVisibility, type AmountVisibilityScope } from "@/lib/hooks/use-amount-visibility";
@@ -122,7 +122,9 @@ export function CategoryBreakdownChart({
             <DialogHeader>
               <DialogTitle>{t("charts.categoryBreakdown.total")}</DialogTitle>
             </DialogHeader>
-            <BreakdownList slices={slices} scope={scope} />
+            <DialogBody>
+              <BreakdownList slices={slices} scope={scope} />
+            </DialogBody>
           </DialogContent>
         </Dialog>
       </>
