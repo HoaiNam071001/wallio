@@ -368,7 +368,7 @@ export function TransactionForm({
 
         {/* Nguồn tiền */}
         <div
-          className={`grid gap-4 ${type === "transfer" ? "grid-cols-2" : "grid-cols-1"}`}
+          className={`grid gap-4 grid-cols-1`}
         >
           <div className="flex min-w-0 flex-col gap-2">
             <Label>
