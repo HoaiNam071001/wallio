@@ -92,6 +92,7 @@ export interface Database {
           kind: CategoryKind;
           icon: string | null;
           color: string | null;
+          is_system: boolean;
           created_at: string;
         };
         Insert: {
@@ -101,6 +102,7 @@ export interface Database {
           kind: CategoryKind;
           icon?: string | null;
           color?: string | null;
+          is_system?: boolean;
           created_at?: string;
         };
         Update: {
@@ -110,6 +112,7 @@ export interface Database {
           kind?: CategoryKind;
           icon?: string | null;
           color?: string | null;
+          is_system?: boolean;
           created_at?: string;
         };
         Relationships: [];

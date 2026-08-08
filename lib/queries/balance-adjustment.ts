@@ -63,11 +63,14 @@ async function findOrCreateAdjustmentCategory(
   userId: string,
   kind: CategoryKind,
 ): Promise<string> {
+  // Nhận diện qua cờ `is_system`, không qua `name` — nhờ vậy user đổi tên danh
+  // mục này (VD: "Cân đối số dư") vẫn không khiến hệ thống tạo thêm bản mới.
   const { data: existing, error: findError } = await supabase
     .from("categories")
     .select("id")
-    .eq("name", ADJUSTMENT_CATEGORY_NAME)
+    .eq("user_id", userId)
     .eq("kind", kind)
+    .eq("is_system", true)
     .limit(1)
     .maybeSingle();
 
@@ -82,6 +85,7 @@ async function findOrCreateAdjustmentCategory(
       kind,
       icon: "Scale",
       color: "#64748b",
+      is_system: true,
     })
     .select("id")
     .single();
