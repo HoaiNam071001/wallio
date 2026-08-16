@@ -44,7 +44,7 @@ Giữ nguyên **backend Supabase** (cùng project, cùng bảng, cùng RLS polic
 | Form + validate | `react-hook-form` + `zod` | `flutter_form_builder` + validator thủ công, hoặc `reactive_forms` |
 | Charts | `victory-native` / `react-native-gifted-charts` | `fl_chart` |
 | Date | `date-fns` (giữ nguyên) | `intl` + `DateFormat` |
-| Lưu trạng thái local (theme/locale/pin-unlock) | `expo-secure-store` (PIN unlock, nhạy cảm hơn sessionStorage) + `AsyncStorage`/MMKV (theme, locale) | `flutter_secure_storage` + `shared_preferences` |
+| Lưu trạng thái local (theme/locale/pin-unlock) | `expo-secure-store` (mốc PIN unlock, nhạy cảm hơn nên không để ở AsyncStorage) + `AsyncStorage`/MMKV (theme, locale) | `flutter_secure_storage` + `shared_preferences` |
 | Icon | `lucide-react-native` (cùng bộ icon Lucide đang dùng, giữ tên icon lưu trong DB không đổi) | `lucide_icons` (Flutter có gói tương đương) hoặc map sang Material Icons nếu thiếu |
 | Navigation | Expo Router (file-based, gần giống Next.js App Router hiện tại) | `go_router` |
 

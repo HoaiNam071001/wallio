@@ -52,13 +52,17 @@ const { data, error } = await supabase.auth.signInWithIdToken({
 Đây là lớp UX, **không phải auth thật** — RLS mới là ranh giới bảo mật (xem [DATA_MODEL.md](./DATA_MODEL.md#6-rls--áp-dụng-như-nhau-cho-mọi-clientwebmobile)).
 Logic (port từ `components/auth/pin-gate.tsx` + `lib/utils/pin.ts`):
 
-1. Sau khi có `user` (đã đăng nhập) và load xong `profile`, nếu `profile.pin_hash` tồn tại **và** chưa unlock
-   trong phiên này → hiện màn nhập PIN 6 ô, che toàn bộ app.
+1. Sau khi có `user` (đã đăng nhập) và load xong `profile`, nếu `profile.pin_hash` tồn tại **và** trạng thái unlock
+   đã hết hạn → hiện màn nhập PIN 6 ô, che toàn bộ app.
 2. Hash PIN nhập vào: `SHA-256(salt=user.id + ":" + pin)`, so với `profile.pin_hash`. Đúng → lưu cờ "đã unlock".
-3. **Trạng thái unlock**: web dùng `sessionStorage` (mất khi đóng tab, còn khi F5). Trên mobile, tương đương hợp lý
-   là biến in-memory + lưu vào secure storage với thời hạn ngắn hoặc reset khi app bị kill hoàn toàn — quyết định
-   UX cụ thể (vd: yêu cầu PIN lại mỗi khi mở app từ background sau N phút) là điểm có thể cải thiện so với web,
-   **nên hỏi lại người dùng/khách hàng** trước khi chọn, vì hành vi mobile (background/kill app) khác web (đóng tab).
+3. **Trạng thái unlock = mốc thời gian hoạt động gần nhất, trượt theo thời gian nhàn rỗi** (`PIN_IDLE_TIMEOUT_MS`,
+   hiện là **2 phút**), lưu ở storage bền (web: `localStorage`; mobile: secure storage):
+   - Khi app đang hiển thị, mốc được gia hạn mỗi 30s; khi app xuống nền (`visibilitychange`/`pagehide`) thì
+     chốt mốc ngay tại thời điểm rời đi, vì timer bị đóng băng ở nền.
+   - Khi quay lại app: rời dưới 2 phút → vào thẳng, không hỏi PIN; quá 2 phút → khoá lại.
+   - **Không** dùng `sessionStorage`: PWA/webview mobile bị hệ điều hành thu hồi khi chuyển sang app khác,
+     lúc quay lại app khởi động như phiên mới nên cờ sessionStorage mất sạch và bắt nhập PIN oan.
+   - Mốc ở tương lai (đồng hồ máy bị chỉnh lùi) được coi là hết hạn.
 4. "Quên mật khẩu": đánh dấu cờ `pin-reset-requested` (dùng storage bền hơn — trên mobile, secure storage, không
    phải bộ nhớ tạm), sign-out, bắt đăng nhập lại Google. Đăng nhập lại thành công tự chứng minh danh tính →
    cho đặt PIN mới ngay, không cần nhập PIN cũ.
@@ -139,6 +143,7 @@ web. RN dùng `lucide-react-native` (cùng tên icon). Flutter không có Lucide
 
 - [ ] Đăng nhập/đăng xuất Google hoạt động, session tự khôi phục khi mở lại app
 - [ ] PIN gate: đặt PIN lần đầu (ở phase 5 mới có UI đặt PIN đầy đủ — tạm có thể test bằng cách set `pin_hash` trực tiếp trong DB), nhập đúng/sai, quên PIN → đăng nhập lại
+- [ ] PIN gate + background: chuyển sang app khác rồi quay lại **dưới 2 phút** → không hỏi PIN (kể cả khi OS đã kill webview/app); rời **quá 2 phút** → hỏi lại PIN
 - [ ] Bottom tab bar 3 mục + FAB nổi
 - [ ] Đổi theme sáng/tối/hệ thống, đổi ngôn ngữ vi/en — áp dụng ngay không cần khởi động lại
 - [ ] Route guard: chưa đăng nhập → về màn Login; đã đăng nhập mà vào Login → tự chuyển vào app

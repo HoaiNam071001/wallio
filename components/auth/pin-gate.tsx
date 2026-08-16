@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { KeyRound, LockKeyhole } from "lucide-react";
 import { toast } from "sonner";
@@ -15,14 +15,18 @@ import {
   clearPinUnlocked,
   hashPin,
   isPinResetRequested,
-  isPinUnlockedInSession,
+  isPinUnlocked,
   isValidPin,
   markPinResetRequested,
   markPinUnlocked,
+  touchPinUnlock,
 } from "@/lib/utils/pin";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n/use-t";
 import { ROUTES } from "@/lib/constants/routes";
+
+/** Nhịp gia hạn mốc mở khoá khi app đang mở — phải ngắn hơn nhiều PIN_IDLE_TIMEOUT_MS. */
+const TOUCH_INTERVAL_MS = 30 * 1000;
 
 /**
  * Khoá toàn màn hình sau khi đã đăng nhập Google, nếu người dùng đã đặt PIN 6 số.
@@ -34,13 +38,51 @@ export function PinGate({ children }: { children: React.ReactNode }) {
   const { data: profile, isLoading: profileLoading } = useProfile();
   const supabase = useSupabase();
   const router = useRouter();
-  const [unlocked, setUnlocked] = useState(isPinUnlockedInSession);
+  const [unlocked, setUnlocked] = useState(isPinUnlocked);
   const [resetMode, setResetMode] = useState(isPinResetRequested);
   const [digits, setDigits] = useState<string[]>(() => Array(6).fill(""));
   const [error, setError] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const boxRefs = useRef<(HTMLInputElement | null)[]>([]);
   const pin = digits.join("");
+
+  /**
+   * Giữ mốc mở khoá luôn mới trong lúc app đang được xem, và ghi mốc ngay khi app bị đưa
+   * xuống nền (timer bị đóng băng ở nền, nên phải chốt mốc tại thời điểm rời đi). Lúc quay
+   * lại mới đối chiếu: rời quá PIN_IDLE_TIMEOUT_MS thì khoá lại, dưới ngưỡng thì đi thẳng vào.
+   */
+  useEffect(() => {
+    if (!unlocked) return;
+
+    const heartbeat = window.setInterval(() => {
+      if (document.visibilityState === "visible") touchPinUnlock();
+    }, TOUCH_INTERVAL_MS);
+
+    function handleLeave() {
+      touchPinUnlock();
+    }
+
+    function handleVisibility() {
+      if (document.visibilityState !== "visible") {
+        handleLeave();
+      } else if (isPinUnlocked()) {
+        touchPinUnlock();
+      } else {
+        clearPinUnlocked();
+        setUnlocked(false);
+      }
+    }
+
+    document.addEventListener("visibilitychange", handleVisibility);
+    // iOS đôi khi bỏ qua visibilitychange khi app bị đóng băng — pagehide là lớp dự phòng.
+    window.addEventListener("pagehide", handleLeave);
+
+    return () => {
+      window.clearInterval(heartbeat);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("pagehide", handleLeave);
+    };
+  }, [unlocked]);
 
   const needsPin = !authLoading && !profileLoading && !!user && !!profile?.pin_hash && !unlocked;
 

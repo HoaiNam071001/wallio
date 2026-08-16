@@ -16,23 +16,41 @@ export function isValidPin(pin: string): boolean {
 }
 
 /**
- * Trạng thái "đã mở khoá PIN" lưu ở sessionStorage — sống sót qua pull-to-refresh /
- * reload trang (khác với biến trong bộ nhớ JS), nhưng tự xoá khi đóng hẳn tab/app,
- * và bị xoá chủ động khi đăng xuất — nên chỉ cần nhập PIN lại mỗi phiên đăng nhập mới.
+ * Trạng thái "đã mở khoá PIN" lưu ở localStorage dưới dạng mốc hoạt động gần nhất.
+ *
+ * Không dùng sessionStorage được: trên PWA mobile, khi chuyển sang app khác, hệ điều hành
+ * có thể thu hồi webview — lúc quay lại app khởi động như một phiên hoàn toàn mới nên cờ
+ * sessionStorage biến mất và bắt nhập PIN dù người dùng chỉ rời đi vài giây.
+ *
+ * Mốc này trượt theo lần hoạt động gần nhất: quay lại trong vòng PIN_IDLE_TIMEOUT_MS thì
+ * vẫn mở khoá, rời lâu hơn mới phải nhập lại. Cờ bị xoá chủ động khi đăng xuất.
  */
-const PIN_UNLOCK_KEY = "wallio:pin-unlocked";
+const PIN_UNLOCK_KEY = "wallio:pin-unlocked-at";
 
-export function isPinUnlockedInSession(): boolean {
+/** Rời app lâu hơn khoảng này thì phải nhập PIN lại. */
+export const PIN_IDLE_TIMEOUT_MS = 2 * 60 * 1000;
+
+export function isPinUnlocked(): boolean {
   if (typeof window === "undefined") return false;
-  return window.sessionStorage.getItem(PIN_UNLOCK_KEY) === "1";
+  const at = Number(window.localStorage.getItem(PIN_UNLOCK_KEY));
+  if (!Number.isFinite(at) || at <= 0) return false;
+  // Mốc nằm ở tương lai = đồng hồ máy bị chỉnh lùi → coi như hết hạn cho an toàn.
+  const elapsed = Date.now() - at;
+  return elapsed >= 0 && elapsed < PIN_IDLE_TIMEOUT_MS;
 }
 
 export function markPinUnlocked(): void {
-  window.sessionStorage.setItem(PIN_UNLOCK_KEY, "1");
+  window.localStorage.setItem(PIN_UNLOCK_KEY, String(Date.now()));
+}
+
+/** Gia hạn mốc mở khoá khi app đang được dùng; không tự mở khoá lại nếu đã hết hạn. */
+export function touchPinUnlock(): void {
+  if (!isPinUnlocked()) return;
+  markPinUnlocked();
 }
 
 export function clearPinUnlocked(): void {
-  window.sessionStorage.removeItem(PIN_UNLOCK_KEY);
+  window.localStorage.removeItem(PIN_UNLOCK_KEY);
 }
 
 /**
