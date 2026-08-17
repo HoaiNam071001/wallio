@@ -62,14 +62,17 @@ function AdjustForm({
 
   const [date, setDate] = useState(() => format(new Date(), "yyyy-MM-dd"));
   const [typedActual, setTypedActual] = useState<number | undefined>(undefined);
+  // Đã chạm vào ô "thực tế" thì tôn trọng đúng những gì người dùng gõ — kể cả khi
+  // họ xoá trắng, không tự điền lại số app tính.
+  const [touched, setTouched] = useState(false);
   const [note, setNote] = useState("");
 
   const { data: expected, isLoading } = useAccountBalanceAsOf(account.id, date);
 
   // Chưa gõ gì thì ô "thực tế" hiển thị luôn số app đang tính (chênh lệch = 0).
-  const actual = typedActual ?? expected;
+  const actual = touched ? typedActual : expected;
   const difference =
-    actual === undefined || expected === undefined ? 0 : Math.round(actual - expected);
+    actual === undefined || expected === undefined ? undefined : Math.round(actual - expected);
 
   const meta = ACCOUNT_TYPE_META[account.type];
 
@@ -137,38 +140,43 @@ function AdjustForm({
             id="actual"
             allowNegative
             value={actual}
-            onValueChange={setTypedActual}
+            onValueChange={(value) => {
+              setTouched(true);
+              setTypedActual(value);
+            }}
             className="h-12 text-lg"
           />
         </div>
 
-        {/* Xem trước bút toán sẽ được ghi */}
-        <div
-          className={`flex items-center gap-2.5 rounded-2xl px-4 py-3 ${
-            difference === 0
-              ? "bg-muted/60"
-              : difference > 0
-                ? "bg-income/12 text-income"
-                : "bg-expense/12 text-expense"
-          }`}
-        >
-          {difference === 0 ? (
-            <Check className="size-4 shrink-0 text-muted-foreground" />
-          ) : difference > 0 ? (
-            <ArrowDownLeft className="size-4 shrink-0" />
-          ) : (
-            <ArrowUpRight className="size-4 shrink-0" />
-          )}
-          <span className="text-sm font-semibold">
-            {difference === 0
-              ? t("accounts.balanceAdjust.matched")
-              : difference > 0
-                ? t("accounts.balanceAdjust.addIncome", { amount: formatCurrency(difference) })
-                : t("accounts.balanceAdjust.addExpense", {
-                    amount: formatCurrency(Math.abs(difference)),
-                  })}
-          </span>
-        </div>
+        {/* Xem trước bút toán sẽ được ghi — bỏ trống ô số thì chưa có gì để xem trước */}
+        {difference !== undefined && (
+          <div
+            className={`flex items-center gap-2.5 rounded-2xl px-4 py-3 ${
+              difference === 0
+                ? "bg-muted/60"
+                : difference > 0
+                  ? "bg-income/12 text-income"
+                  : "bg-expense/12 text-expense"
+            }`}
+          >
+            {difference === 0 ? (
+              <Check className="size-4 shrink-0 text-muted-foreground" />
+            ) : difference > 0 ? (
+              <ArrowDownLeft className="size-4 shrink-0" />
+            ) : (
+              <ArrowUpRight className="size-4 shrink-0" />
+            )}
+            <span className="text-sm font-semibold">
+              {difference === 0
+                ? t("accounts.balanceAdjust.matched")
+                : difference > 0
+                  ? t("accounts.balanceAdjust.addIncome", { amount: formatCurrency(difference) })
+                  : t("accounts.balanceAdjust.addExpense", {
+                      amount: formatCurrency(Math.abs(difference)),
+                    })}
+            </span>
+          </div>
+        )}
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="adjust-note">{t("transactions.form.note")}</Label>
