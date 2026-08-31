@@ -72,7 +72,10 @@ export function DateRangeFilter({
     setCursor(parseISO(field === "start" ? draft.customStart : draft.customEnd));
   }
 
-  /** Sửa tay trên lịch → khoảng ngày không còn khớp preset nào nữa. */
+  /** Bấm ngày nào trên lịch cũng đổi được ngay, không có ô bị chặn: đang chỉnh mốc đầu thì
+   * gán mốc đầu (mốc cuối bị đẩy theo nếu hoá ra sớm hơn), đang chỉnh mốc cuối mà bấm ngày
+   * trước mốc đầu thì hiểu là nới mốc đầu về trước thay vì bỏ qua cú bấm.
+   * Sửa tay trên lịch → khoảng ngày không còn khớp preset nào nữa. */
   function pickDate(next: string) {
     if (editingField === "start") {
       setDraft((prev) => ({
@@ -82,13 +85,13 @@ export function DateRangeFilter({
       }));
       setEditingField("end");
       setCursor(parseISO(next));
-    } else {
-      setDraft((prev) => ({
-        preset: "custom",
-        customStart: prev.customStart,
-        customEnd: next < prev.customStart ? prev.customStart : next,
-      }));
+      return;
     }
+    setDraft((prev) =>
+      next < prev.customStart
+        ? { preset: "custom", customStart: next, customEnd: prev.customEnd }
+        : { preset: "custom", customStart: prev.customStart, customEnd: next },
+    );
   }
 
   function apply() {
@@ -165,8 +168,6 @@ export function DateRangeFilter({
               onSelect={pickDate}
               cursor={cursor}
               onCursorChange={setCursor}
-              minDate={editingField === "end" ? draft.customStart : undefined}
-              maxDate={toQueryDate(new Date())}
               rangeStart={draft.customStart}
               rangeEnd={draft.customEnd}
             />

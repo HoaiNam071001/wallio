@@ -44,9 +44,11 @@ Thứ tự bố cục:
   2. **2 thẻ mốc đầu/cuối** đặt cạnh nhau, ngăn bởi mũi tên `→` (nhãn "Từ ngày"/"Đến ngày" + ngày `dd/MM/yyyy`
      + thứ trong tuần, thẻ đang chỉnh có viền/nền brand) — thay cho 2 pill 1 dòng bị cắt chữ trước đây. Bấm thẻ
      nào thì lịch nhảy tới mốc đó.
-  3. **Lịch** (`Calendar`): chọn xong mốc đầu tự chuyển sang mốc cuối; tô sáng cả dải ngày giữa 2 mốc
-     (`rangeStart`/`rangeEnd`); khi đang chỉnh mốc cuối thì ngày trước mốc đầu bị vô hiệu hoá (`minDate`).
-     Sửa tay trên lịch làm `preset` chuyển thành `"custom"` (không chip nào còn active).
+  3. **Lịch** (`Calendar`): **mọi ngày đều bấm được** (không truyền `minDate`/`maxDate` — kể cả ngày tương
+     lai, vì preset Tuần/Tháng/Năm vốn đã có mốc cuối ở tương lai). Chọn xong mốc đầu tự chuyển sang mốc cuối;
+     đang chỉnh mốc cuối mà bấm ngày trước mốc đầu thì hiểu là **nới mốc đầu về trước** chứ không bỏ qua cú
+     bấm. Lịch tô sáng cả dải ngày giữa 2 mốc (`rangeStart`/`rangeEnd`). Sửa tay trên lịch làm `preset` chuyển
+     thành `"custom"` (không chip nào còn active).
   Mọi thay đổi chỉ có hiệu lực khi bấm **"Áp dụng"** (draft nội bộ, đóng sheet giữa chừng = huỷ). Khi mở sheet,
   draft được quy về đúng khoảng của preset đang lọc (`withPresetDates`) để 2 thẻ ngày/lịch không hiện mốc cũ.
   Component này dùng chung cho cả 3 màn có filter ngày (Sổ thu chi, Báo cáo, Tổng quan) — thay cho 3 kiểu UI
