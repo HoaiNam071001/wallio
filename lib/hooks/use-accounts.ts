@@ -7,10 +7,12 @@ import {
   createAccount,
   deleteAccount,
   getAccountBalanceAsOf,
+  getAccountFlowTotals,
   listAccountBalances,
   listAccounts,
   listAccountsWithBalance,
   reorderAccounts,
+  setDefaultAccount,
   updateAccount,
 } from "@/lib/queries/accounts";
 import {
@@ -137,6 +139,31 @@ export function useReorderAccounts() {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["accounts"] });
     },
+  });
+}
+
+/** Tổng tiền vào/ra của một nguồn tiền trong khoảng ngày — trang chi tiết nguồn tiền. */
+export function useAccountFlowTotals(
+  accountId: string | undefined,
+  startDate: string,
+  endDate: string,
+) {
+  const supabase = useSupabase();
+  return useQuery({
+    queryKey: ["accounts", "flow-totals", accountId, startDate, endDate],
+    queryFn: () => getAccountFlowTotals(supabase, accountId!, startDate, endDate),
+    enabled: !!accountId,
+  });
+}
+
+/** Chọn/bỏ nguồn tiền mặc định cho form ghi khoản mới (tối đa 1 mỗi user). */
+export function useSetDefaultAccount() {
+  const supabase = useSupabase();
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: (id: string | null) => setDefaultAccount(supabase, user!.id, id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["accounts"] }),
   });
 }
 

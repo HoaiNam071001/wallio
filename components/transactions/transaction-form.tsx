@@ -11,12 +11,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { DateField } from "@/components/ui/date-field";
-import { EntityIcon } from "@/components/shared/entity-icon";
-import { AccountSelect } from "@/components/accounts/account-select";
+import { OptionGrid } from "@/components/shared/option-grid";
+import { AccountPicker } from "@/components/accounts/account-picker";
 import { useCategories } from "@/lib/hooks/use-categories";
 import { useAccountsWithBalance } from "@/lib/hooks/use-accounts";
-import { cn, formatAmount } from "@/lib/utils";
-import { normalizeColor, withAlpha } from "@/lib/theme/palette";
+import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n/use-t";
 import type { TFunction } from "i18next";
 import type { Transaction, TransactionType } from "@/lib/types/database.types";
@@ -174,11 +173,36 @@ export function TransactionForm({
     } else {
       setValue("to_account_id", undefined);
       // Đổi qua lại thu <-> chi (hoặc rời khỏi chuyển khoản): danh mục cũ thuộc loại
-      // khác không còn hợp lệ, chuyển về danh mục đầu tiên của loại mới.
+      // khác không còn hợp lệ, chuyển về danh mục mặc định của loại mới (hoặc danh mục đầu tiên).
       const nextCategories = categories?.filter((c) => c.kind === type) ?? [];
-      setValue("category_id", nextCategories[0]?.id, { shouldValidate: true });
+      const next = nextCategories.find((c) => c.is_default) ?? nextCategories[0];
+      setValue("category_id", next?.id, { shouldValidate: true });
     }
   }, [type, categories, setValue]);
+
+  // Chọn sẵn nguồn tiền / danh mục người dùng đã đánh dấu mặc định (trang Nguồn tiền, Danh mục).
+  // Phải làm trong effect vì hai danh sách này thường về sau khi form đã mount. Chỉ áp một lần,
+  // và chỉ cho ô nào form chưa có sẵn giá trị — sửa giao dịch (kể cả khoản offline đang chờ)
+  // luôn có account_id/category_id nên không bị đè.
+  const appliedDefaults = useRef(false);
+  useEffect(() => {
+    if (appliedDefaults.current) return;
+    if (!accounts || !categories) return;
+    appliedDefaults.current = true;
+
+    if (!defaultValues?.account_id) {
+      const defaultAccount = accounts.find((a) => a.is_default);
+      // Hiện vật chỉ dùng cho chuyển khoản nên không chọn sẵn cho thu/chi.
+      if (defaultAccount && (type === "transfer" || defaultAccount.type !== "in_kind")) {
+        setValue("account_id", defaultAccount.id);
+      }
+    }
+
+    if (type !== "transfer" && !defaultValues?.category_id) {
+      const defaultCategory = categories.find((c) => c.kind === type && c.is_default);
+      if (defaultCategory) setValue("category_id", defaultCategory.id);
+    }
+  }, [accounts, categories, defaultValues, type, setValue]);
 
   // Rời khỏi trường hợp 2 vế khác đơn vị thì bỏ luôn to_amount — coi 2 vế bằng nhau như cũ.
   useEffect(() => {
@@ -203,8 +227,10 @@ export function TransactionForm({
       className={cn("flex min-h-0 flex-col gap-5", className)}
     >
       <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto">
-        {/* Chọn loại giao dịch */}
-        <div className="flex gap-2">
+        {/* Chọn loại giao dịch — segmented control: 1 khối bo tròn chia đều 3 phần như radio.
+            Icon xếp trên nhãn để nhãn được trọn bề ngang ô, không phải cắt bằng "..." trên máy hẹp
+            ("Chuyển khoản" là nhãn dài nhất). */}
+        <div role="radiogroup" className="grid grid-cols-3 gap-1 rounded-2xl bg-muted/60 p-1">
           {TYPE_OPTIONS.map((option) => {
             const Icon = option.icon;
             const active = type === option.value;
@@ -212,19 +238,17 @@ export function TransactionForm({
               <button
                 key={option.value}
                 type="button"
+                role="radio"
+                aria-checked={active}
                 onClick={() => setValue("type", option.value as TransactionType)}
                 className={cn(
-                  "flex min-w-0 flex-1 basis-0 flex-col items-center gap-1.5 rounded-2xl border p-3 text-xs font-bold transition-all active:scale-95",
-                  active
-                    ? "border-transparent text-white shadow-soft"
-                    : "border-input bg-card/60 text-muted-foreground",
+                  "flex flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1.5 text-[11px] font-bold whitespace-nowrap transition-all active:scale-95",
+                  active ? "text-white shadow-soft" : "text-muted-foreground",
                 )}
                 style={active ? { backgroundColor: option.color } : undefined}
               >
-                <Icon className="size-5 shrink-0" />
-                <span className="w-full truncate text-center">
-                  {option.label}
-                </span>
+                <Icon className="size-4 shrink-0" />
+                {option.label}
               </button>
             );
           })}
@@ -323,62 +347,31 @@ export function TransactionForm({
                 })}
               </p>
             ) : (
-              <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
-                {relevantCategories.map((category) => {
-                  const active = categoryId === category.id;
-                  const color = normalizeColor(category.color);
-                  return (
-                    <button
-                      key={category.id}
-                      type="button"
-                      onClick={() =>
-                        setValue("category_id", active ? undefined : category.id)
-                      }
-                      className={cn(
-                        "flex min-w-0 flex-col items-center gap-1 rounded-2xl border p-2 transition-all active:scale-95",
-                        active ? "border-transparent" : "border-transparent",
-                      )}
-                      style={
-                        active
-                          ? { backgroundColor: withAlpha(color, 0.14) }
-                          : undefined
-                      }
-                    >
-                      <EntityIcon
-                        icon={category.icon}
-                        color={category.color}
-                        className={cn("size-10", active && "ring-2")}
-                      />
-                      <span
-                        className={cn(
-                          "line-clamp-1 text-[11px] font-semibold",
-                          active ? "" : "text-muted-foreground",
-                        )}
-                        style={active ? { color } : undefined}
-                      >
-                        {category.name}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
+              <OptionGrid
+                items={relevantCategories.map((category) => ({
+                  id: category.id,
+                  label: category.name,
+                  icon: category.icon,
+                  color: category.color,
+                }))}
+                value={categoryId}
+                onSelect={(id) => setValue("category_id", id)}
+              />
             )}
           </div>
         )}
 
         {/* Nguồn tiền */}
-        <div
-          className={`grid gap-4 grid-cols-1`}
-        >
+        <div className="grid grid-cols-1 gap-4">
           <div className="flex min-w-0 flex-col gap-2">
             <Label>
               {type === "transfer"
                 ? t("transactions.form.fromAccount")
                 : t("transactions.form.account")}
             </Label>
-            <AccountSelect
+            <AccountPicker
               value={accountId}
-              onChange={(v) => setValue("account_id", v)}
+              onChange={(v) => setValue("account_id", v, { shouldValidate: !!errors.account_id })}
               excludeTypes={type !== "transfer" ? ["in_kind"] : undefined}
             />
             {errors.account_id && (
@@ -391,10 +384,11 @@ export function TransactionForm({
           {type === "transfer" && (
             <div className="flex min-w-0 flex-col gap-2">
               <Label>{t("transactions.form.toAccount")}</Label>
-              <AccountSelect
+              <AccountPicker
                 value={toAccountId}
-                onChange={(v) => setValue("to_account_id", v)}
-                placeholder={t("transactions.form.toAccountPlaceholder")}
+                onChange={(v) =>
+                  setValue("to_account_id", v, { shouldValidate: !!errors.to_account_id })
+                }
                 excludeId={accountId}
               />
               {errors.to_account_id && (

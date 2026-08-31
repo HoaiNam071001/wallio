@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { differenceInCalendarDays, parseISO } from "date-fns";
-import { MoreVertical, Pencil, Scale, Trash2 } from "lucide-react";
+import { MoreVertical, Pencil, Scale, Star, StarOff, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,6 +13,7 @@ import {
 import { EntityIcon } from "@/components/shared/entity-icon";
 import { AmountTextForAccount } from "@/components/shared/amount-text";
 import { ACCOUNT_TYPE_META } from "@/components/accounts/account-type";
+import { ROUTES } from "@/lib/constants/routes";
 import { normalizeColor, withAlpha } from "@/lib/theme/palette";
 import { useT } from "@/lib/i18n/use-t";
 import type { TFunction } from "i18next";
@@ -34,11 +36,13 @@ export function AccountCard({
   onEdit,
   onDelete,
   onAdjust,
+  onToggleDefault,
 }: {
   account: AccountWithBalance;
   onEdit: () => void;
   onDelete: () => void;
   onAdjust: () => void;
+  onToggleDefault: () => void;
 }) {
   const { t } = useT();
   const meta = ACCOUNT_TYPE_META[account.type];
@@ -52,6 +56,13 @@ export function AccountCard({
       className="glass relative overflow-hidden rounded-xl p-4"
       style={{ backgroundImage: `linear-gradient(135deg, ${withAlpha(color, 0.16)}, transparent 65%)` }}
     >
+      {/* Lớp phủ toàn thẻ để bấm đâu cũng mở chi tiết; các nút bên dưới nổi lên trên nhờ z-2. */}
+      <Link
+        href={ROUTES.accountDetail(account.id)}
+        aria-label={account.name}
+        className="absolute inset-0 z-1"
+      />
+
       <div className="flex items-start justify-between gap-2">
         <EntityIcon
           icon={account.icon ?? meta.icon}
@@ -61,11 +72,15 @@ export function AccountCard({
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="-mt-1 -mr-1 size-8">
+            <Button variant="ghost" size="icon" className="relative z-2 -mt-1 -mr-1 size-8">
               <MoreVertical className="size-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={onToggleDefault}>
+              {account.is_default ? <StarOff className="size-4" /> : <Star className="size-4" />}
+              {account.is_default ? t("accounts.card.unsetDefault") : t("accounts.card.setDefault")}
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={onAdjust}>
               <Scale className="size-4" />
               {t("accounts.card.adjustBalance")}
@@ -83,8 +98,14 @@ export function AccountCard({
       </div>
 
       <p className="mt-3 truncate font-bold">{account.name}</p>
-      <p className="text-xs font-medium" style={{ color }}>
-        {t(`accountType.${account.type}.label`)}
+      <p className="flex items-center gap-1.5 text-xs font-medium" style={{ color }}>
+        <span className="truncate">{t(`accountType.${account.type}.label`)}</span>
+        {account.is_default && (
+          <span className="flex shrink-0 items-center gap-0.5 rounded-full bg-brand-500/15 px-1.5 py-0.5 text-[10px] font-bold text-brand-700 dark:text-brand-300">
+            <Star className="size-2.5 fill-current" />
+            {t("common.defaultBadge")}
+          </span>
+        )}
       </p>
 
       <p className={`mt-2 flex items-center text-xl font-extrabold tabular-nums ${isDebt ? "text-expense" : ""}`}>
@@ -97,7 +118,7 @@ export function AccountCard({
         <button
           type="button"
           onClick={onAdjust}
-          className="mt-2 flex w-full items-center gap-1.5 rounded-full bg-amber-500/15 px-3 py-1.5 text-[11px] font-bold text-amber-700 transition-transform active:scale-95 dark:text-amber-300"
+          className="relative z-2 mt-2 flex w-full items-center gap-1.5 rounded-full bg-amber-500/15 px-3 py-1.5 text-[11px] font-bold text-amber-700 transition-transform active:scale-95 dark:text-amber-300"
         >
           <Scale className="size-3.5 shrink-0" />
           <span className="truncate">{t("accounts.card.rebalanceSuffix", { text: activity.text })}</span>

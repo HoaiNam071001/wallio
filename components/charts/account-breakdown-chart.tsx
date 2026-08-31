@@ -1,8 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { EntityIcon } from "@/components/shared/entity-icon";
 import { AmountText } from "@/components/shared/amount-text";
 import { ACCOUNT_TYPE_META } from "@/components/accounts/account-type";
+import { ROUTES } from "@/lib/constants/routes";
 import { colorForKey } from "@/lib/theme/palette";
 import { useT } from "@/lib/i18n/use-t";
 import type { AmountVisibilityScope } from "@/lib/hooks/use-amount-visibility";
@@ -37,7 +39,11 @@ export function AccountBreakdownChart({
 
         return (
           <li key={item.accountId} className="flex flex-col gap-1.5">
-            <div className="flex items-center gap-2">
+            {/* Bấm vào một nguồn tiền để xem toàn bộ giao dịch vào/ra của riêng nguồn đó. */}
+            <Link
+              href={ROUTES.accountDetail(item.accountId)}
+              className="flex items-center gap-2 transition-opacity active:opacity-70"
+            >
               <EntityIcon
                 icon={item.icon ?? meta.icon}
                 color={color}
@@ -52,7 +58,7 @@ export function AccountBreakdownChart({
                 scope={scope}
                 className="shrink-0 text-sm font-bold tabular-nums"
               />
-            </div>
+            </Link>
             <div className="h-2 overflow-hidden rounded-full bg-muted">
               <div
                 className="h-full rounded-full"

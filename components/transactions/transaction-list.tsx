@@ -45,17 +45,20 @@ function visualsOf(t: TransactionWithRelations) {
 function TransactionRow({
   transaction: t,
   scope,
+  showDate,
   onView,
   onEdit,
   onDelete,
 }: {
   transaction: TransactionWithRelations;
   scope: AmountVisibilityScope;
+  /** Danh sách phẳng không có tiêu đề ngày nên mỗi dòng tự hiện ngày của nó. */
+  showDate?: boolean;
   onView?: (transaction: TransactionWithRelations) => void;
   onEdit?: (transaction: TransactionWithRelations) => void;
   onDelete?: (transaction: TransactionWithRelations) => void;
 }) {
-  const { t: tr } = useT();
+  const { t: tr, locale } = useT();
   const visuals = visualsOf(t);
   const amountClass =
     t.type === "income" ? "text-income" : t.type === "expense" ? "text-expense" : "text-transfer";
@@ -66,7 +69,12 @@ function TransactionRow({
       ? `${t.account?.name ?? "?"} → ${t.to_account?.name ?? "?"}`
       : (t.category?.name ?? tr("common.uncategorized"));
 
-  const subtitle = t.type === "transfer" ? tr("common.transfer") : (t.account?.name ?? "");
+  const subtitle = [
+    showDate ? dayLabel(tr, locale, t.transaction_date) : null,
+    t.type === "transfer" ? tr("common.transfer") : (t.account?.name || null),
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   // Chuyển đổi hiện vật (vd Momo -> vàng) có 2 vế số khác nhau/khác đơn vị.
   const isDualLeg = t.type === "transfer" && t.to_amount != null && t.to_amount !== t.amount;
@@ -148,6 +156,7 @@ function TransactionRow({
 export function TransactionList({
   transactions,
   scope,
+  grouped = true,
   onView,
   onEdit,
   onDelete,
@@ -155,6 +164,11 @@ export function TransactionList({
 }: {
   transactions: TransactionWithRelations[];
   scope: AmountVisibilityScope;
+  /**
+   * Gom theo ngày (mặc định) cho các màn hình xem nhiều ngày. Đặt false để hiện danh sách phẳng
+   * — dùng ở trang chi tiết nguồn tiền, nơi cuộn vô tận nên tiêu đề ngày sẽ chen giữa các trang.
+   */
+  grouped?: boolean;
   onView?: (transaction: TransactionWithRelations) => void;
   onEdit?: (transaction: TransactionWithRelations) => void;
   onDelete?: (transaction: TransactionWithRelations) => void;
@@ -163,6 +177,7 @@ export function TransactionList({
   const { t, locale } = useT();
   // Gom theo ngày để danh sách dễ quét mắt hơn một bảng phẳng.
   const groups = useMemo(() => {
+    if (!grouped) return [];
     const byDate = new Map<string, TransactionWithRelations[]>();
     for (const t of transactions) {
       const list = byDate.get(t.transaction_date);
@@ -178,13 +193,33 @@ export function TransactionList({
         0,
       ),
     }));
-  }, [transactions]);
+  }, [transactions, grouped]);
 
   if (transactions.length === 0) {
     return (
       <p className="py-6 text-center text-sm text-muted-foreground">
         {emptyLabel ?? t("transactions.list.empty")}
       </p>
+    );
+  }
+
+  if (!grouped) {
+    return (
+      <div className="glass overflow-hidden rounded-xl">
+        <div className="divide-y divide-border/50 p-1">
+          {transactions.map((item) => (
+            <TransactionRow
+              key={item.id}
+              transaction={item}
+              scope={scope}
+              showDate
+              onView={onView}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
+          ))}
+        </div>
+      </div>
     );
   }
 

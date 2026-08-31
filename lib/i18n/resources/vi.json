@@ -12,6 +12,7 @@
     "yesterday": "Hôm qua",
     "transfer": "Chuyển khoản",
     "uncategorized": "Không phân loại",
+    "defaultBadge": "Mặc định",
     "hideAmount": "Ẩn số tiền",
     "showAmount": "Hiện số tiền",
     "close": "Đóng",
@@ -384,6 +385,8 @@
       "toastAdded": "Đã thêm nguồn tiền",
       "toastDeleted": "Đã xoá nguồn tiền",
       "toastDeleteError": "Không thể xoá — có thể còn giao dịch liên quan",
+    "toastDefaultSet": "Đã chọn \"{{name}}\" làm nguồn tiền mặc định",
+    "toastDefaultCleared": "Đã bỏ nguồn tiền mặc định",
       "reorder": "Sắp xếp",
       "doneReorder": "Xong",
       "dragHandle": "Kéo để sắp xếp"
@@ -410,10 +413,12 @@
       "activityYesterday": "Ghi hôm qua",
       "activityDaysAgo": "Ghi lần cuối {{days}} ngày trước",
       "rebalanceSuffix": "{{text}} · cân đối lại",
-      "adjustBalance": "Cân đối số dư"
+      "adjustBalance": "Cân đối số dư",
+    "setDefault": "Đặt làm mặc định",
+    "unsetDefault": "Bỏ mặc định"
     },
-    "select": {
-      "defaultPlaceholder": "Chọn nguồn tiền"
+    "picker": {
+      "empty": "Chưa có nguồn tiền nào — thêm ở mục Nguồn tiền."
     },
     "balanceAdjust": {
       "title": "Cân đối số dư",
@@ -429,6 +434,18 @@
       "toastAdjusted": "Đã cân đối {{amount}}",
       "submit": "Cân đối"
     }
+  },
+
+  "accountDetail": {
+    "title": "Chi tiết nguồn tiền",
+    "notFound": "Không tìm thấy nguồn tiền này.",
+    "currentBalance": "Số dư hiện tại",
+    "totalIn": "Tiền vào trong kỳ",
+    "totalOut": "Tiền ra trong kỳ",
+    "tabAll": "Tất cả",
+    "tabIn": "Tiền vào",
+    "tabOut": "Tiền ra",
+    "empty": "Chưa có giao dịch nào trong khoảng thời gian này."
   },
 
   "categories": {
@@ -447,7 +464,11 @@
       "toastUpdated": "Đã cập nhật danh mục",
       "toastAdded": "Đã thêm danh mục",
       "toastDeleted": "Đã xoá danh mục",
-      "toastDeleteError": "Không thể xoá danh mục"
+      "toastDeleteError": "Không thể xoá danh mục",
+    "setDefault": "Đặt làm mặc định",
+    "unsetDefault": "Bỏ mặc định",
+    "toastDefaultSet": "Đã chọn \"{{name}}\" làm danh mục mặc định",
+    "toastDefaultCleared": "Đã bỏ danh mục mặc định"
     },
     "form": {
       "validation": { "nameRequired": "Nhập tên danh mục" },

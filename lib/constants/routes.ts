@@ -7,6 +7,8 @@ export const ROUTES = {
   transactions: "/transactions",
   newTransaction: "/transactions/new",
   accounts: "/accounts",
+  /** Chi tiết một nguồn tiền: số dư + dòng tiền vào/ra của riêng nguồn đó. */
+  accountDetail: (id: string) => `/accounts/${id}`,
   categories: "/categories",
   reports: "/reports",
   profile: "/profile",

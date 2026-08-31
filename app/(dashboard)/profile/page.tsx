@@ -164,18 +164,23 @@ function AccountsWidgetCard() {
               const isDebt = account.type === "debt";
               const displayBalance = isDebt ? Math.abs(account.current_balance) : account.current_balance;
               return (
-                <li key={account.id} className="flex items-center gap-2.5">
-                  <EntityIcon
-                    icon={account.icon ?? meta.icon}
-                    color={account.color ?? meta.color}
-                    className="size-9 rounded-xl"
-                    iconClassName="size-4"
-                  />
-                  <span className="min-w-0 flex-1 truncate text-sm font-semibold">{account.name}</span>
-                  <span className={cn("shrink-0 text-sm font-bold tabular-nums", isDebt && "text-expense")}>
-                    {isDebt && displayBalance !== 0 ? "-" : ""}
-                    <AmountTextForAccount amount={displayBalance} account={account} scope="accounts" />
-                  </span>
+                <li key={account.id}>
+                  <Link
+                    href={ROUTES.accountDetail(account.id)}
+                    className="flex items-center gap-2.5 transition-opacity active:opacity-70"
+                  >
+                    <EntityIcon
+                      icon={account.icon ?? meta.icon}
+                      color={account.color ?? meta.color}
+                      className="size-9 rounded-xl"
+                      iconClassName="size-4"
+                    />
+                    <span className="min-w-0 flex-1 truncate text-sm font-semibold">{account.name}</span>
+                    <span className={cn("shrink-0 text-sm font-bold tabular-nums", isDebt && "text-expense")}>
+                      {isDebt && displayBalance !== 0 ? "-" : ""}
+                      <AmountTextForAccount amount={displayBalance} account={account} scope="accounts" />
+                    </span>
+                  </Link>
                 </li>
               );
             })}

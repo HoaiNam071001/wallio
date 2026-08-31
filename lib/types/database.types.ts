@@ -21,6 +21,7 @@ export interface Database {
           color: string | null;
           unit: string | null;
           sort_order: number;
+          is_default: boolean;
           created_at: string;
         };
         Insert: {
@@ -34,6 +35,7 @@ export interface Database {
           color?: string | null;
           unit?: string | null;
           sort_order?: number;
+          is_default?: boolean;
           created_at?: string;
         };
         Update: {
@@ -47,6 +49,7 @@ export interface Database {
           color?: string | null;
           unit?: string | null;
           sort_order?: number;
+          is_default?: boolean;
           created_at?: string;
         };
         Relationships: [];
@@ -93,6 +96,7 @@ export interface Database {
           icon: string | null;
           color: string | null;
           is_system: boolean;
+          is_default: boolean;
           created_at: string;
         };
         Insert: {
@@ -103,6 +107,7 @@ export interface Database {
           icon?: string | null;
           color?: string | null;
           is_system?: boolean;
+          is_default?: boolean;
           created_at?: string;
         };
         Update: {
@@ -113,6 +118,7 @@ export interface Database {
           icon?: string | null;
           color?: string | null;
           is_system?: boolean;
+          is_default?: boolean;
           created_at?: string;
         };
         Relationships: [];

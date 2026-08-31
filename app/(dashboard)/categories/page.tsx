@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Plus, Pencil, Tags, Trash2 } from "lucide-react";
+import { Plus, Pencil, Star, Tags, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -28,9 +28,11 @@ import {
   useCategories,
   useCreateCategory,
   useDeleteCategory,
+  useSetDefaultCategory,
   useUpdateCategory,
 } from "@/lib/hooks/use-categories";
 import { normalizeColor, withAlpha } from "@/lib/theme/palette";
+import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n/use-t";
 import type { Category, CategoryKind } from "@/lib/types/database.types";
 
@@ -43,6 +45,7 @@ export default function CategoriesPage() {
   const createCategory = useCreateCategory();
   const updateCategory = useUpdateCategory();
   const deleteCategory = useDeleteCategory();
+  const setDefaultCategory = useSetDefaultCategory();
 
   const [tab, setTab] = useState<CategoryKind>("expense");
   const [formOpen, setFormOpen] = useState(false);
@@ -96,6 +99,24 @@ export default function CategoriesPage() {
           toast.success(t("categories.page.toastAdded"));
           setFormOpen(false);
         },
+        onError: () => toast.error(t("common.genericError")),
+      },
+    );
+  }
+
+  /** Đánh dấu / bỏ đánh dấu danh mục mặc định của loại đang xem (tối đa 1 mỗi loại). */
+  function toggleDefault(category: Category) {
+    if (!guardOnline()) return;
+    const id = category.is_default ? null : category.id;
+    setDefaultCategory.mutate(
+      { kind: category.kind, id },
+      {
+        onSuccess: () =>
+          toast.success(
+            id
+              ? t("categories.page.toastDefaultSet", { name: category.name })
+              : t("categories.page.toastDefaultCleared"),
+          ),
         onError: () => toast.error(t("common.genericError")),
       },
     );
@@ -166,8 +187,34 @@ export default function CategoriesPage() {
               }}
             >
               <EntityIcon icon={category.icon} color={color} />
-              <span className="min-w-0 flex-1 truncate font-bold">{category.name}</span>
+              <div className="flex min-w-0 flex-1 flex-col">
+                <span className="truncate font-bold">{category.name}</span>
+                {category.is_default && (
+                  <span className="flex items-center gap-0.5 text-[11px] font-bold text-brand-700 dark:text-brand-300">
+                    <Star className="size-3 fill-current" />
+                    {t("common.defaultBadge")}
+                  </span>
+                )}
+              </div>
               <div className="flex shrink-0 gap-0.5">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn("size-8", category.is_default && "text-brand-600")}
+                  aria-label={
+                    category.is_default
+                      ? t("categories.page.unsetDefault")
+                      : t("categories.page.setDefault")
+                  }
+                  title={
+                    category.is_default
+                      ? t("categories.page.unsetDefault")
+                      : t("categories.page.setDefault")
+                  }
+                  onClick={() => toggleDefault(category)}
+                >
+                  <Star className={cn("size-4", category.is_default && "fill-current")} />
+                </Button>
                 <Button
                   variant="ghost"
                   size="icon"

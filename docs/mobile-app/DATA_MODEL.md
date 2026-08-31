@@ -1,7 +1,8 @@
 # Data Model — Supabase (dùng chung web + mobile)
 
-Backend không cần thay đổi gì để phục vụ mobile — schema dưới đây là **hiện trạng thật** (2 migration đã chạy:
-`0001_init.sql` + `0002_profile_and_inkind.sql`), khác spec gốc ở vài điểm quan trọng (đánh dấu ⚠️).
+Backend không cần thay đổi gì để phục vụ mobile — schema dưới đây là **hiện trạng thật** (các migration đã chạy:
+`0001_init.sql`, `0002_profile_and_inkind.sql`, `0003_account_sort_order.sql`, `0004_category_is_system.sql`,
+`0005_default_account_category.sql`), khác spec gốc ở vài điểm quan trọng (đánh dấu ⚠️).
 
 ## 1. Bảng `accounts` (nguồn tiền)
 
@@ -17,9 +18,16 @@ create table accounts (
   color text,       -- hex #rrggbb
   unit text,        -- ⚠️ mới: chỉ dùng khi type = 'in_kind', vd "chỉ", "cổ phiếu"
   sort_order integer not null default 0, -- ⚠️ mới: thứ tự hiển thị, chỉnh bằng kéo-thả ở màn Accounts
+  is_default boolean not null default false, -- ⚠️ mới: nguồn tiền chọn sẵn khi ghi khoản mới
   created_at timestamptz not null default now()
 );
+
+create unique index idx_accounts_one_default on accounts(user_id) where is_default;
 ```
+
+`is_default`: mỗi user đánh dấu **tối đa 1** nguồn tiền (unique partial index ở trên đảm bảo, không chỉ dựa vào
+UI). Form ghi giao dịch chọn sẵn account này khi tạo khoản mới. Khi đổi mặc định phải **gỡ cờ ở bản ghi cũ
+TRƯỚC** rồi mới gắn cho bản ghi mới, nếu làm ngược lại sẽ đụng unique index.
 
 Danh sách accounts luôn `order by sort_order asc, created_at asc` — không phải `created_at` như spec gốc.
 `sort_order` chỉ đổi qua tính năng "Sắp xếp" (reorder) ở màn Accounts, xem [PHASE_2_ACCOUNTS_CATEGORIES.md](PHASE_2_ACCOUNTS_CATEGORIES.md).
@@ -46,9 +54,19 @@ create table categories (
   kind text not null check (kind in ('income','expense')),
   icon text,
   color text,
+  is_system boolean not null default false,  -- ⚠️ mới: danh mục do app tự tạo, vd "Điều chỉnh số dư"
+  is_default boolean not null default false, -- ⚠️ mới: danh mục chọn sẵn khi ghi khoản mới
   created_at timestamptz not null default now()
 );
+
+create unique index idx_categories_one_system_per_kind on categories(user_id, kind) where is_system;
+create unique index idx_categories_one_default_per_kind on categories(user_id, kind) where is_default;
 ```
+
+`is_system`: nhận diện danh mục "Điều chỉnh số dư" độc lập với tên (user đổi tên vẫn tìm đúng, xem §10).
+
+`is_default`: tối đa **1 danh mục mỗi `kind`** cho mỗi user — form ghi giao dịch chọn sẵn danh mục này theo loại
+đang chọn (chi tiêu / thu nhập). Quy tắc gỡ-cờ-cũ-trước giống `accounts.is_default`.
 
 ## 3. Bảng `transactions` (giao dịch)
 

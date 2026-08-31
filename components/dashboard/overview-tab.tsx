@@ -88,22 +88,27 @@ export function OverviewTab() {
               {inKindAccounts.map((item) => {
                 const meta = ACCOUNT_TYPE_META.in_kind;
                 return (
-                  <li key={item.accountId} className="flex items-center gap-2.5">
-                    <EntityIcon
-                      icon={item.icon ?? meta.icon}
-                      color={item.color ?? meta.color}
-                      className="size-9 rounded-xl"
-                      iconClassName="size-4"
-                    />
-                    <span className="min-w-0 flex-1 truncate text-sm font-semibold">
-                      {item.accountName}
-                    </span>
-                    <AmountTextForAccount
-                      amount={item.balance}
-                      account={{ type: "in_kind", unit: item.unit }}
-                      scope="dashboard"
-                      className="shrink-0 text-sm font-bold tabular-nums"
-                    />
+                  <li key={item.accountId}>
+                    <Link
+                      href={ROUTES.accountDetail(item.accountId)}
+                      className="flex items-center gap-2.5 transition-opacity active:opacity-70"
+                    >
+                      <EntityIcon
+                        icon={item.icon ?? meta.icon}
+                        color={item.color ?? meta.color}
+                        className="size-9 rounded-xl"
+                        iconClassName="size-4"
+                      />
+                      <span className="min-w-0 flex-1 truncate text-sm font-semibold">
+                        {item.accountName}
+                      </span>
+                      <AmountTextForAccount
+                        amount={item.balance}
+                        account={{ type: "in_kind", unit: item.unit }}
+                        scope="dashboard"
+                        className="shrink-0 text-sm font-bold tabular-nums"
+                      />
+                    </Link>
                   </li>
                 );
               })}

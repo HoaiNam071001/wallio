@@ -17,8 +17,13 @@ Từ `lib/queries/accounts.ts` — port các hàm:
   không có sẵn trong DB) → trả về `AccountWithBalance[]` đầy đủ để hiển thị.
 - `getAccountBalanceAsOf(accountId, date)` — số dư tính đến hết một ngày (dùng cho cân đối số dư, xem 2.4).
 - `createAccount` / `updateAccount` / `deleteAccount` — CRUD chuẩn qua Supabase, RLS tự lọc theo `user_id`.
+- `setDefaultAccount(userId, id | null)` — đánh dấu nguồn tiền mặc định (xem 2.2.2). Luôn chạy 2 bước: gỡ cờ ở
+  mọi bản ghi cũ của user trước, rồi mới gắn cờ cho `id` (bỏ qua bước 2 nếu `id = null`).
+- `getAccountFlowTotals(accountId, start, end)` — tổng tiền vào/ra của một nguồn trong khoảng ngày, cho màn chi
+  tiết nguồn tiền (2.2.3). Vế nhận của transfer lấy `to_amount ?? amount` vì hai vế có thể khác đơn vị.
 
-Từ `lib/queries/categories.ts` — CRUD chuẩn tương tự, không có gì đặc biệt.
+Từ `lib/queries/categories.ts` — CRUD chuẩn tương tự, thêm `setDefaultCategory(userId, kind, id | null)` (cùng
+quy tắc 2 bước, nhưng phạm vi "tối đa 1" là theo từng `kind`).
 
 Nếu dùng React Query (RN) / Riverpod `AsyncNotifier` (Flutter), giữ đúng pattern hook hiện có:
 `use-accounts.ts`, `use-categories.ts` — mutation nào cũng nên `invalidate` query liên quan (accounts, account
@@ -54,6 +59,34 @@ Mỗi lần thả (drop) gọi `useReorderAccounts()` ngay — không đợi b�
 dạng card, thứ tự đã lưu từ trước đó rồi. Danh sách account ở mọi nơi khác trong app (grid, dropdown chọn
 account...) tự động theo `sort_order` vì đều dùng chung `listAccounts` / `listAccountsWithBalance`.
 
+### 2.2.2 Nguồn tiền mặc định — ⚠️ mới, không có trong spec gốc
+
+Mỗi user đánh dấu tối đa 1 account làm mặc định (cột `accounts.is_default`, xem
+[DATA_MODEL.md §1](./DATA_MODEL.md#1-bảng-accounts-nguồn-tiền)). Bật/tắt từ menu ba chấm của account card
+("Đặt làm mặc định" / "Bỏ mặc định"); card đang mặc định hiện badge sao cạnh nhãn loại. Form ghi khoản mới chọn
+sẵn account này (xem PHASE_3 §3.2). Bấm lại đúng account đang mặc định = bỏ mặc định (gửi `id = null`).
+
+### 2.2.3 Màn hình chi tiết nguồn tiền — ⚠️ mới, không có trong spec gốc
+
+Route `/accounts/[id]`. Vào được từ **mọi nơi hiện danh sách nguồn tiền**: card ở màn Accounts (bấm bất kỳ đâu
+trên card trừ menu ba chấm), danh sách "Số dư theo nguồn tiền" và "Tiền tệ khác" ở Tổng quan, widget nguồn tiền
+ở Hồ sơ.
+
+Nội dung:
+
+- Thẻ đầu trang: icon + số dư hiện tại (account `debt` hiện trị tuyệt đối kèm dấu trừ như mọi nơi khác), kèm
+  **tổng tiền vào / tổng tiền ra trong kỳ đang lọc** (`getAccountFlowTotals`).
+- Bộ lọc khoảng thời gian dùng chung `DateRangeFilter` (mặc định "Tháng này").
+- 3 tab chiều tiền: **Tất cả / Tiền vào / Tiền ra**. Ánh xạ sang filter query (`direction` trong
+  `listTransactions`):
+  - `in`  → `income` ghi vào account này, **hoặc** `transfer` có `to_account_id` = account này
+  - `out` → `expense` từ account này, **hoặc** `transfer` có `account_id` = account này
+  - `all` → `account_id` hoặc `to_account_id` = account này
+- Danh sách giao dịch **để phẳng, không gom theo ngày** (mỗi dòng tự hiện ngày của nó) vì trang dùng **cuộn vô
+  tận**: tải thêm trang kế khi ô đánh dấu cuối danh sách sắp lọt vào khung nhìn (web dùng
+  `IntersectionObserver`; mobile dùng `onEndReached` của FlatList / `NotificationListener` của ListView).
+- Bấm một dòng mở dialog xem chi tiết; sửa/xoá vẫn làm ở màn Sổ thu chi.
+
 ## 2.3 Hiển thị số tiền theo loại account
 
 Port hàm `formatAccountAmount` (`lib/utils/currency.ts`):
@@ -84,7 +117,9 @@ Tính năng độc lập, mở từ mỗi account card (icon cân `Scale`). Port
 ## 2.5 Màn hình Categories
 
 CRUD đơn giản hơn account: `name`, `kind` (income/expense — quyết định category chỉ xuất hiện khi chọn đúng loại
-giao dịch tương ứng ở form transaction), icon, color. Danh sách nên nhóm/tab theo `kind` để dễ quản lý khi nhiều
+giao dịch tương ứng ở form transaction), icon, color. Mỗi dòng có thêm **nút sao đánh dấu danh mục mặc định**
+(`categories.is_default`) — tối đa 1 cho mỗi `kind`, form ghi khoản mới chọn sẵn danh mục này theo loại đang
+chọn; bấm lại nút sao của danh mục đang mặc định để bỏ. Danh sách nên nhóm/tab theo `kind` để dễ quản lý khi nhiều
 danh mục. Không có khái niệm "is_active" hay xoá bị chặn kiểu account — `category_id` trên transaction dùng
 `on delete set null`, nên xoá category không xoá mất giao dịch, chỉ làm giao dịch cũ mất phân loại (hiển thị
 "Không phân loại").
@@ -102,3 +137,5 @@ tương tự hiện tối đa 8 category). Xem chi tiết bố cục ở PHASE_5
 - [ ] Cân đối số dư: preview đúng chênh lệch, ghi đúng 1 giao dịch, category tự tạo đúng 1 lần (không nhân bản)
 - [ ] Tạo/sửa/xoá category, lọc đúng theo income/expense
 - [ ] Xoá account đang có giao dịch → báo lỗi rõ ràng, không crash
+- [ ] Đánh dấu mặc định: chỉ 1 account và 1 category mỗi kind giữ cờ, đổi qua lại không lỗi unique index
+- [ ] Màn chi tiết nguồn tiền: 3 tab lọc đúng chiều tiền, đổi khoảng ngày đổi cả tổng vào/ra, cuộn vô tận tải thêm

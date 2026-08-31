@@ -12,6 +12,7 @@
     "yesterday": "Yesterday",
     "transfer": "Transfer",
     "uncategorized": "Uncategorized",
+    "defaultBadge": "Default",
     "hideAmount": "Hide amount",
     "showAmount": "Show amount",
     "close": "Close",
@@ -384,6 +385,8 @@
       "toastAdded": "Account added",
       "toastDeleted": "Account deleted",
       "toastDeleteError": "Couldn't delete — it may still have related transactions",
+    "toastDefaultSet": "\"{{name}}\" is now the default account",
+    "toastDefaultCleared": "Default account removed",
       "reorder": "Reorder",
       "doneReorder": "Done",
       "dragHandle": "Drag to reorder"
@@ -410,10 +413,12 @@
       "activityYesterday": "Recorded yesterday",
       "activityDaysAgo": "Last recorded {{days}} days ago",
       "rebalanceSuffix": "{{text}} · rebalance",
-      "adjustBalance": "Adjust balance"
+      "adjustBalance": "Adjust balance",
+    "setDefault": "Set as default",
+    "unsetDefault": "Remove default"
     },
-    "select": {
-      "defaultPlaceholder": "Choose an account"
+    "picker": {
+      "empty": "No accounts yet — add one under Accounts."
     },
     "balanceAdjust": {
       "title": "Adjust balance",
@@ -429,6 +434,18 @@
       "toastAdjusted": "Adjusted by {{amount}}",
       "submit": "Adjust"
     }
+  },
+
+  "accountDetail": {
+    "title": "Account detail",
+    "notFound": "This account doesn't exist.",
+    "currentBalance": "Current balance",
+    "totalIn": "Money in this period",
+    "totalOut": "Money out this period",
+    "tabAll": "All",
+    "tabIn": "Money in",
+    "tabOut": "Money out",
+    "empty": "No transactions in this date range yet."
   },
 
   "categories": {
@@ -447,7 +464,11 @@
       "toastUpdated": "Category updated",
       "toastAdded": "Category added",
       "toastDeleted": "Category deleted",
-      "toastDeleteError": "Couldn't delete category"
+      "toastDeleteError": "Couldn't delete category",
+    "setDefault": "Set as default",
+    "unsetDefault": "Remove default",
+    "toastDefaultSet": "\"{{name}}\" is now the default category",
+    "toastDefaultCleared": "Default category removed"
     },
     "form": {
       "validation": { "nameRequired": "Enter a category name" },

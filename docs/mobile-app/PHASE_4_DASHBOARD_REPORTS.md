@@ -28,9 +28,9 @@ Thứ tự bố cục:
    PHASE_1 §1.6-kế — một nút gọn mở bottom sheet, đủ cả 5 preset kể cả "Tuỳ chọn", đã đồng bộ với Reports/Sổ thu
    chi thay vì tabs riêng không có "Tuỳ chọn" như trước), mặc định "Tháng". Bar/donut so sánh thu vs chi trong kỳ.
 3. **Biểu đồ số dư theo account** (`AccountBreakdownChart`) — toàn bộ account (không lọc theo kỳ, vì số dư luôn
-   là hiện tại).
+   là hiện tại). Bấm vào một dòng mở **màn chi tiết nguồn tiền** (PHASE_2 §2.2.3).
 4. **Danh sách tài sản hiện vật** (chỉ hiện nếu có ít nhất 1 account `in_kind`) — liệt kê riêng từng account hiện
-   vật kèm số lượng theo đơn vị của nó (không trộn vào chart VNĐ).
+   vật kèm số lượng theo đơn vị của nó (không trộn vào chart VNĐ). Cũng bấm được để mở màn chi tiết nguồn tiền.
 5. **Giao dịch gần đây** (6 giao dịch mới nhất) + link "Xem tất cả" sang tab Sổ.
 
 ## 4.3 Tab "Báo cáo" (`ReportsTab`)

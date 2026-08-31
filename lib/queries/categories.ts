@@ -1,5 +1,11 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Category, CategoryInsert, CategoryUpdate, Database } from "@/lib/types/database.types";
+import type {
+  Category,
+  CategoryInsert,
+  CategoryKind,
+  CategoryUpdate,
+  Database,
+} from "@/lib/types/database.types";
 
 type Client = SupabaseClient<Database>;
 
@@ -50,5 +56,29 @@ export async function updateCategory(
 
 export async function deleteCategory(supabase: Client, id: string): Promise<void> {
   const { error } = await supabase.from("categories").delete().eq("id", id);
+  if (error) throw error;
+}
+
+/**
+ * Đánh dấu danh mục mặc định cho một loại (chi tiêu / thu nhập). Mỗi user tối đa 1 danh mục
+ * mỗi loại — gỡ cờ cũ trước rồi mới gắn cờ mới, xem `setDefaultAccount`. `id = null` để bỏ.
+ */
+export async function setDefaultCategory(
+  supabase: Client,
+  userId: string,
+  kind: CategoryKind,
+  id: string | null,
+): Promise<void> {
+  const { error: clearError } = await supabase
+    .from("categories")
+    .update({ is_default: false })
+    .eq("user_id", userId)
+    .eq("kind", kind)
+    .eq("is_default", true);
+  if (clearError) throw clearError;
+
+  if (!id) return;
+
+  const { error } = await supabase.from("categories").update({ is_default: true }).eq("id", id);
   if (error) throw error;
 }

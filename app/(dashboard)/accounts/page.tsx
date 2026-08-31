@@ -36,6 +36,7 @@ import {
   useCreateAccount,
   useDeleteAccount,
   useReorderAccounts,
+  useSetDefaultAccount,
   useUpdateAccount,
 } from "@/lib/hooks/use-accounts";
 import { useT } from "@/lib/i18n/use-t";
@@ -53,6 +54,7 @@ export default function AccountsPage() {
   const updateAccount = useUpdateAccount();
   const deleteAccount = useDeleteAccount();
   const reorderAccounts = useReorderAccounts();
+  const setDefaultAccount = useSetDefaultAccount();
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<AccountWithBalance | null>(null);
@@ -129,6 +131,19 @@ export default function AccountsPage() {
     });
   }
 
+  /** Đánh dấu / bỏ đánh dấu nguồn tiền mặc định cho modal ghi khoản mới (tối đa 1). */
+  function toggleDefault(account: AccountWithBalance) {
+    if (!guardOnline()) return;
+    const next = account.is_default ? null : account.id;
+    setDefaultAccount.mutate(next, {
+      onSuccess: () =>
+        toast.success(
+          next ? t("accounts.page.toastDefaultSet", { name: account.name }) : t("accounts.page.toastDefaultCleared"),
+        ),
+      onError: () => toast.error(t("common.genericError")),
+    });
+  }
+
   function toggleReorder() {
     if (!reordering && !guardOnline()) return;
     setReordering((prev) => !prev);
@@ -202,6 +217,7 @@ export default function AccountsPage() {
               onEdit={() => openEdit(account)}
               onDelete={() => guardOnline() && setDeleting(account)}
               onAdjust={() => guardOnline() && setAdjusting(account)}
+              onToggleDefault={() => toggleDefault(account)}
             />
           ))}
         </div>

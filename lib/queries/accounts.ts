@@ -165,3 +165,68 @@ export async function bulkDeleteAccounts(supabase: Client, ids: string[]): Promi
   const { error } = await supabase.from("accounts").delete().in("id", ids);
   if (error) throw error;
 }
+
+/**
+ * Đánh dấu nguồn tiền mặc định cho form ghi khoản mới. Mỗi user tối đa 1 nguồn tiền, nên phải
+ * gỡ cờ ở nguồn tiền cũ TRƯỚC khi gắn cho nguồn mới — unique index `idx_accounts_one_default`
+ * sẽ chặn nếu làm ngược lại. Truyền `id = null` để bỏ mặc định hoàn toàn.
+ */
+export async function setDefaultAccount(
+  supabase: Client,
+  userId: string,
+  id: string | null,
+): Promise<void> {
+  const { error: clearError } = await supabase
+    .from("accounts")
+    .update({ is_default: false })
+    .eq("user_id", userId)
+    .eq("is_default", true);
+  if (clearError) throw clearError;
+
+  if (!id) return;
+
+  const { error } = await supabase.from("accounts").update({ is_default: true }).eq("id", id);
+  if (error) throw error;
+}
+
+export interface AccountFlowTotals {
+  /** Tiền vào: thu nhập ghi vào nguồn này + chuyển khoản đến nguồn này. */
+  in: number;
+  /** Tiền ra: chi tiêu từ nguồn này + chuyển khoản đi khỏi nguồn này. */
+  out: number;
+}
+
+/**
+ * Tổng tiền vào/ra của một nguồn tiền trong khoảng ngày — dùng cho trang chi tiết nguồn tiền.
+ * Vế nhận của chuyển đổi hiện vật lấy `to_amount` vì hai vế khác đơn vị.
+ */
+export async function getAccountFlowTotals(
+  supabase: Client,
+  accountId: string,
+  startDate: string,
+  endDate: string,
+): Promise<AccountFlowTotals> {
+  const { data, error } = await supabase
+    .from("transactions")
+    .select("type, amount, to_amount, account_id, to_account_id")
+    .gte("transaction_date", startDate)
+    .lte("transaction_date", endDate)
+    .or(`account_id.eq.${accountId},to_account_id.eq.${accountId}`);
+
+  if (error) throw error;
+
+  let inflow = 0;
+  let outflow = 0;
+  for (const row of data) {
+    const amount = Number(row.amount) || 0;
+    if (row.account_id === accountId) {
+      if (row.type === "income") inflow += amount;
+      else outflow += amount; // chi tiêu và chuyển khoản đi ra đều là tiền ra
+    }
+    if (row.to_account_id === accountId && row.type === "transfer") {
+      inflow += row.to_amount != null ? Number(row.to_amount) || 0 : amount;
+    }
+  }
+
+  return { in: inflow, out: outflow };
+}

@@ -9,10 +9,19 @@ import type {
 
 type Client = SupabaseClient<Database>;
 
+/**
+ * Chiều tiền so với `accountId` đang lọc: "in" là tiền vào (thu nhập ghi vào nguồn này, hoặc
+ * chuyển khoản đến nguồn này), "out" là tiền ra (chi tiêu từ nguồn này, hoặc chuyển khoản đi).
+ * Bỏ trống = lấy cả hai chiều.
+ */
+export type AccountFlowDirection = "in" | "out";
+
 export interface TransactionFilters {
   startDate?: string;
   endDate?: string;
   accountId?: string;
+  /** Chỉ có tác dụng khi đi kèm `accountId`. */
+  direction?: AccountFlowDirection;
   categoryId?: string;
   type?: TransactionType;
   search?: string;
@@ -60,8 +69,7 @@ export async function listTransactions(
 
   if (filters.startDate) query = query.gte("transaction_date", filters.startDate);
   if (filters.endDate) query = query.lte("transaction_date", filters.endDate);
-  if (filters.accountId)
-    query = query.or(`account_id.eq.${filters.accountId},to_account_id.eq.${filters.accountId}`);
+  if (filters.accountId) query = query.or(accountFilterExpression(filters.accountId, filters.direction));
   if (filters.categoryId) query = query.eq("category_id", filters.categoryId);
   if (filters.type) query = query.eq("type", filters.type);
   if (filters.search) query = query.ilike("note", `%${filters.search}%`);
@@ -74,6 +82,17 @@ export async function listTransactions(
   const { data, error } = await query;
   if (error) throw error;
   return data as unknown as TransactionWithRelations[];
+}
+
+/** Biểu thức `or` của PostgREST cho một nguồn tiền, thu hẹp theo chiều tiền nếu có. */
+function accountFilterExpression(accountId: string, direction?: AccountFlowDirection): string {
+  if (direction === "in") {
+    return `and(type.eq.income,account_id.eq.${accountId}),and(type.eq.transfer,to_account_id.eq.${accountId})`;
+  }
+  if (direction === "out") {
+    return `and(type.eq.expense,account_id.eq.${accountId}),and(type.eq.transfer,account_id.eq.${accountId})`;
+  }
+  return `account_id.eq.${accountId},to_account_id.eq.${accountId}`;
 }
 
 export async function createTransaction(
