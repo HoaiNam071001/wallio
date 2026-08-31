@@ -38,7 +38,11 @@ Thứ tự bố cục:
 - Chọn khoảng thời gian qua `DateRangeFilter` (`components/shared/date-range-filter.tsx`) — một nút gọn hiện
   lựa chọn hiện tại (vd "Tháng 8, 2026"), bấm mở bottom sheet: danh sách 5 preset theo thứ tự **Tuỳ chọn, Hôm
   nay, Tuần, Tháng, Năm** (`DATE_RANGE_PRESET_ORDER`), chọn "Tuỳ chọn" hiện thêm lịch chọn khoảng ngày ngay
-  trong sheet + nút "Áp dụng". Component này dùng chung cho cả 3 màn có filter ngày (Sổ thu chi, Báo cáo, Tổng
+  trong sheet + nút "Áp dụng". Phần "Tuỳ chọn" gồm **2 thẻ mốc đầu/cuối** đặt cạnh nhau (nhãn "Từ ngày"/"Đến
+  ngày" + ngày `dd/MM/yyyy` + thứ trong tuần, thẻ đang chỉnh được viền/nền brand) thay cho 2 pill 1 dòng bị
+  cắt chữ trước đây; bấm thẻ nào thì lịch nhảy tới mốc đó, chọn xong mốc đầu tự chuyển sang mốc cuối. Lịch tô
+  sáng cả dải ngày giữa 2 mốc (`rangeStart`/`rangeEnd` của `Calendar`) và khi đang chỉnh mốc cuối thì các ngày
+  trước mốc đầu bị vô hiệu hoá (`minDate`); nút "Hôm nay" nằm dưới lịch chỉ để cuộn lịch về tháng hiện tại. Component này dùng chung cho cả 3 màn có filter ngày (Sổ thu chi, Báo cáo, Tổng
   quan) — thay cho 3 kiểu UI khác nhau (chip cuộn ngang, 2 kiểu tabs) trước đây, tối ưu cho mobile hơn.
 - 3 ô tổng nhanh: Thu / Chi / Chênh lệch (net) trong kỳ đã chọn.
 - **Biểu đồ theo danh mục**: toggle **tròn (pie/donut) / ngang (bar, mặc định)** — cùng component

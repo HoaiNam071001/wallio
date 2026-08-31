@@ -5,6 +5,7 @@ import {
   addDays,
   addMonths,
   addYears,
+  endOfDay,
   endOfMonth,
   endOfYear,
   format,
@@ -42,6 +43,8 @@ export function Calendar({
   minDate,
   cursor: controlledCursor,
   onCursorChange,
+  rangeStart,
+  rangeEnd,
 }: {
   value?: string;
   onSelect: (date: string) => void;
@@ -51,6 +54,10 @@ export function Calendar({
    * bỏ trống thì Calendar tự quản lý cursor như trước (uncontrolled). */
   cursor?: Date;
   onCursorChange?: (date: Date) => void;
+  /** Tô sáng dải ngày giữa 2 mốc (dùng khi chọn khoảng thời gian) — chỉ để hiển thị,
+   * việc chọn vẫn là từng ngày một qua `value`/`onSelect`. */
+  rangeStart?: string;
+  rangeEnd?: string;
 }) {
   const { t, locale } = useT();
   const dateLocale = locale === "en" ? enUS : vi;
@@ -120,7 +127,15 @@ export function Calendar({
       </div>
 
       {view === "day" && (
-        <DayGrid cursor={cursor} selected={selected} min={min} max={max} onSelect={onSelect} />
+        <DayGrid
+          cursor={cursor}
+          selected={selected}
+          min={min}
+          max={max}
+          onSelect={onSelect}
+          rangeStart={rangeStart ? parseISO(rangeStart) : undefined}
+          rangeEnd={rangeEnd ? parseISO(rangeEnd) : undefined}
+        />
       )}
       {view === "month" && (
         <MonthGrid
@@ -157,12 +172,16 @@ function DayGrid({
   min,
   max,
   onSelect,
+  rangeStart,
+  rangeEnd,
 }: {
   cursor: Date;
   selected?: Date;
   min?: Date;
   max?: Date;
   onSelect: (date: string) => void;
+  rangeStart?: Date;
+  rangeEnd?: Date;
 }) {
   const { t } = useT();
   const weekdays = t("calendar.weekdays", { returnObjects: true }) as string[];
@@ -185,23 +204,37 @@ function DayGrid({
           const outside = !isSameMonth(day, cursor);
           const selectedDay = selected && isSameDay(day, selected);
           const disabled = (max && day > max) || (min && day < min);
+          const hasRange = Boolean(rangeStart && rangeEnd && rangeEnd > rangeStart);
+          const inRange = hasRange && day >= rangeStart! && day <= endOfDay(rangeEnd!);
+          const isRangeStart = hasRange && isSameDay(day, rangeStart!);
+          const isRangeEnd = hasRange && isSameDay(day, rangeEnd!);
           return (
-            <button
+            <div
               key={day.toISOString()}
-              type="button"
-              disabled={disabled}
-              onClick={() => onSelect(format(day, "yyyy-MM-dd"))}
               className={cn(
-                "mx-auto flex size-8 items-center justify-center rounded-full text-sm font-semibold transition-colors",
-                outside && "text-muted-foreground/35",
-                !outside && !selectedDay && "text-foreground hover:bg-accent",
-                selectedDay && "brand-gradient text-white shadow-glow",
-                !selectedDay && isToday(day) && "font-extrabold text-brand-600",
-                disabled && "pointer-events-none",
+                "flex justify-center",
+                inRange && "bg-brand-500/12",
+                isRangeStart && "rounded-l-full",
+                isRangeEnd && "rounded-r-full",
               )}
             >
-              {format(day, "d")}
-            </button>
+              <button
+                type="button"
+                disabled={disabled}
+                onClick={() => onSelect(format(day, "yyyy-MM-dd"))}
+                className={cn(
+                  "flex size-8 items-center justify-center rounded-full text-sm font-semibold transition-colors",
+                  outside && "text-muted-foreground/35",
+                  !outside && !selectedDay && "text-foreground hover:bg-accent",
+                  inRange && !selectedDay && "text-brand-700 dark:text-brand-200",
+                  selectedDay && "brand-gradient text-white shadow-glow",
+                  !selectedDay && isToday(day) && "font-extrabold text-brand-600",
+                  disabled && "pointer-events-none",
+                )}
+              >
+                {format(day, "d")}
+              </button>
+            </div>
           );
         })}
       </div>

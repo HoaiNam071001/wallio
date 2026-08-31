@@ -79,8 +79,8 @@
 
   "dateRangeFilter": {
     "sheetTitle": "Chọn khoảng thời gian",
-    "fromDate": "Từ ngày {{date}}",
-    "toDate": "Đến ngày {{date}}",
+    "from": "Từ ngày",
+    "to": "Đến ngày",
     "apply": "Áp dụng"
   },
 

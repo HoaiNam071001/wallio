@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
 import { vi, enUS } from "date-fns/locale";
-import { CalendarRange, Check } from "lucide-react";
+import { ArrowRight, CalendarRange, Check } from "lucide-react";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -52,11 +52,7 @@ export function DateRangeFilter({
     setOpen(next);
   }
 
-  function jumpTo(field: "today" | "start" | "end") {
-    if (field === "today") {
-      setCursor(new Date());
-      return;
-    }
+  function jumpTo(field: "start" | "end") {
     setEditingField(field);
     setCursor(parseISO(field === "start" ? draft.customStart : draft.customEnd));
   }
@@ -119,41 +115,26 @@ export function DateRangeFilter({
         {draft.preset === "custom" && (
           <>
             <div className="flex flex-col gap-3 border-t border-border/60 pt-3">
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => jumpTo("today")}
-                  className="shrink-0 rounded-full border border-border px-3 py-2 text-xs font-bold text-muted-foreground transition-colors"
-                >
-                  {t("common.today")}
-                </button>
-                <button
-                  type="button"
+              {/* Hai thẻ From/To đủ rộng để hiện trọn ngày (trước đây là 2 pill 1 dòng nên bị cắt "…") */}
+              <div className="flex items-stretch gap-2">
+                <DateFieldCard
+                  label={t("dateRangeFilter.from")}
+                  date={draft.customStart}
+                  active={editingField === "start"}
+                  dateLocale={dateLocale}
                   onClick={() => jumpTo("start")}
-                  className={cn(
-                    "min-w-0 flex-1 truncate rounded-full border px-3 py-2 text-xs font-bold transition-colors",
-                    editingField === "start"
-                      ? "border-transparent bg-brand-500/15 text-brand-700 dark:text-brand-300"
-                      : "border-border text-muted-foreground",
-                  )}
-                >
-                  {t("dateRangeFilter.fromDate", { date: formatDraftDate(draft.customStart, dateLocale) })}
-                </button>
-                <button
-                  type="button"
+                />
+                <ArrowRight className="size-4 shrink-0 self-center text-muted-foreground" />
+                <DateFieldCard
+                  label={t("dateRangeFilter.to")}
+                  date={draft.customEnd}
+                  active={editingField === "end"}
+                  dateLocale={dateLocale}
                   onClick={() => jumpTo("end")}
-                  className={cn(
-                    "min-w-0 flex-1 truncate rounded-full border px-3 py-2 text-xs font-bold transition-colors",
-                    editingField === "end"
-                      ? "border-transparent bg-brand-500/15 text-brand-700 dark:text-brand-300"
-                      : "border-border text-muted-foreground",
-                  )}
-                >
-                  {t("dateRangeFilter.toDate", { date: formatDraftDate(draft.customEnd, dateLocale) })}
-                </button>
+                />
               </div>
 
-              <div className="flex justify-center">
+              <div className="flex flex-col items-center gap-1">
                 <Calendar
                   value={editingField === "start" ? draft.customStart : draft.customEnd}
                   onSelect={(next) => {
@@ -164,6 +145,7 @@ export function DateRangeFilter({
                         customEnd: prev.customEnd < next ? next : prev.customEnd,
                       }));
                       setEditingField("end");
+                      setCursor(parseISO(next));
                     } else {
                       setDraft((prev) => ({
                         ...prev,
@@ -173,8 +155,18 @@ export function DateRangeFilter({
                   }}
                   cursor={cursor}
                   onCursorChange={setCursor}
+                  minDate={editingField === "end" ? draft.customStart : undefined}
                   maxDate={toQueryDate(new Date())}
+                  rangeStart={draft.customStart}
+                  rangeEnd={draft.customEnd}
                 />
+                <button
+                  type="button"
+                  onClick={() => setCursor(new Date())}
+                  className="rounded-full px-3 py-1 text-xs font-bold text-muted-foreground transition-colors hover:bg-accent"
+                >
+                  {t("common.today")}
+                </button>
               </div>
             </div>
 
@@ -185,6 +177,49 @@ export function DateRangeFilter({
         )}
       </SheetContent>
     </Sheet>
+  );
+}
+
+/** Thẻ chọn mốc đầu/cuối: nhãn ở dòng trên, ngày to ở giữa, thứ ở dòng dưới — bấm để
+ * chuyển lịch sang chỉnh mốc đó. */
+function DateFieldCard({
+  label,
+  date,
+  active,
+  dateLocale,
+  onClick,
+}: {
+  label: string;
+  date: string;
+  active: boolean;
+  dateLocale: Locale;
+  onClick: () => void;
+}) {
+  const parsed = parseISO(date);
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "flex min-w-0 flex-1 flex-col gap-0.5 rounded-2xl border px-3 py-2.5 text-left transition-colors",
+        active ? "border-brand-500 bg-brand-500/10" : "border-border bg-card/40 hover:bg-accent",
+      )}
+    >
+      <span
+        className={cn(
+          "text-[11px] font-bold uppercase tracking-wide",
+          active ? "text-brand-700 dark:text-brand-300" : "text-muted-foreground",
+        )}
+      >
+        {label}
+      </span>
+      <span className="text-base font-extrabold tabular-nums text-foreground">
+        {format(parsed, "dd/MM/yyyy", { locale: dateLocale })}
+      </span>
+      <span className="truncate text-[11px] font-semibold capitalize text-muted-foreground">
+        {format(parsed, "EEEE", { locale: dateLocale })}
+      </span>
+    </button>
   );
 }
 

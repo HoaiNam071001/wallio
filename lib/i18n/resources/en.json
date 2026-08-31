@@ -79,8 +79,8 @@
 
   "dateRangeFilter": {
     "sheetTitle": "Choose a time range",
-    "fromDate": "From {{date}}",
-    "toDate": "To {{date}}",
+    "from": "From",
+    "to": "To",
     "apply": "Apply"
   },
 
