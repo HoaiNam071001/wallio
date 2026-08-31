@@ -37,6 +37,7 @@ export function toQueryDate(date: Date): string {
   return format(date, "yyyy-MM-dd");
 }
 
-// Thứ tự này quyết định thứ tự hiển thị tab/chip ở Báo cáo và Sổ thu chi —
-// đặt "custom" (Tuỳ chọn) lên đầu theo yêu cầu. Nhãn lấy từ t.dateRangePreset vì cần theo ngôn ngữ đang chọn.
-export const DATE_RANGE_PRESET_ORDER: DateRangePreset[] = ["custom", "today", "week", "month", "year"];
+// Thứ tự hàng chip preset trong DateRangeFilter. Không có "custom" ở đây: phần chọn khoảng ngày
+// luôn hiển thị sẵn nên "custom" chỉ là *kết quả* khi người dùng tự sửa mốc đầu/cuối, không phải một
+// lựa chọn bấm được. Nhãn lấy từ t.dateRangePreset vì cần theo ngôn ngữ đang chọn.
+export const DATE_RANGE_PRESET_ORDER: Exclude<DateRangePreset, "custom">[] = ["today", "week", "month", "year"];

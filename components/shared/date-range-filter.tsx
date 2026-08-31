@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
 import { vi, enUS } from "date-fns/locale";
-import { ArrowRight, CalendarRange, Check } from "lucide-react";
+import { ArrowRight, CalendarRange } from "lucide-react";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -12,6 +12,7 @@ import type { TFunction } from "i18next";
 import {
   cn,
   DATE_RANGE_PRESET_ORDER,
+  getPresetRange,
   toQueryDate,
   type DateRangePreset,
 } from "@/lib/utils";
@@ -24,8 +25,10 @@ export interface DateRangeFilterValue {
 
 /**
  * Bộ lọc khoảng thời gian dùng chung cho sổ thu chi/báo cáo/tổng quan: một nút gọn hiện
- * lựa chọn hiện tại, bấm vào mở bottom sheet chứa danh sách preset + lịch chọn khoảng khi
- * chọn "Tuỳ chọn" — thay cho 3 UI rời rạc (chip cuộn ngang, 2 kiểu Tabs) trước đây.
+ * lựa chọn hiện tại, bấm vào mở bottom sheet gồm hàng chip preset (Hôm nay/Tuần/Tháng/Năm) +
+ * 2 thẻ mốc đầu-cuối + lịch. Chip chỉ *điền sẵn* khoảng ngày vào draft (kể cả lịch), mọi thay
+ * đổi chỉ có hiệu lực khi bấm "Áp dụng" — không còn preset "Tuỳ chọn" riêng vì phần chọn ngày
+ * giờ luôn hiển thị.
  */
 export function DateRangeFilter({
   value,
@@ -39,17 +42,29 @@ export function DateRangeFilter({
   const { t, locale } = useT();
   const dateLocale = locale === "en" ? enUS : vi;
   const [open, setOpen] = useState(false);
-  const [draft, setDraft] = useState(value);
+  const [draft, setDraft] = useState(() => withPresetDates(value));
   const [editingField, setEditingField] = useState<"start" | "end">("start");
-  const [cursor, setCursor] = useState<Date>(() => parseISO(value.customStart));
+  const [cursor, setCursor] = useState<Date>(() => parseISO(withPresetDates(value).customStart));
 
   function handleOpenChange(next: boolean) {
     if (next) {
-      setDraft(value);
+      const initial = withPresetDates(value);
+      setDraft(initial);
       setEditingField("start");
-      setCursor(parseISO(value.customStart));
+      setCursor(parseISO(initial.customStart));
     }
     setOpen(next);
+  }
+
+  function selectPreset(preset: DateRangePreset) {
+    const range = getPresetRange(preset);
+    setDraft({
+      preset,
+      customStart: toQueryDate(range.start),
+      customEnd: toQueryDate(range.end),
+    });
+    setEditingField("start");
+    setCursor(range.start);
   }
 
   function jumpTo(field: "start" | "end") {
@@ -57,16 +72,26 @@ export function DateRangeFilter({
     setCursor(parseISO(field === "start" ? draft.customStart : draft.customEnd));
   }
 
-  function commitPreset(preset: DateRangePreset) {
-    if (preset === "custom") {
-      setDraft((prev) => ({ ...prev, preset }));
-      return;
+  /** Sửa tay trên lịch → khoảng ngày không còn khớp preset nào nữa. */
+  function pickDate(next: string) {
+    if (editingField === "start") {
+      setDraft((prev) => ({
+        preset: "custom",
+        customStart: next,
+        customEnd: prev.customEnd < next ? next : prev.customEnd,
+      }));
+      setEditingField("end");
+      setCursor(parseISO(next));
+    } else {
+      setDraft((prev) => ({
+        preset: "custom",
+        customStart: prev.customStart,
+        customEnd: next < prev.customStart ? prev.customStart : next,
+      }));
     }
-    onChange({ ...value, preset });
-    setOpen(false);
   }
 
-  function applyCustom() {
+  function apply() {
     onChange(draft);
     setOpen(false);
   }
@@ -92,92 +117,76 @@ export function DateRangeFilter({
           <SheetTitle>{t("dateRangeFilter.sheetTitle")}</SheetTitle>
         </SheetHeader>
 
-        <div className="flex flex-col gap-1">
+        {/* Hàng chip preset: bấm chỉ điền sẵn mốc đầu/cuối + lịch, chưa submit. */}
+        <div className="grid grid-cols-4 gap-1.5">
           {DATE_RANGE_PRESET_ORDER.map((preset) => {
             const active = draft.preset === preset;
             return (
               <button
                 key={preset}
                 type="button"
-                onClick={() => commitPreset(preset)}
+                onClick={() => selectPreset(preset)}
                 className={cn(
-                  "flex items-center justify-between rounded-2xl px-3.5 py-2.5 text-sm font-semibold transition-colors",
-                  active ? "bg-brand-500/15 text-brand-700 dark:text-brand-300" : "text-foreground hover:bg-accent",
+                  "truncate rounded-full border px-1 py-2 text-center text-xs font-bold transition-colors",
+                  active
+                    ? "border-brand-500 bg-brand-500/15 text-brand-700 dark:text-brand-300"
+                    : "border-border text-muted-foreground hover:bg-accent",
                 )}
               >
                 {t(`dateRangePreset.${preset}`)}
-                {active && <Check className="size-4" />}
               </button>
             );
           })}
         </div>
 
-        {draft.preset === "custom" && (
-          <>
-            <div className="flex flex-col gap-3 border-t border-border/60 pt-3">
-              {/* Hai thẻ From/To đủ rộng để hiện trọn ngày (trước đây là 2 pill 1 dòng nên bị cắt "…") */}
-              <div className="flex items-stretch gap-2">
-                <DateFieldCard
-                  label={t("dateRangeFilter.from")}
-                  date={draft.customStart}
-                  active={editingField === "start"}
-                  dateLocale={dateLocale}
-                  onClick={() => jumpTo("start")}
-                />
-                <ArrowRight className="size-4 shrink-0 self-center text-muted-foreground" />
-                <DateFieldCard
-                  label={t("dateRangeFilter.to")}
-                  date={draft.customEnd}
-                  active={editingField === "end"}
-                  dateLocale={dateLocale}
-                  onClick={() => jumpTo("end")}
-                />
-              </div>
+        <div className="flex flex-col gap-3 border-t border-border/60 pt-3">
+          {/* Hai thẻ mốc đầu/cuối đủ rộng để hiện trọn ngày (trước đây là 2 pill 1 dòng nên bị cắt "…") */}
+          <div className="flex items-stretch gap-2">
+            <DateFieldCard
+              label={t("dateRangeFilter.from")}
+              date={draft.customStart}
+              active={editingField === "start"}
+              dateLocale={dateLocale}
+              onClick={() => jumpTo("start")}
+            />
+            <ArrowRight className="size-4 shrink-0 self-center text-muted-foreground" />
+            <DateFieldCard
+              label={t("dateRangeFilter.to")}
+              date={draft.customEnd}
+              active={editingField === "end"}
+              dateLocale={dateLocale}
+              onClick={() => jumpTo("end")}
+            />
+          </div>
 
-              <div className="flex flex-col items-center gap-1">
-                <Calendar
-                  value={editingField === "start" ? draft.customStart : draft.customEnd}
-                  onSelect={(next) => {
-                    if (editingField === "start") {
-                      setDraft((prev) => ({
-                        ...prev,
-                        customStart: next,
-                        customEnd: prev.customEnd < next ? next : prev.customEnd,
-                      }));
-                      setEditingField("end");
-                      setCursor(parseISO(next));
-                    } else {
-                      setDraft((prev) => ({
-                        ...prev,
-                        customEnd: next < prev.customStart ? prev.customStart : next,
-                      }));
-                    }
-                  }}
-                  cursor={cursor}
-                  onCursorChange={setCursor}
-                  minDate={editingField === "end" ? draft.customStart : undefined}
-                  maxDate={toQueryDate(new Date())}
-                  rangeStart={draft.customStart}
-                  rangeEnd={draft.customEnd}
-                />
-                <button
-                  type="button"
-                  onClick={() => setCursor(new Date())}
-                  className="rounded-full px-3 py-1 text-xs font-bold text-muted-foreground transition-colors hover:bg-accent"
-                >
-                  {t("common.today")}
-                </button>
-              </div>
-            </div>
+          <div className="flex justify-center">
+            <Calendar
+              value={editingField === "start" ? draft.customStart : draft.customEnd}
+              onSelect={pickDate}
+              cursor={cursor}
+              onCursorChange={setCursor}
+              minDate={editingField === "end" ? draft.customStart : undefined}
+              maxDate={toQueryDate(new Date())}
+              rangeStart={draft.customStart}
+              rangeEnd={draft.customEnd}
+            />
+          </div>
+        </div>
 
-            <SheetFooter>
-              <Button onClick={applyCustom}>{t("dateRangeFilter.apply")}</Button>
-            </SheetFooter>
-          </>
-        )}
+        <SheetFooter>
+          <Button onClick={apply}>{t("dateRangeFilter.apply")}</Button>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );
+}
+
+/** Với preset dựng sẵn, mốc đầu/cuối lưu trong value có thể là của lần chọn "custom" trước đó —
+ * quy về đúng khoảng của preset để 2 thẻ ngày và lịch luôn hiện đúng thứ đang lọc. */
+function withPresetDates(value: DateRangeFilterValue): DateRangeFilterValue {
+  if (value.preset === "custom") return value;
+  const range = getPresetRange(value.preset);
+  return { ...value, customStart: toQueryDate(range.start), customEnd: toQueryDate(range.end) };
 }
 
 /** Thẻ chọn mốc đầu/cuối: nhãn ở dòng trên, ngày to ở giữa, thứ ở dòng dưới — bấm để

@@ -24,9 +24,9 @@ Thứ tự bố cục:
 1. **Summary cards** (từ `getNetWorthSummary`): 4 số — Tổng tài sản (net worth, nổi bật nhất), Tiền khả dụng
    thực tế, Đang cho mượn, Tổng nợ đang mang. ⚠️ Tài sản `in_kind` **không** gộp vào các số này (không quy đổi
    VNĐ được) — xem mục 4.4.
-2. **Biểu đồ thu/chi theo kỳ**: dùng chung component chọn khoảng thời gian `DateRangeFilter` (xem §4.3 và
-   PHASE_1 §1.6-kế — một nút gọn mở bottom sheet, đủ cả 5 preset kể cả "Tuỳ chọn", đã đồng bộ với Reports/Sổ thu
-   chi thay vì tabs riêng không có "Tuỳ chọn" như trước), mặc định "Tháng". Bar/donut so sánh thu vs chi trong kỳ.
+2. **Biểu đồ thu/chi theo kỳ**: dùng chung component chọn khoảng thời gian `DateRangeFilter` (xem §4.3 — một
+   nút gọn mở bottom sheet có 4 chip preset + phần chọn khoảng ngày luôn hiển thị, đã đồng bộ với Reports/Sổ thu
+   chi thay vì tabs riêng không chọn được khoảng ngày như trước), mặc định "Tháng". Bar/donut so sánh thu vs chi trong kỳ.
 3. **Biểu đồ số dư theo account** (`AccountBreakdownChart`) — toàn bộ account (không lọc theo kỳ, vì số dư luôn
    là hiện tại). Bấm vào một dòng mở **màn chi tiết nguồn tiền** (PHASE_2 §2.2.3).
 4. **Danh sách tài sản hiện vật** (chỉ hiện nếu có ít nhất 1 account `in_kind`) — liệt kê riêng từng account hiện
@@ -36,14 +36,21 @@ Thứ tự bố cục:
 ## 4.3 Tab "Báo cáo" (`ReportsTab`)
 
 - Chọn khoảng thời gian qua `DateRangeFilter` (`components/shared/date-range-filter.tsx`) — một nút gọn hiện
-  lựa chọn hiện tại (vd "Tháng 8, 2026"), bấm mở bottom sheet: danh sách 5 preset theo thứ tự **Tuỳ chọn, Hôm
-  nay, Tuần, Tháng, Năm** (`DATE_RANGE_PRESET_ORDER`), chọn "Tuỳ chọn" hiện thêm lịch chọn khoảng ngày ngay
-  trong sheet + nút "Áp dụng". Phần "Tuỳ chọn" gồm **2 thẻ mốc đầu/cuối** đặt cạnh nhau (nhãn "Từ ngày"/"Đến
-  ngày" + ngày `dd/MM/yyyy` + thứ trong tuần, thẻ đang chỉnh được viền/nền brand) thay cho 2 pill 1 dòng bị
-  cắt chữ trước đây; bấm thẻ nào thì lịch nhảy tới mốc đó, chọn xong mốc đầu tự chuyển sang mốc cuối. Lịch tô
-  sáng cả dải ngày giữa 2 mốc (`rangeStart`/`rangeEnd` của `Calendar`) và khi đang chỉnh mốc cuối thì các ngày
-  trước mốc đầu bị vô hiệu hoá (`minDate`); nút "Hôm nay" nằm dưới lịch chỉ để cuộn lịch về tháng hiện tại. Component này dùng chung cho cả 3 màn có filter ngày (Sổ thu chi, Báo cáo, Tổng
-  quan) — thay cho 3 kiểu UI khác nhau (chip cuộn ngang, 2 kiểu tabs) trước đây, tối ưu cho mobile hơn.
+  lựa chọn hiện tại (vd "Tháng 8, 2026"), bấm mở bottom sheet gồm 3 phần, **phần chọn ngày luôn hiển thị**
+  (không còn preset "Tuỳ chọn" phải bấm vào mới hiện):
+  1. **Hàng chip preset ngang** 4 ô đều nhau: **Hôm nay, Tuần, Tháng, Năm** (`DATE_RANGE_PRESET_ORDER`, đã bỏ
+     `"custom"` khỏi mảng này). Bấm chip **chỉ điền sẵn** mốc đầu/cuối + đưa lịch về đúng khoảng đó, **chưa
+     submit**.
+  2. **2 thẻ mốc đầu/cuối** đặt cạnh nhau, ngăn bởi mũi tên `→` (nhãn "Từ ngày"/"Đến ngày" + ngày `dd/MM/yyyy`
+     + thứ trong tuần, thẻ đang chỉnh có viền/nền brand) — thay cho 2 pill 1 dòng bị cắt chữ trước đây. Bấm thẻ
+     nào thì lịch nhảy tới mốc đó.
+  3. **Lịch** (`Calendar`): chọn xong mốc đầu tự chuyển sang mốc cuối; tô sáng cả dải ngày giữa 2 mốc
+     (`rangeStart`/`rangeEnd`); khi đang chỉnh mốc cuối thì ngày trước mốc đầu bị vô hiệu hoá (`minDate`).
+     Sửa tay trên lịch làm `preset` chuyển thành `"custom"` (không chip nào còn active).
+  Mọi thay đổi chỉ có hiệu lực khi bấm **"Áp dụng"** (draft nội bộ, đóng sheet giữa chừng = huỷ). Khi mở sheet,
+  draft được quy về đúng khoảng của preset đang lọc (`withPresetDates`) để 2 thẻ ngày/lịch không hiện mốc cũ.
+  Component này dùng chung cho cả 3 màn có filter ngày (Sổ thu chi, Báo cáo, Tổng quan) — thay cho 3 kiểu UI
+  khác nhau (chip cuộn ngang, 2 kiểu tabs) trước đây, tối ưu cho mobile hơn.
 - 3 ô tổng nhanh: Thu / Chi / Chênh lệch (net) trong kỳ đã chọn.
 - **Biểu đồ theo danh mục**: toggle **tròn (pie/donut) / ngang (bar, mặc định)** — cùng component
   `CategoryBreakdownChart` với Sổ thu chi (`variant` prop), lựa chọn loại chart lưu riêng cho trang Báo cáo
@@ -120,7 +127,8 @@ không tự ý thêm vào khi port.
 - [ ] 4 summary card đúng công thức, account `in_kind` không ảnh hưởng các số này
 - [ ] Đổi preset kỳ ở Tổng quan cập nhật đúng chart thu/chi
 - [ ] Danh sách hiện vật chỉ hiện khi có account `in_kind`, đúng đơn vị từng account
-- [ ] Báo cáo: preset "Tuỳ chọn" cho chọn khoảng ngày tự do, breakdown category đổi đúng theo tab Thu/Chi
+- [ ] Báo cáo: chọn khoảng ngày tự do bằng 2 thẻ Từ/Đến + lịch (chỉ áp dụng khi bấm "Áp dụng"), breakdown
+      category đổi đúng theo tab Thu/Chi
 - [ ] Xuất CSV: file có đủ 3 phần accounts/categories/transactions, đúng khoảng thời gian đang lọc, mở được share
       sheet, encoding đúng (UTF-8 BOM để Excel đọc đúng tiếng Việt)
 - [ ] Nhập CSV: mặc định chọn hết tái tạo đúng số dư khi map "Tạo mới"; bỏ chọn 1 account loại đúng các giao dịch
