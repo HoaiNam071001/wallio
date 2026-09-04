@@ -102,8 +102,11 @@ export function DateRangeFilter({
 
   const label = triggerLabel(value, t, dateLocale);
 
+  /** Lùi/tiến trực tiếp từ customStart/customEnd đang lọc — KHÔNG qua withPresetDates(), vì hàm đó luôn quy
+   * preset dựng sẵn (tuần/tháng/năm/hôm nay) về đúng khoảng của "bây giờ", sẽ xoá mất kết quả bấm prev/next
+   * trước đó và khiến người dùng không bao giờ lùi/tiến được quá 1 bước tính từ hiện tại. */
   function shift(direction: 1 | -1) {
-    onChange(shiftDateRange(withPresetDates(value), direction));
+    onChange(shiftDateRange(value, direction));
   }
 
   return (
