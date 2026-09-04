@@ -74,9 +74,13 @@ trên card trừ menu ba chấm), danh sách "Số dư theo nguồn tiền" và 
 
 Nội dung:
 
+- Header trang: tên account làm tiêu đề + nút **"Cân đối số dư"** (icon `Scale`) mở cùng dialog cân đối số dư
+  như ở account card (§2.4) — tiện chỉnh ngay khi đang xem chi tiết một nguồn tiền, không phải quay lại màn
+  Accounts.
 - Thẻ đầu trang: icon + số dư hiện tại (account `debt` hiện trị tuyệt đối kèm dấu trừ như mọi nơi khác), kèm
   **tổng tiền vào / tổng tiền ra trong kỳ đang lọc** (`getAccountFlowTotals`).
-- Bộ lọc khoảng thời gian dùng chung `DateRangeFilter` (mặc định "Tháng này").
+- Bộ lọc khoảng thời gian dùng chung `DateRangeFilter` (mặc định "Tháng này") — có nút prev/next hai bên,
+  xem §4.3.
 - 3 tab chiều tiền: **Tất cả / Tiền vào / Tiền ra**. Ánh xạ sang filter query (`direction` trong
   `listTransactions`):
   - `in`  → `income` ghi vào account này, **hoặc** `transfer` có `to_account_id` = account này
@@ -101,8 +105,10 @@ về mặt kế toán nhưng cách trình bày cho người dùng là "đang n�
 
 ## 2.4 Cân đối số dư thực tế (Balance Adjustment)
 
-Tính năng độc lập, mở từ mỗi account card (icon cân `Scale`). Port từ `lib/queries/balance-adjustment.ts` +
-`components/accounts/balance-adjust-dialog.tsx`. Flow UI:
+Tính năng độc lập, cùng một dialog (`components/accounts/balance-adjust-dialog.tsx`) mở được từ 2 nơi: mỗi
+account card ở màn Accounts (icon cân `Scale`, trong menu ba chấm hoặc nút nhắc khi lâu ngày không ghi) **và**
+nút "Cân đối số dư" ở header màn chi tiết nguồn tiền (§2.2.3). Port từ `lib/queries/balance-adjustment.ts`.
+Flow UI:
 
 1. Chọn ngày cần chốt (mặc định hôm nay, max = hôm nay).
 2. App tự tính và hiện **số dư app đang tính** tại ngày đó (`getAccountBalanceAsOf`, xem

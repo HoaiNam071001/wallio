@@ -81,7 +81,9 @@
     "sheetTitle": "Chọn khoảng thời gian",
     "from": "Từ ngày",
     "to": "Đến ngày",
-    "apply": "Áp dụng"
+    "apply": "Áp dụng",
+    "prev": "Kỳ trước",
+    "next": "Kỳ sau"
   },
 
   "layout": {

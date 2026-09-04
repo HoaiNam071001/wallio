@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Scale } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SkeletonView } from "@/components/ui/skeleton";
@@ -13,6 +14,7 @@ import { AmountText, AmountTextForAccount } from "@/components/shared/amount-tex
 import { OfflineUnavailable } from "@/components/shared/offline-unavailable";
 import { PageHeader } from "@/components/layout/page-header";
 import { ACCOUNT_TYPE_META } from "@/components/accounts/account-type";
+import { BalanceAdjustDialog } from "@/components/accounts/balance-adjust-dialog";
 import { TransactionList } from "@/components/transactions/transaction-list";
 import { TransactionDetailDialog } from "@/components/transactions/transaction-detail-dialog";
 import { transactionRowsSkeleton } from "@/lib/skeleton/shapes";
@@ -41,16 +43,16 @@ export default function AccountDetailPage() {
 
   const [tab, setTab] = useState<FlowTab>("all");
   const [preset, setPreset] = useState<DateRangePreset>("month");
-  const [customStart, setCustomStart] = useState(toQueryDate(new Date()));
-  const [customEnd, setCustomEnd] = useState(toQueryDate(new Date()));
+  const [customStart, setCustomStart] = useState(() => toQueryDate(getPresetRange("month").start));
+  const [customEnd, setCustomEnd] = useState(() => toQueryDate(getPresetRange("month").end));
   const [viewing, setViewing] = useState<TransactionWithRelations | null>(null);
+  const [adjusting, setAdjusting] = useState(false);
   const rowsShape = useMemo(() => transactionRowsSkeleton(6), []);
 
-  const { startDate, endDate } = useMemo(() => {
-    if (preset === "custom") return { startDate: customStart, endDate: customEnd };
-    const range = getPresetRange(preset);
-    return { startDate: toQueryDate(range.start), endDate: toQueryDate(range.end) };
-  }, [preset, customStart, customEnd]);
+  // DateRangeFilter luôn giữ customStart/customEnd khớp với preset đang chọn (kể cả sau khi
+  // bấm nút prev/next điều hướng sang kỳ khác), nên chỉ cần đọc thẳng hai mốc này.
+  const startDate = customStart;
+  const endDate = customEnd;
 
   const { data: accounts, isLoading: loadingAccount } = useAccountsWithBalance();
   const account = accounts?.find((a) => a.id === accountId);
@@ -114,6 +116,14 @@ export default function AccountDetailPage() {
         title={account?.name ?? t("accountDetail.title")}
         subtitle={account ? t(`accountType.${account.type}.label`) : undefined}
         amountScope="accounts"
+        action={
+          account && (
+            <Button size="sm" variant="outline" onClick={() => setAdjusting(true)}>
+              <Scale className="size-4" />
+              {t("accounts.card.adjustBalance")}
+            </Button>
+          )
+        }
       />
 
       {!account && !loadingAccount && (
@@ -223,6 +233,8 @@ export default function AccountDetailPage() {
         onOpenChange={(open) => !open && setViewing(null)}
         editHref={ROUTES.transactions}
       />
+
+      <BalanceAdjustDialog account={account ?? null} open={adjusting} onOpenChange={setAdjusting} />
     </div>
   );
 }

@@ -81,7 +81,9 @@
     "sheetTitle": "Choose a time range",
     "from": "From",
     "to": "To",
-    "apply": "Apply"
+    "apply": "Apply",
+    "prev": "Previous period",
+    "next": "Next period"
   },
 
   "layout": {

@@ -51,8 +51,22 @@ Thứ tự bố cục:
      thành `"custom"` (không chip nào còn active).
   Mọi thay đổi chỉ có hiệu lực khi bấm **"Áp dụng"** (draft nội bộ, đóng sheet giữa chừng = huỷ). Khi mở sheet,
   draft được quy về đúng khoảng của preset đang lọc (`withPresetDates`) để 2 thẻ ngày/lịch không hiện mốc cũ.
-  Component này dùng chung cho cả 3 màn có filter ngày (Sổ thu chi, Báo cáo, Tổng quan) — thay cho 3 kiểu UI
-  khác nhau (chip cuộn ngang, 2 kiểu tabs) trước đây, tối ưu cho mobile hơn.
+  Component này dùng chung cho cả 4 màn có filter ngày (Sổ thu chi, Báo cáo, Tổng quan, chi tiết nguồn tiền —
+  PHASE_2 §2.2.3) — thay cho 3 kiểu UI khác nhau (chip cuộn ngang, 2 kiểu tabs) trước đây, tối ưu cho mobile hơn.
+- **Nút prev/next hai bên nút trigger** (`ChevronLeft`/`ChevronRight`, hàm `shiftDateRange` trong
+  `lib/utils/date-range.ts`): lùi/tiến một bước theo đúng đơn vị đang chọn, áp dụng ngay (không qua sheet/Áp
+  dụng) —
+  - "Hôm nay" hoặc một ngày cụ thể → lùi/tiến 1 ngày.
+  - "Tuần" → lùi/tiến 7 ngày, luôn giữ khung Thứ 2 → Chủ nhật.
+  - "Tháng" → lùi/tiến đúng 1 tháng dương lịch (dùng `startOfMonth`/`endOfMonth` chứ không cộng/trừ số ngày cố
+    định, để tháng 28-31 ngày không bị lệch).
+  - "Năm" → lùi/tiến đúng 1 năm dương lịch.
+  - Khoảng tuỳ chọn không khớp preset nào (vd chọn tay 10 ngày bất kỳ trên lịch) → lùi/tiến đúng bằng độ dài
+    khoảng đang chọn, trượt sang khối ngày liền kề (không chồng lấn).
+  Nhãn trên nút trigger đọc theo đúng mốc `customStart`/`customEnd` đang lọc (không phải "hôm nay" cố định) —
+  vd bấm next từ tháng hiện tại sẽ đổi nhãn thành tên tháng kế tiếp; preset "Hôm nay"/"Tuần" chỉ hiện chữ "Hôm
+  nay"/"Tuần này" khi khoảng đang lọc thật sự trùng ngày/tuần hiện tại, lệch khỏi đó thì hiện ngày/khoảng ngày
+  cụ thể.
 - 3 ô tổng nhanh: Thu / Chi / Chênh lệch (net) trong kỳ đã chọn.
 - **Biểu đồ theo danh mục**: toggle **tròn (pie/donut) / ngang (bar, mặc định)** — cùng component
   `CategoryBreakdownChart` với Sổ thu chi (`variant` prop), lựa chọn loại chart lưu riêng cho trang Báo cáo

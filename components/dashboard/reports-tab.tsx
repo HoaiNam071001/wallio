@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Download } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -23,16 +23,15 @@ import { getPresetRange, toQueryDate, type DateRangePreset } from "@/lib/utils";
 export function ReportsTab() {
   const { t } = useT();
   const [preset, setPreset] = useState<DateRangePreset>("month");
-  const [customStart, setCustomStart] = useState(toQueryDate(new Date()));
-  const [customEnd, setCustomEnd] = useState(toQueryDate(new Date()));
+  const [customStart, setCustomStart] = useState(() => toQueryDate(getPresetRange("month").start));
+  const [customEnd, setCustomEnd] = useState(() => toQueryDate(getPresetRange("month").end));
   const [kind, setKind] = useState<"income" | "expense">("expense");
   const [chartType, setChartType] = useChartType("reports");
 
-  const { startDate, endDate } = useMemo(() => {
-    if (preset === "custom") return { startDate: customStart, endDate: customEnd };
-    const range = getPresetRange(preset);
-    return { startDate: toQueryDate(range.start), endDate: toQueryDate(range.end) };
-  }, [preset, customStart, customEnd]);
+  // DateRangeFilter luôn giữ customStart/customEnd khớp với preset đang chọn (kể cả sau khi
+  // bấm nút prev/next điều hướng sang kỳ khác), nên chỉ cần đọc thẳng hai mốc này.
+  const startDate = customStart;
+  const endDate = customEnd;
 
   const { data: totals } = usePeriodTotals(startDate, endDate);
   const { data: categoryBreakdown } = useCategoryBreakdown(startDate, endDate, kind);

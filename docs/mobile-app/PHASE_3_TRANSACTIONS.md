@@ -38,9 +38,10 @@ Bố cục theo thứ tự (port `today-hero.tsx` + `transaction-filter.tsx` + `
    NAY** (không phải tổng tài sản — quyết định UX có chủ đích, xem comment gốc). Gồm: lời chào theo giờ trong
    ngày (sáng <11h / trưa <14h / chiều <18h / tối), ngày hiện tại theo locale, số tiền đã chi hôm nay (to, nổi
    bật), 2 ô nhỏ: thu hôm nay + chênh lệch (thu-chi). Có nút mắt để ẩn/hiện số tiền riêng cho scope này.
-2. **Bộ lọc**: một nút gọn mở bottom sheet chọn khoảng thời gian (xem PHASE_1/`DateRangeFilter` —
-   `components/shared/date-range-filter.tsx`, dùng chung cho cả 3 trang có filter ngày), cộng thêm nút mở rộng
-   filter theo account/category/search theo note (`TransactionFilterBar`).
+2. **Bộ lọc**: một nút gọn mở bottom sheet chọn khoảng thời gian, kèm nút prev/next hai bên để lùi/tiến một
+   bước theo đúng đơn vị đang chọn (xem PHASE_4 §4.3/`DateRangeFilter` — `components/shared/date-range-filter.tsx`,
+   dùng chung cho cả 4 trang có filter ngày), cộng thêm nút mở rộng filter theo account/category/search theo
+   note (`TransactionFilterBar`).
 3. **Card "Cơ cấu theo danh mục"** gộp chung tổng thu/chi/còn lại của kỳ đang xem (3 ô nhỏ) + chart cơ cấu theo
    danh mục vào **một card duy nhất** (trước đây là 2 khối tách rời, chiếm nhiều chỗ hơn cần thiết) — có toggle
    Tab thu/chi và toggle loại chart (tròn/ngang, xem `CategoryBreakdownChart`'s `variant` prop và

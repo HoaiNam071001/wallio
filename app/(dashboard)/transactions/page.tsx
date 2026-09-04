@@ -49,11 +49,12 @@ import { transactionRowsSkeleton } from "@/lib/skeleton/shapes";
 import type { TransactionWithRelations } from "@/lib/queries/transactions";
 
 const TODAY = toQueryDate(new Date());
+const DEFAULT_MONTH_RANGE = getPresetRange("month");
 
 const DEFAULT_FILTER: TransactionFilterState = {
   preset: "month",
-  customStart: TODAY,
-  customEnd: TODAY,
+  customStart: toQueryDate(DEFAULT_MONTH_RANGE.start),
+  customEnd: toQueryDate(DEFAULT_MONTH_RANGE.end),
   accountId: "",
   categoryId: "",
   search: "",
@@ -72,13 +73,10 @@ export default function TransactionsPage() {
   const updateTransaction = useUpdateTransaction();
   const deleteTransaction = useDeleteTransaction();
 
-  const { startDate, endDate } = useMemo(() => {
-    if (filter.preset === "custom") {
-      return { startDate: filter.customStart, endDate: filter.customEnd };
-    }
-    const range = getPresetRange(filter.preset);
-    return { startDate: toQueryDate(range.start), endDate: toQueryDate(range.end) };
-  }, [filter.preset, filter.customStart, filter.customEnd]);
+  // DateRangeFilter luôn giữ customStart/customEnd khớp với preset đang chọn (kể cả sau khi
+  // bấm nút prev/next điều hướng sang kỳ khác), nên chỉ cần đọc thẳng hai mốc này.
+  const startDate = filter.customStart;
+  const endDate = filter.customEnd;
 
   const { data: todayTotals, isLoading: loadingToday } = usePeriodTotals(TODAY, TODAY);
   const { data: periodTotals } = usePeriodTotals(startDate, endDate);

@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { format, parseISO } from "date-fns";
+import { format, isToday, parseISO } from "date-fns";
 import { vi, enUS } from "date-fns/locale";
-import { ArrowRight, CalendarRange } from "lucide-react";
+import { ArrowRight, CalendarRange, ChevronLeft, ChevronRight } from "lucide-react";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -13,6 +13,7 @@ import {
   cn,
   DATE_RANGE_PRESET_ORDER,
   getPresetRange,
+  shiftDateRange,
   toQueryDate,
   type DateRangePreset,
 } from "@/lib/utils";
@@ -101,84 +102,105 @@ export function DateRangeFilter({
 
   const label = triggerLabel(value, t, dateLocale);
 
+  function shift(direction: 1 | -1) {
+    onChange(shiftDateRange(withPresetDates(value), direction));
+  }
+
   return (
-    <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetTrigger asChild>
-        <button
-          type="button"
-          className={cn(
-            "flex h-10 shrink-0 items-center gap-2 rounded-full border border-border bg-card/70 px-4 text-sm font-bold transition-colors active:scale-95",
-            className,
-          )}
-        >
-          <CalendarRange className="size-4 shrink-0 text-muted-foreground" />
-          <span className="truncate">{label}</span>
-        </button>
-      </SheetTrigger>
-      <SheetContent>
-        <SheetHeader>
-          <SheetTitle>{t("dateRangeFilter.sheetTitle")}</SheetTitle>
-        </SheetHeader>
+    <div className={cn("flex min-w-0 items-center gap-1.5", className)}>
+      <button
+        type="button"
+        aria-label={t("dateRangeFilter.prev")}
+        onClick={() => shift(-1)}
+        className="flex size-10 shrink-0 items-center justify-center rounded-full border border-border bg-card/70 text-muted-foreground transition-colors active:scale-95 hover:bg-accent"
+      >
+        <ChevronLeft className="size-4" />
+      </button>
 
-        {/* Hàng chip preset: bấm chỉ điền sẵn mốc đầu/cuối + lịch, chưa submit. */}
-        <div className="grid grid-cols-4 gap-1.5">
-          {DATE_RANGE_PRESET_ORDER.map((preset) => {
-            const active = draft.preset === preset;
-            return (
-              <button
-                key={preset}
-                type="button"
-                onClick={() => selectPreset(preset)}
-                className={cn(
-                  "truncate rounded-full border px-1 py-2 text-center text-xs font-bold transition-colors",
-                  active
-                    ? "border-brand-500 bg-brand-500/15 text-brand-700 dark:text-brand-300"
-                    : "border-border text-muted-foreground hover:bg-accent",
-                )}
-              >
-                {t(`dateRangePreset.${preset}`)}
-              </button>
-            );
-          })}
-        </div>
+      <Sheet open={open} onOpenChange={handleOpenChange}>
+        <SheetTrigger asChild>
+          <button
+            type="button"
+            className="flex h-10 min-w-0 flex-1 items-center gap-2 rounded-full border border-border bg-card/70 px-4 text-sm font-bold transition-colors active:scale-95"
+          >
+            <CalendarRange className="size-4 shrink-0 text-muted-foreground" />
+            <span className="truncate">{label}</span>
+          </button>
+        </SheetTrigger>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>{t("dateRangeFilter.sheetTitle")}</SheetTitle>
+          </SheetHeader>
 
-        <div className="flex flex-col gap-3 border-t border-border/60 pt-3">
-          {/* Hai thẻ mốc đầu/cuối đủ rộng để hiện trọn ngày (trước đây là 2 pill 1 dòng nên bị cắt "…") */}
-          <div className="flex items-stretch gap-2">
-            <DateFieldCard
-              label={t("dateRangeFilter.from")}
-              date={draft.customStart}
-              active={editingField === "start"}
-              dateLocale={dateLocale}
-              onClick={() => jumpTo("start")}
-            />
-            <ArrowRight className="size-4 shrink-0 self-center text-muted-foreground" />
-            <DateFieldCard
-              label={t("dateRangeFilter.to")}
-              date={draft.customEnd}
-              active={editingField === "end"}
-              dateLocale={dateLocale}
-              onClick={() => jumpTo("end")}
-            />
+          {/* Hàng chip preset: bấm chỉ điền sẵn mốc đầu/cuối + lịch, chưa submit. */}
+          <div className="grid grid-cols-4 gap-1.5">
+            {DATE_RANGE_PRESET_ORDER.map((preset) => {
+              const active = draft.preset === preset;
+              return (
+                <button
+                  key={preset}
+                  type="button"
+                  onClick={() => selectPreset(preset)}
+                  className={cn(
+                    "truncate rounded-full border px-1 py-2 text-center text-xs font-bold transition-colors",
+                    active
+                      ? "border-brand-500 bg-brand-500/15 text-brand-700 dark:text-brand-300"
+                      : "border-border text-muted-foreground hover:bg-accent",
+                  )}
+                >
+                  {t(`dateRangePreset.${preset}`)}
+                </button>
+              );
+            })}
           </div>
 
-          <div className="flex justify-center">
-            <Calendar
-              value={editingField === "start" ? draft.customStart : draft.customEnd}
-              onSelect={pickDate}
-              cursor={cursor}
-              onCursorChange={setCursor}
-              rangeStart={draft.customStart}
-              rangeEnd={draft.customEnd}
-            />
-          </div>
-        </div>
+          <div className="flex flex-col gap-3 border-t border-border/60 pt-3">
+            {/* Hai thẻ mốc đầu/cuối đủ rộng để hiện trọn ngày (trước đây là 2 pill 1 dòng nên bị cắt "…") */}
+            <div className="flex items-stretch gap-2">
+              <DateFieldCard
+                label={t("dateRangeFilter.from")}
+                date={draft.customStart}
+                active={editingField === "start"}
+                dateLocale={dateLocale}
+                onClick={() => jumpTo("start")}
+              />
+              <ArrowRight className="size-4 shrink-0 self-center text-muted-foreground" />
+              <DateFieldCard
+                label={t("dateRangeFilter.to")}
+                date={draft.customEnd}
+                active={editingField === "end"}
+                dateLocale={dateLocale}
+                onClick={() => jumpTo("end")}
+              />
+            </div>
 
-        <SheetFooter>
-          <Button onClick={apply}>{t("dateRangeFilter.apply")}</Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+            <div className="flex justify-center">
+              <Calendar
+                value={editingField === "start" ? draft.customStart : draft.customEnd}
+                onSelect={pickDate}
+                cursor={cursor}
+                onCursorChange={setCursor}
+                rangeStart={draft.customStart}
+                rangeEnd={draft.customEnd}
+              />
+            </div>
+          </div>
+
+          <SheetFooter>
+            <Button onClick={apply}>{t("dateRangeFilter.apply")}</Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+
+      <button
+        type="button"
+        aria-label={t("dateRangeFilter.next")}
+        onClick={() => shift(1)}
+        className="flex size-10 shrink-0 items-center justify-center rounded-full border border-border bg-card/70 text-muted-foreground transition-colors active:scale-95 hover:bg-accent"
+      >
+        <ChevronRight className="size-4" />
+      </button>
+    </div>
   );
 }
 
@@ -237,19 +259,31 @@ function formatDraftDate(value: string, dateLocale: Locale): string {
   return format(parseISO(value), "dd/MM/yyyy", { locale: dateLocale });
 }
 
+/** Nhãn hiện trên nút trigger. Với các preset lịch (tuần/tháng/năm), luôn đọc mốc từ chính
+ * customStart/customEnd đang lọc — không phải "bây giờ" — để bấm nút prev/next điều hướng
+ * sang tuần/tháng/năm khác thì nhãn đổi theo đúng khoảng đang xem. "Hôm nay"/"Tuần này" chỉ
+ * hiện khi khoảng đang chọn thật sự trùng ngày/tuần hiện tại; lệch khỏi đó thì hiện ngày cụ thể. */
 function triggerLabel(value: DateRangeFilterValue, t: TFunction, dateLocale: Locale): string {
-  const now = new Date();
+  const start = parseISO(value.customStart);
   switch (value.preset) {
     case "today":
-      return t("dateRangePreset.today");
-    case "week":
-      return t("dateRangePreset.week");
+      return isToday(start) ? t("dateRangePreset.today") : formatDraftDate(value.customStart, dateLocale);
+    case "week": {
+      const current = getPresetRange("week");
+      const isCurrentWeek =
+        value.customStart === toQueryDate(current.start) && value.customEnd === toQueryDate(current.end);
+      return isCurrentWeek
+        ? t("dateRangePreset.week")
+        : `${formatDraftDate(value.customStart, dateLocale)} → ${formatDraftDate(value.customEnd, dateLocale)}`;
+    }
     case "month":
-      return format(now, "MMMM yyyy", { locale: dateLocale });
+      return format(start, "MMMM yyyy", { locale: dateLocale });
     case "year":
-      return format(now, "yyyy", { locale: dateLocale });
+      return format(start, "yyyy", { locale: dateLocale });
     case "custom":
-      return `${formatDraftDate(value.customStart, dateLocale)} → ${formatDraftDate(value.customEnd, dateLocale)}`;
+      return value.customStart === value.customEnd
+        ? formatDraftDate(value.customStart, dateLocale)
+        : `${formatDraftDate(value.customStart, dateLocale)} → ${formatDraftDate(value.customEnd, dateLocale)}`;
   }
 }
 

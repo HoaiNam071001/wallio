@@ -29,16 +29,15 @@ import type { TransactionWithRelations } from "@/lib/queries/transactions";
 export function OverviewTab() {
   const { t } = useT();
   const [preset, setPreset] = useState<DateRangePreset>("month");
-  const [customStart, setCustomStart] = useState(toQueryDate(new Date()));
-  const [customEnd, setCustomEnd] = useState(toQueryDate(new Date()));
+  const [customStart, setCustomStart] = useState(() => toQueryDate(getPresetRange("month").start));
+  const [customEnd, setCustomEnd] = useState(() => toQueryDate(getPresetRange("month").end));
   const [viewing, setViewing] = useState<TransactionWithRelations | null>(null);
   const rowsShape = useMemo(() => transactionRowsSkeleton(3), []);
 
-  const { startDate, endDate } = useMemo(() => {
-    if (preset === "custom") return { startDate: customStart, endDate: customEnd };
-    const range = getPresetRange(preset);
-    return { startDate: toQueryDate(range.start), endDate: toQueryDate(range.end) };
-  }, [preset, customStart, customEnd]);
+  // DateRangeFilter luôn giữ customStart/customEnd khớp với preset đang chọn (kể cả sau khi
+  // bấm nút prev/next điều hướng sang kỳ khác), nên chỉ cần đọc thẳng hai mốc này.
+  const startDate = customStart;
+  const endDate = customEnd;
 
   const { data: netWorth } = useNetWorthSummary();
   const { data: totals } = usePeriodTotals(startDate, endDate);
