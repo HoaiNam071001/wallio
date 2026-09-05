@@ -11,6 +11,7 @@ import {
   startOfMonth,
   startOfWeek,
   startOfYear,
+  subYears,
 } from "date-fns";
 
 export type DateRangePreset = "today" | "week" | "month" | "year" | "custom";
@@ -93,4 +94,18 @@ export function shiftDateRange(range: QueryDateRange, direction: 1 | -1): QueryD
       };
     }
   }
+}
+
+/**
+ * Cùng khoảng ngày nhưng lùi đúng 1 năm dương lịch (dùng cho so sánh "cùng kỳ năm trước") — không
+ * bám theo preset như shiftDateRange vì một tháng/tuần lùi 1 năm không chắc còn khớp preset gốc
+ * (khác số ngày do năm nhuận), nên luôn trả về "custom". Ngày 29/2 lùi về năm không nhuận sẽ dồn
+ * về 28/2 (hành vi mặc định của date-fns subYears) — chấp nhận được, hiếm gặp.
+ */
+export function getSameRangeLastYear(range: QueryDateRange): QueryDateRange {
+  return {
+    preset: "custom",
+    customStart: toQueryDate(subYears(parseISO(range.customStart), 1)),
+    customEnd: toQueryDate(subYears(parseISO(range.customEnd), 1)),
+  };
 }

@@ -169,6 +169,28 @@
       "description": "Set a 6-digit passcode to lock the app whenever it's opened, keeping your finance data more secure.",
       "later": "Later",
       "setNow": "Set it now"
+    },
+    "emailLogin": {
+      "tabLogin": "Log in",
+      "tabSignup": "Sign up",
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "submit": "Log in",
+      "errorInvalid": "Incorrect email or password",
+      "orDivider": "or"
+    },
+    "signup": {
+      "confirmPasswordLabel": "Confirm password",
+      "submit": "Create account",
+      "errorMismatch": "The two passwords don't match",
+      "errorAlreadyRegistered": "This email already has an account — try signing in with Google or with your password instead?",
+      "pendingConfirmation": "Confirmation email sent — check your inbox to finish signing up."
+    },
+    "passwordReminder": {
+      "title": "You haven't set a login password",
+      "description": "Your account currently only signs in with Google. Set a password so you can still log in by email when you need to.",
+      "later": "Later",
+      "setNow": "Set it now"
     }
   },
 
@@ -246,6 +268,17 @@
       "csvFilenamePrefix": "transactions",
       "exportCsv": "Export CSV",
       "importCsv": "Import CSV"
+    },
+    "dailyChart": {
+      "title": "Daily income / expense",
+      "empty": "No data in this period yet."
+    },
+    "comparison": {
+      "title": "Category comparison",
+      "modePrevious": "vs previous period",
+      "modeSameYear": "vs same period last year",
+      "new": "New",
+      "empty": "Not enough data to compare yet."
     },
     "import": {
       "dialogTitle": "Review import data",
@@ -529,6 +562,18 @@
       "setPin": "Set passcode",
       "toastChanged": "Passcode changed",
       "toastSet": "Passcode set"
+    },
+    "password": {
+      "title": "Login password",
+      "hasPasswordBadge": "Login password set",
+      "newPasswordLabel": "New password",
+      "confirmLabel": "Confirm password",
+      "errorLength": "Password must be at least 6 characters",
+      "errorMismatch": "The two passwords don't match",
+      "setPassword": "Set password",
+      "changePassword": "Change password",
+      "toastSet": "Login password set",
+      "toastChanged": "Login password changed"
     },
     "amountVisibility": {
       "title": "Show/hide amounts",

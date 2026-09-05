@@ -47,6 +47,39 @@ const { data, error } = await supabase.auth.signInWithIdToken({
   `/auth/callback` đọc `next` đó, mặc định về `/` nếu thiếu. Vì mobile native luôn coi như "đã cài", flow tương
   đương là vào thẳng màn chính sau khi có session — không cần khái niệm `next` này.
 
+## 1.2b Đăng nhập Email + Mật khẩu (mới — giống nhau trên web/mobile)
+
+Ngoài Google OAuth ở §1.2, web đã thêm đăng nhập/đăng ký bằng email + mật khẩu
+(`components/auth/email-login-form.tsx`, `email-signup-form.tsx`, gắn dạng tab trên
+`app/(auth)/login/page.tsx`). **Khác với Google OAuth, luồng này không cần phân biệt web/mobile** — không có
+redirect/deep-link nào cả, chỉ gọi thẳng 3 method của `supabase-js` (mobile dùng `supabase_flutter` hoặc
+`@supabase/supabase-js` cho RN, cùng API):
+
+```ts
+await supabase.auth.signInWithPassword({ email, password });
+await supabase.auth.signUp({ email, password, options: { emailRedirectTo } }); // emailRedirectTo chỉ có ý nghĩa trên web
+await supabase.auth.updateUser({ password }); // đặt/đổi mật khẩu cho user đã đăng nhập
+```
+
+- `signUp` với **"Confirm email" đang bật** (mặc định) không trả về session ngay — phải hiện trạng thái "kiểm
+  tra email" chờ xác nhận. Nếu email đã có tài khoản, Supabase **không báo lỗi thẳng** mà trả về "thành công" với
+  `data.user.identities` là mảng rỗng (chống dò email tồn tại) — phải tự suy ra ca này từ `identities.length ===
+  0` để hiện thông báo phù hợp, không thể chỉ bắt `error`.
+- **Nhắc đặt mật khẩu cho tài khoản chỉ có Google**: `user.identities` (mảng identity đã liên kết, có sẵn trên
+  object `User` của SDK) chứa `{ provider: "google" }` nhưng chưa có `{ provider: "email" }` cho tới khi user
+  gọi `updateUser({ password })` — helper `hasPasswordIdentity`/`isGoogleOnlyAccount`
+  (`lib/utils/identities.ts`) kiểm tra đúng điều kiện này, port nguyên trạng sang mobile vì chỉ đọc field có sẵn
+  trên `User`, không có phần nào riêng cho web. Web hiện một modal nhắc theo đúng khuôn `PinReminderModal` ở
+  §1.3 (`components/auth/password-reminder-modal.tsx`, dismiss theo ngày qua storage) — mobile nên dựng một màn
+  hình/modal tương đương, và một mục "Đặt mật khẩu đăng nhập" trong màn Hồ sơ (khác PIN 6 số ở §1.3 — mật khẩu
+  này dùng để đăng nhập lại bằng email khi không đăng nhập được Google, không phải khoá màn hình).
+- Đổi/đặt mật khẩu qua `updateUser` **không yêu cầu nhập lại mật khẩu cũ** (chỉ cần session còn hiệu lực) — cùng
+  mức rủi ro với đổi PIN, chấp nhận được cho app cá nhân một người dùng.
+- Chưa có luồng "quên mật khẩu đăng nhập" (`resetPasswordForEmail`) — ngoài phạm vi lúc thêm tính năng này, nếu
+  làm thêm thì port giống các method trên (không cần khác gì giữa web/mobile).
+- Không cần setting gì thêm trong Postgres/RLS — mật khẩu do Supabase Auth (GoTrue) quản lý trong `auth.users`,
+  ngoài phạm vi các bảng ứng dụng.
+
 ## 1.3 PIN Gate (khoá màn hình)
 
 Đây là lớp UX, **không phải auth thật** — RLS mới là ranh giới bảo mật (xem [DATA_MODEL.md](./DATA_MODEL.md#6-rls--áp-dụng-như-nhau-cho-mọi-clientwebmobile)).

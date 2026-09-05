@@ -5,6 +5,7 @@ import { SyncFab } from "@/components/layout/sync-fab";
 import { Topbar } from "@/components/layout/topbar";
 import { PinGate } from "@/components/auth/pin-gate";
 import { PinReminderModal } from "@/components/auth/pin-reminder-modal";
+import { PasswordReminderModal } from "@/components/auth/password-reminder-modal";
 import { NewTransactionModal } from "@/components/transactions/new-transaction-modal";
 import { SyncOfflineModal } from "@/components/transactions/sync-offline-modal";
 import { SyncReconnectWatcher } from "@/components/transactions/sync-reconnect-watcher";
@@ -29,6 +30,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <SyncFab />
       </div>
       <PinReminderModal />
+      <PasswordReminderModal />
       <NewTransactionModal />
       <SyncOfflineModal />
       <SyncReconnectWatcher />

@@ -13,6 +13,7 @@ import {
   EyeOff,
   Home,
   KeyRound,
+  Lock,
   LogOut,
   SlidersHorizontal,
   ShieldCheck,
@@ -41,6 +42,7 @@ import { useT } from "@/lib/i18n/use-t";
 import type { Locale } from "@/lib/i18n";
 import { clearPinUnlocked, hashPin, isValidPin } from "@/lib/utils/pin";
 import { normalizeColor } from "@/lib/theme/palette";
+import { hasPasswordIdentity } from "@/lib/utils/identities";
 import { cn, toQueryDate } from "@/lib/utils";
 import { ROUTES } from "@/lib/constants/routes";
 import { CURRENCIES, DEFAULT_CURRENCY_CODE, symbolForCurrency } from "@/lib/constants/currencies";
@@ -52,6 +54,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { Profile } from "@/lib/types/database.types";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 const infoSchema = z.object({
   display_name: z.string().max(80).optional(),
@@ -88,6 +91,7 @@ export default function ProfilePage() {
         <TabsContent value="user" className="flex flex-col gap-4">
           <ProfileInfoCard profile={profile} onSave={(values) => upsertProfile.mutate(values)} saving={upsertProfile.isPending} />
           <PinCard hasPin={!!profile?.pin_hash} userId={user?.id} onSave={(pin_hash) => upsertProfile.mutate({ pin_hash, pin_set_at: new Date().toISOString() })} saving={upsertProfile.isPending} />
+          <PasswordCard user={user} />
           <CurrencyCard profile={profile} onSave={(values) => upsertProfile.mutate(values)} saving={upsertProfile.isPending} />
           <PreferencesCard />
         </TabsContent>
@@ -368,6 +372,91 @@ function PinCard({
           {error && <p className="text-sm text-destructive">{error}</p>}
           <Button type="submit" disabled={saving} className="self-start">
             {saving ? t("common.saving") : hasPin ? t("profile.pin.changePin") : t("profile.pin.setPin")}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
+/** Mật khẩu đăng nhập (khác PIN 6 số ở card "Bảo mật" phía trên — PIN chỉ khoá màn hình, mật khẩu
+ * này dùng để đăng nhập lại bằng email khi không đăng nhập được Google). Không yêu cầu nhập lại mật
+ * khẩu cũ trước khi đổi — cùng mức rủi ro với đổi PIN ở PinCard, chấp nhận được vì đây là app cá nhân
+ * một người dùng, phiên đã qua PinGate mới vào được tới đây. */
+function PasswordCard({ user }: { user: SupabaseUser | null }) {
+  const { t } = useT();
+  const supabase = useSupabase();
+  const hasPassword = hasPasswordIdentity(user);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  async function submit(event: React.FormEvent) {
+    event.preventDefault();
+    setError(null);
+
+    if (password.length < 6) {
+      setError(t("profile.password.errorLength"));
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError(t("profile.password.errorMismatch"));
+      return;
+    }
+
+    setSaving(true);
+    const { error: updateError } = await supabase.auth.updateUser({ password });
+    setSaving(false);
+
+    if (updateError) {
+      setError(updateError.message);
+      return;
+    }
+    setPassword("");
+    setConfirmPassword("");
+    toast.success(hasPassword ? t("profile.password.toastChanged") : t("profile.password.toastSet"));
+  }
+
+  return (
+    <Card>
+      <CardHeader className="flex-row items-center gap-2">
+        <Lock className="size-4.5 text-brand-600" />
+        <CardTitle className="text-base">{t("profile.password.title")}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {hasPassword && (
+          <p className="mb-3 flex items-center gap-1.5 text-sm font-semibold text-income">
+            <ShieldCheck className="size-4" />
+            {t("profile.password.hasPasswordBadge")}
+          </p>
+        )}
+        <form onSubmit={submit} className="flex flex-col gap-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="account-password">{t("profile.password.newPasswordLabel")}</Label>
+              <Input
+                id="account-password"
+                type="password"
+                autoComplete="new-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="account-password-confirm">{t("profile.password.confirmLabel")}</Label>
+              <Input
+                id="account-password-confirm"
+                type="password"
+                autoComplete="new-password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </div>
+          </div>
+          {error && <p className="text-sm text-destructive">{error}</p>}
+          <Button type="submit" disabled={saving} className="self-start">
+            {saving ? t("common.saving") : hasPassword ? t("profile.password.changePassword") : t("profile.password.setPassword")}
           </Button>
         </form>
       </CardContent>

@@ -10,15 +10,28 @@ import { CsvImportDialog } from "@/components/reports/csv-import-dialog";
 import { CategoryBreakdownChart } from "@/components/charts/category-breakdown-chart";
 import { ChartTypeToggle } from "@/components/charts/chart-type-toggle";
 import { AccountBreakdownChart } from "@/components/charts/account-breakdown-chart";
+import { DailyTotalsChart } from "@/components/charts/daily-totals-chart";
+import { CategoryComparisonCard, type ComparisonMode } from "@/components/dashboard/category-comparison-card";
 import { AmountText } from "@/components/shared/amount-text";
-import { useAccountBreakdown, useCategoryBreakdown, usePeriodTotals } from "@/lib/hooks/use-summary";
+import {
+  useAccountBreakdown,
+  useCategoryBreakdown,
+  useDailyTotals,
+  usePeriodTotals,
+} from "@/lib/hooks/use-summary";
 import { useTransactions } from "@/lib/hooks/use-transactions";
 import { useAccounts } from "@/lib/hooks/use-accounts";
 import { useCategories } from "@/lib/hooks/use-categories";
 import { useChartType } from "@/lib/hooks/use-chart-type";
 import { useT } from "@/lib/i18n/use-t";
 import { buildWallioExportCsv, downloadCsv } from "@/lib/utils/csv-export";
-import { getPresetRange, toQueryDate, type DateRangePreset } from "@/lib/utils";
+import {
+  getPresetRange,
+  getSameRangeLastYear,
+  shiftDateRange,
+  toQueryDate,
+  type DateRangePreset,
+} from "@/lib/utils";
 
 export function ReportsTab() {
   const { t } = useT();
@@ -27,15 +40,22 @@ export function ReportsTab() {
   const [customEnd, setCustomEnd] = useState(() => toQueryDate(getPresetRange("month").end));
   const [kind, setKind] = useState<"income" | "expense">("expense");
   const [chartType, setChartType] = useChartType("reports");
+  const [comparisonMode, setComparisonMode] = useState<ComparisonMode>("previousPeriod");
 
   // DateRangeFilter luôn giữ customStart/customEnd khớp với preset đang chọn (kể cả sau khi
   // bấm nút prev/next điều hướng sang kỳ khác), nên chỉ cần đọc thẳng hai mốc này.
   const startDate = customStart;
   const endDate = customEnd;
 
+  const previousRange =
+    comparisonMode === "previousPeriod"
+      ? shiftDateRange({ preset, customStart, customEnd }, -1)
+      : getSameRangeLastYear({ preset, customStart, customEnd });
+
   const { data: totals } = usePeriodTotals(startDate, endDate);
   const { data: categoryBreakdown } = useCategoryBreakdown(startDate, endDate, kind);
   const { data: accountBreakdown } = useAccountBreakdown();
+  const { data: dailyTotals } = useDailyTotals(startDate, endDate);
   const { data: transactions } = useTransactions({ startDate, endDate });
   const { data: accounts } = useAccounts();
   const { data: categories } = useCategories();
@@ -89,6 +109,15 @@ export function ReportsTab() {
       )}
 
       <Card>
+        <CardHeader>
+          <CardTitle className="text-base">{t("reports.dailyChart.title")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <DailyTotalsChart data={dailyTotals ?? []} scope="reports" />
+        </CardContent>
+      </Card>
+
+      <Card>
         <CardHeader className="flex-row items-center justify-between gap-2">
           <CardTitle className="text-base">{t("reports.page.byCategory")}</CardTitle>
           <div className="flex items-center gap-1.5">
@@ -109,6 +138,16 @@ export function ReportsTab() {
           <CategoryBreakdownChart data={categoryBreakdown ?? []} scope="reports" variant={chartType} />
         </CardContent>
       </Card>
+
+      <CategoryComparisonCard
+        currentStart={startDate}
+        currentEnd={endDate}
+        previousStart={previousRange.customStart}
+        previousEnd={previousRange.customEnd}
+        kind={kind}
+        mode={comparisonMode}
+        onModeChange={setComparisonMode}
+      />
 
       <Card>
         <CardHeader>

@@ -12,10 +12,23 @@ getNetWorthSummary(): { netWorth, availableCash, lending, debt }   // công th�
 getPeriodTotals(startDate, endDate): { income, expense, net }       // chỉ tính type income/expense, bỏ transfer
 getCategoryBreakdown(startDate, endDate, kind): CategoryBreakdownItem[]   // gộp theo category, sort giảm dần theo total
 getAccountBreakdown(): AccountBreakdownItem[]   // = listAccountsWithBalance, map lại field cần cho chart
+getCategoryComparison(currentStart, currentEnd, previousStart, previousEnd, kind): CategoryComparisonItem[]
+getDailyTotals(startDate, endDate): DailyTotalItem[]   // { date, income, expense } — 1 dòng/ngày
 ```
 
 `getCategoryBreakdown`: giao dịch không có category (`category_id = null`) gộp vào nhóm `"uncategorized"` /
 "Không phân loại" — không được rớt mất khỏi biểu đồ.
+
+`getCategoryComparison`: gọi `getCategoryBreakdown` 2 lần (kỳ hiện tại + kỳ so sánh) rồi gộp kiểu **full outer
+join** theo `categoryId` — danh mục chỉ phát sinh ở một trong hai kỳ vẫn được liệt kê (kỳ còn lại nhận `total =
+0`) thay vì rớt mất. `changePercent = null` khi kỳ so sánh bằng 0 (tránh chia cho 0) — UI hiện nhãn "Mới" thay
+vì phần trăm. Hai kỳ so sánh: "kỳ trước" = `shiftDateRange(range, -1)` đã có sẵn (đúng độ dài, đúng đơn vị lịch
+với preset); "cùng kỳ năm trước" = hàm mới `getSameRangeLastYear` (lùi cả 2 mốc đúng 1 năm bằng `subYears`, luôn
+trả về dạng "custom" vì không chắc còn khớp preset gốc).
+
+`getDailyTotals`: tự lấp đủ **mọi ngày** trong khoảng `[startDate, endDate]` bằng `eachDayOfInterval`, kể cả
+ngày không có giao dịch nào (`income = expense = 0`) — không để chart tự bỏ qua ngày trống, tránh trục ngày bị
+lệch/gây hiểu nhầm.
 
 ## 4.2 Tab "Tổng quan" (`OverviewTab`)
 
@@ -68,9 +81,26 @@ Thứ tự bố cục:
   nay"/"Tuần này" khi khoảng đang lọc thật sự trùng ngày/tuần hiện tại, lệch khỏi đó thì hiện ngày/khoảng ngày
   cụ thể.
 - 3 ô tổng nhanh: Thu / Chi / Chênh lệch (net) trong kỳ đã chọn.
+- **Biểu đồ cột thu/chi theo ngày** (`DailyTotalsChart`, `components/charts/daily-totals-chart.tsx`) — component
+  Recharts `BarChart` thật đầu tiên trong app (trước đó chỉ có donut `CategoryBreakdownChart` dùng Recharts,
+  các "chart" còn lại đều là thanh CSS tự vẽ). Dữ liệu từ `getDailyTotals`, một cột thu (`var(--income)`) + một
+  cột chi (`var(--expense)`) mỗi ngày trong kỳ đang lọc. Khoảng dài (preset Năm ≈ 365 ngày) được bọc trong
+  container cuộn ngang, mỗi ngày giữ tối thiểu ~28px để cột không bị bóp quá hẹp mất khả năng đọc.
+  **⚠️ Chiều cao cột không bị ẩn theo tuỳ chọn "ẩn số tiền"** (`useAmountVisibility`) — giống `IncomeExpenseChart`
+  ở tab Tổng quan, chỉ nhãn trục Y và tooltip bị che thành "••••••", vì độ cao cột vẫn cần thể hiện đúng xu
+  hướng tương đối dù đang ẩn số tuyệt đối.
 - **Biểu đồ theo danh mục**: toggle **tròn (pie/donut) / ngang (bar, mặc định)** — cùng component
   `CategoryBreakdownChart` với Sổ thu chi (`variant` prop), lựa chọn loại chart lưu riêng cho trang Báo cáo
   (`wallio:chartType:reports`, xem PHASE_3 §3.2) — với tab con Chi/Thu để chuyển `kind`.
+- **So sánh theo danh mục** (`CategoryComparisonCard`, `components/dashboard/category-comparison-card.tsx`) —
+  đặt ngay dưới card "Theo danh mục", dùng chung `kind` (Chi/Thu) với card đó. Có toggle 1-trong-2 kiểu so sánh
+  (không hiện đồng thời cả hai, tránh rối trên mobile): **"So với kỳ trước"** hoặc **"So với cùng kỳ năm
+  trước"** (xem `getCategoryComparison` ở §4.1). Mỗi dòng danh mục hiện tổng kỳ hiện tại, tổng kỳ so sánh (chữ
+  nhỏ, mờ), và một chip xu hướng: mũi tên lên/màu xanh (`text-income`) khi tăng, mũi tên xuống/màu đỏ
+  (`text-expense`) khi giảm, gạch ngang/xám khi gần như không đổi (`|changePercent| < 0.5%`), hoặc nhãn "Mới"
+  khi kỳ so sánh bằng 0. **Màu xu hướng theo hướng tăng/giảm của con số, không đảo theo income/expense** — chi
+  tiêu tăng vẫn tô xanh giống thu nhập tăng (quy ước giống mũi tên giá cổ phiếu, đã chốt với người dùng khi làm
+  tính năng này thay vì tô đỏ cho "chi tiêu tăng = xấu").
 - **Biểu đồ theo account** (giống Overview, không đổi theo kỳ).
 - **Xuất/Nhập CSV** (`lib/utils/csv-export.ts` + `csv-import.ts`, `components/reports/csv-import-dialog.tsx`):
   xem §4.4 — định dạng mới tự mô tả (accounts + categories + transactions trong 1 file), thay cho bản cũ chỉ

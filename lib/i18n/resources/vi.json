@@ -169,6 +169,28 @@
       "description": "Đặt mật khẩu 6 số để khoá app lại mỗi khi mở lên, bảo vệ dữ liệu thu chi của bạn tốt hơn.",
       "later": "Để sau",
       "setNow": "Đặt ngay"
+    },
+    "emailLogin": {
+      "tabLogin": "Đăng nhập",
+      "tabSignup": "Đăng ký",
+      "emailLabel": "Email",
+      "passwordLabel": "Mật khẩu",
+      "submit": "Đăng nhập",
+      "errorInvalid": "Email hoặc mật khẩu không đúng",
+      "orDivider": "hoặc"
+    },
+    "signup": {
+      "confirmPasswordLabel": "Nhập lại mật khẩu",
+      "submit": "Tạo tài khoản",
+      "errorMismatch": "Hai mật khẩu chưa khớp nhau",
+      "errorAlreadyRegistered": "Email này đã có tài khoản — thử đăng nhập bằng Google hoặc đăng nhập bằng mật khẩu?",
+      "pendingConfirmation": "Đã gửi email xác nhận — kiểm tra hộp thư để hoàn tất đăng ký."
+    },
+    "passwordReminder": {
+      "title": "Bạn chưa đặt mật khẩu đăng nhập",
+      "description": "Tài khoản của bạn hiện chỉ đăng nhập được bằng Google. Đặt thêm mật khẩu để vẫn đăng nhập được bằng email khi cần.",
+      "later": "Để sau",
+      "setNow": "Đặt ngay"
     }
   },
 
@@ -246,6 +268,17 @@
       "csvFilenamePrefix": "giao-dich",
       "exportCsv": "Xuất CSV",
       "importCsv": "Nhập CSV"
+    },
+    "dailyChart": {
+      "title": "Thu / chi theo ngày",
+      "empty": "Chưa có dữ liệu trong khoảng thời gian này."
+    },
+    "comparison": {
+      "title": "So sánh theo danh mục",
+      "modePrevious": "So với kỳ trước",
+      "modeSameYear": "So với cùng kỳ năm trước",
+      "new": "Mới",
+      "empty": "Chưa có dữ liệu để so sánh."
     },
     "import": {
       "dialogTitle": "Xem lại dữ liệu nhập",
@@ -529,6 +562,18 @@
       "setPin": "Đặt mật khẩu",
       "toastChanged": "Đã đổi mật khẩu",
       "toastSet": "Đã đặt mật khẩu"
+    },
+    "password": {
+      "title": "Mật khẩu đăng nhập",
+      "hasPasswordBadge": "Đã đặt mật khẩu đăng nhập",
+      "newPasswordLabel": "Mật khẩu mới",
+      "confirmLabel": "Nhập lại mật khẩu",
+      "errorLength": "Mật khẩu phải có ít nhất 6 ký tự",
+      "errorMismatch": "Hai mật khẩu chưa khớp nhau",
+      "setPassword": "Đặt mật khẩu",
+      "changePassword": "Đổi mật khẩu",
+      "toastSet": "Đã đặt mật khẩu đăng nhập",
+      "toastChanged": "Đã đổi mật khẩu đăng nhập"
     },
     "amountVisibility": {
       "title": "Ẩn/hiện số tiền",

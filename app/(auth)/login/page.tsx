@@ -4,14 +4,19 @@ import { useState } from "react";
 import Image from "next/image";
 import { Sparkles, PieChart, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { EmailLoginForm } from "@/components/auth/email-login-form";
+import { EmailSignupForm } from "@/components/auth/email-signup-form";
 import { useSupabase } from "@/lib/hooks/use-supabase";
 import { useT } from "@/lib/i18n/use-t";
 import { ROUTE_PARAMS, ROUTES } from "@/lib/constants/routes";
+import { nextDestination } from "@/lib/utils/pwa";
 
 export default function LoginPage() {
   const supabase = useSupabase();
   const { t } = useT();
   const [loading, setLoading] = useState(false);
+  const [authTab, setAuthTab] = useState<"login" | "signup">("login");
 
   const HIGHLIGHTS = [
     { icon: Sparkles, text: t("auth.login.highlight1") },
@@ -21,12 +26,7 @@ export default function LoginPage() {
 
   async function handleGoogleLogin() {
     setLoading(true);
-    // App đã cài (PWA standalone / iOS "Add to Home Screen") → vào thẳng app như cũ. Mở từ
-    // trình duyệt thường (không standalone) → quay ra trang chủ, bấm "Vào app" mới vào.
-    const isStandalone =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
-    const next = isStandalone ? ROUTES.transactions : ROUTES.home;
+    const next = nextDestination();
     const redirectTo = `${window.location.origin}${ROUTES.authCallback}?${ROUTE_PARAMS.next}=${encodeURIComponent(next)}`;
     await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -72,6 +72,25 @@ export default function LoginPage() {
           </svg>
           {loading ? t("auth.login.redirecting") : t("auth.login.signInGoogle")}
         </Button>
+
+        <div className="my-5 flex items-center gap-3">
+          <div className="h-px flex-1 bg-border" />
+          <span className="text-xs font-semibold text-muted-foreground">{t("auth.emailLogin.orDivider")}</span>
+          <div className="h-px flex-1 bg-border" />
+        </div>
+
+        <Tabs value={authTab} onValueChange={(v) => setAuthTab(v as "login" | "signup")}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="login">{t("auth.emailLogin.tabLogin")}</TabsTrigger>
+            <TabsTrigger value="signup">{t("auth.emailLogin.tabSignup")}</TabsTrigger>
+          </TabsList>
+          <TabsContent value="login" className="mt-4">
+            <EmailLoginForm />
+          </TabsContent>
+          <TabsContent value="signup" className="mt-4">
+            <EmailSignupForm />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
