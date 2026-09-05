@@ -37,7 +37,9 @@ export async function updateSession(request: NextRequest) {
 
   const {
     data: { user },
+    error,
   } = await supabase.auth.getUser();
+  if (error) console.error("[DEBUG getUser@middleware]", error);
 
   // Trang chủ ("/") luôn public — tự quyết định hiển thị marketing page hay đẩy vào app dựa
   // trên session, không chặn ở middleware. Không cho vào PUBLIC_PATHS vì startsWith("/") sẽ khớp
