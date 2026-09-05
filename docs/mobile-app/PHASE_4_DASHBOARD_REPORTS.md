@@ -84,8 +84,11 @@ Thứ tự bố cục:
 - **Biểu đồ cột thu/chi theo ngày** (`DailyTotalsChart`, `components/charts/daily-totals-chart.tsx`) — component
   Recharts `BarChart` thật đầu tiên trong app (trước đó chỉ có donut `CategoryBreakdownChart` dùng Recharts,
   các "chart" còn lại đều là thanh CSS tự vẽ). Dữ liệu từ `getDailyTotals`, một cột thu (`var(--income)`) + một
-  cột chi (`var(--expense)`) mỗi ngày trong kỳ đang lọc. Khoảng dài (preset Năm ≈ 365 ngày) được bọc trong
-  container cuộn ngang, mỗi ngày giữ tối thiểu ~28px để cột không bị bóp quá hẹp mất khả năng đọc.
+  cột chi (`var(--expense)`) mỗi ngày trong kỳ đang lọc. Tab con **Chi / Thu / Cả hai** (`view` prop, mặc định
+  "Cả hai") ẩn/hiện từng cột và dòng tương ứng trong tooltip — cùng vị trí với tab Chi/Thu của card "Theo danh
+  mục" bên dưới, nhưng là state độc lập (đổi tab ở card này không ảnh hưởng card kia). Khoảng dài (preset Năm ≈
+  365 ngày) được bọc trong container cuộn ngang, mỗi ngày giữ tối thiểu ~28px để cột không bị bóp quá hẹp mất
+  khả năng đọc.
   **⚠️ Chiều cao cột không bị ẩn theo tuỳ chọn "ẩn số tiền"** (`useAmountVisibility`) — giống `IncomeExpenseChart`
   ở tab Tổng quan, chỉ nhãn trục Y và tooltip bị che thành "••••••", vì độ cao cột vẫn cần thể hiện đúng xu
   hướng tương đối dù đang ẩn số tuyệt đối.

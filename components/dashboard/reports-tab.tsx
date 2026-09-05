@@ -10,7 +10,7 @@ import { CsvImportDialog } from "@/components/reports/csv-import-dialog";
 import { CategoryBreakdownChart } from "@/components/charts/category-breakdown-chart";
 import { ChartTypeToggle } from "@/components/charts/chart-type-toggle";
 import { AccountBreakdownChart } from "@/components/charts/account-breakdown-chart";
-import { DailyTotalsChart } from "@/components/charts/daily-totals-chart";
+import { DailyTotalsChart, type DailyChartView } from "@/components/charts/daily-totals-chart";
 import { CategoryComparisonCard, type ComparisonMode } from "@/components/dashboard/category-comparison-card";
 import { AmountText } from "@/components/shared/amount-text";
 import {
@@ -41,6 +41,7 @@ export function ReportsTab() {
   const [kind, setKind] = useState<"income" | "expense">("expense");
   const [chartType, setChartType] = useChartType("reports");
   const [comparisonMode, setComparisonMode] = useState<ComparisonMode>("previousPeriod");
+  const [dailyView, setDailyView] = useState<DailyChartView>("both");
 
   // DateRangeFilter luôn giữ customStart/customEnd khớp với preset đang chọn (kể cả sau khi
   // bấm nút prev/next điều hướng sang kỳ khác), nên chỉ cần đọc thẳng hai mốc này.
@@ -109,11 +110,24 @@ export function ReportsTab() {
       )}
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex-row items-center justify-between gap-2">
           <CardTitle className="text-base">{t("reports.dailyChart.title")}</CardTitle>
+          <Tabs value={dailyView} onValueChange={(v) => setDailyView(v as DailyChartView)}>
+            <TabsList className="h-9">
+              <TabsTrigger value="expense" className="text-xs">
+                {t("transactions.page.expense")}
+              </TabsTrigger>
+              <TabsTrigger value="income" className="text-xs">
+                {t("transactions.page.income")}
+              </TabsTrigger>
+              <TabsTrigger value="both" className="text-xs">
+                {t("reports.dailyChart.both")}
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </CardHeader>
         <CardContent>
-          <DailyTotalsChart data={dailyTotals ?? []} scope="reports" />
+          <DailyTotalsChart data={dailyTotals ?? []} scope="reports" view={dailyView} />
         </CardContent>
       </Card>
 

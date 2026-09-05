@@ -13,17 +13,33 @@ const MIN_BAR_GROUP_WIDTH = 28;
 
 type Locale = typeof vi;
 
-function TooltipCard({ item, visible, dateLocale }: { item: DailyTotalItem; visible: boolean; dateLocale: Locale }) {
+export type DailyChartView = "expense" | "income" | "both";
+
+function TooltipCard({
+  item,
+  visible,
+  dateLocale,
+  view,
+}: {
+  item: DailyTotalItem;
+  visible: boolean;
+  dateLocale: Locale;
+  view: DailyChartView;
+}) {
   const { t } = useT();
   return (
     <div className="glass rounded-2xl px-3 py-2 text-xs">
       <p className="font-bold">{format(parseISO(item.date), "dd/MM/yyyy", { locale: dateLocale })}</p>
-      <p className="text-income">
-        {t("charts.incomeExpense.income")}: {visible ? formatCurrency(item.income) : MASK}
-      </p>
-      <p className="text-expense">
-        {t("charts.incomeExpense.expense")}: {visible ? formatCurrency(item.expense) : MASK}
-      </p>
+      {view !== "expense" && (
+        <p className="text-income">
+          {t("charts.incomeExpense.income")}: {visible ? formatCurrency(item.income) : MASK}
+        </p>
+      )}
+      {view !== "income" && (
+        <p className="text-expense">
+          {t("charts.incomeExpense.expense")}: {visible ? formatCurrency(item.expense) : MASK}
+        </p>
+      )}
     </div>
   );
 }
@@ -36,9 +52,11 @@ function TooltipCard({ item, visible, dateLocale }: { item: DailyTotalItem; visi
 export function DailyTotalsChart({
   data,
   scope,
+  view = "both",
 }: {
   data: DailyTotalItem[];
   scope: AmountVisibilityScope;
+  view?: DailyChartView;
 }) {
   const { t, locale } = useT();
   const dateLocale = locale === "en" ? enUS : vi;
@@ -75,12 +93,21 @@ export function DailyTotalsChart({
               cursor={{ fill: "var(--muted)" }}
               content={({ active, payload }) =>
                 active && payload?.length ? (
-                  <TooltipCard item={payload[0].payload as DailyTotalItem} visible={visible} dateLocale={dateLocale} />
+                  <TooltipCard
+                    item={payload[0].payload as DailyTotalItem}
+                    visible={visible}
+                    dateLocale={dateLocale}
+                    view={view}
+                  />
                 ) : null
               }
             />
-            <Bar dataKey="income" fill="var(--income)" radius={[4, 4, 0, 0]} isAnimationActive={false} />
-            <Bar dataKey="expense" fill="var(--expense)" radius={[4, 4, 0, 0]} isAnimationActive={false} />
+            {view !== "expense" && (
+              <Bar dataKey="income" fill="var(--income)" radius={[4, 4, 0, 0]} isAnimationActive={false} />
+            )}
+            {view !== "income" && (
+              <Bar dataKey="expense" fill="var(--expense)" radius={[4, 4, 0, 0]} isAnimationActive={false} />
+            )}
           </BarChart>
         </ResponsiveContainer>
       </div>

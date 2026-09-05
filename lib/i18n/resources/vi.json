@@ -272,6 +272,7 @@
     },
     "dailyChart": {
       "title": "Thu / chi theo ngày",
+      "both": "Cả hai",
       "empty": "Chưa có dữ liệu trong khoảng thời gian này."
     },
     "comparison": {

@@ -272,6 +272,7 @@
     },
     "dailyChart": {
       "title": "Daily income / expense",
+      "both": "Both",
       "empty": "No data in this period yet."
     },
     "comparison": {
