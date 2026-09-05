@@ -1,0 +1,226 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --radius: 1.25rem;
+
+  /* ---- Brand scale: đổi 10 dòng này để đổi tông màu thương hiệu ---- */
+  --brand-50: oklch(0.976 0.015 255);
+  --brand-100: oklch(0.946 0.034 255);
+  --brand-200: oklch(0.898 0.065 256);
+  --brand-300: oklch(0.822 0.108 258);
+  --brand-400: oklch(0.722 0.163 260);
+  --brand-500: oklch(0.638 0.196 262);
+  --brand-600: oklch(0.566 0.216 264);
+  --brand-700: oklch(0.492 0.202 266);
+  --brand-800: oklch(0.424 0.166 267);
+  --brand-900: oklch(0.362 0.132 268);
+
+  --background: oklch(0.982 0.011 250);
+  --foreground: oklch(0.24 0.035 265);
+  --card: oklch(1 0 0);
+  --card-foreground: var(--foreground);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--foreground);
+  --primary: var(--brand-600);
+  --primary-foreground: oklch(0.99 0.005 250);
+  --secondary: oklch(0.955 0.023 253);
+  --secondary-foreground: var(--brand-700);
+  --muted: oklch(0.958 0.014 250);
+  --muted-foreground: oklch(0.53 0.037 262);
+  --accent: oklch(0.94 0.035 253);
+  --accent-foreground: var(--brand-700);
+  --destructive: oklch(0.632 0.216 24);
+  --destructive-foreground: oklch(0.99 0.005 250);
+  --border: oklch(0.905 0.021 253);
+  --input: oklch(0.9 0.024 253);
+  --ring: var(--brand-500);
+
+  /* ---- Skeleton loading (tuỳ chọn, chỉ cần nếu dùng thư viện skeleton) ---- */
+  --skeleton-base: oklch(0.91 0.018 255);
+  --skeleton-highlight: oklch(0.97 0.01 250);
+
+  /*
+   * ---- Semantic status colors (TUỲ CHỌN) ----
+   * Wallio dùng income/expense/transfer cho app tài chính. Ở project khác,
+   * đổi tên + số lượng cho đúng domain (VD: success/warning/info, hoặc
+   * open/in-progress/done...), nhưng giữ đúng khuôn "màu + màu-foreground"
+   * này thay vì dùng thẳng green-500/red-500 của Tailwind.
+   */
+  --income: oklch(0.66 0.165 158);
+  --income-foreground: oklch(0.99 0.005 250);
+  --expense: oklch(0.635 0.212 22);
+  --expense-foreground: oklch(0.99 0.005 250);
+  --transfer: oklch(0.6 0.198 295);
+  --transfer-foreground: oklch(0.99 0.005 250);
+
+  --shadow-soft: 0 10px 30px -16px oklch(0.42 0.166 267 / 0.45);
+  --shadow-card: 0 16px 40px -28px oklch(0.42 0.166 267 / 0.55);
+  --shadow-glow: 0 18px 40px -18px oklch(0.566 0.216 264 / 0.55);
+}
+
+.dark {
+  --background: oklch(0.14 0.032 266);
+  --foreground: oklch(0.965 0.012 250);
+  --card: oklch(0.24 0.05 266);
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.24 0.05 266);
+  --popover-foreground: var(--foreground);
+  --primary: var(--brand-500);
+  --primary-foreground: oklch(0.98 0.006 250);
+  --secondary: oklch(0.29 0.056 266);
+  --secondary-foreground: oklch(0.94 0.02 255);
+  --muted: oklch(0.26 0.046 266);
+  --muted-foreground: oklch(0.74 0.032 258);
+  --accent: oklch(0.33 0.062 266);
+  --accent-foreground: oklch(0.95 0.02 255);
+  --destructive: oklch(0.66 0.2 24);
+  --border: oklch(1 0 0 / 15%);
+  --input: oklch(1 0 0 / 19%);
+  --ring: var(--brand-500);
+
+  --skeleton-base: oklch(0.32 0.05 266);
+  --skeleton-highlight: oklch(0.4 0.06 266);
+
+  --income: oklch(0.72 0.165 158);
+  --expense: oklch(0.7 0.195 22);
+  --transfer: oklch(0.7 0.175 295);
+
+  --shadow-soft: 0 10px 30px -16px oklch(0 0 0 / 0.7);
+  --shadow-card: 0 16px 40px -28px oklch(0 0 0 / 0.78);
+  --shadow-glow: 0 18px 40px -18px oklch(0.492 0.202 266 / 0.7);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-brand-50: var(--brand-50);
+  --color-brand-100: var(--brand-100);
+  --color-brand-200: var(--brand-200);
+  --color-brand-300: var(--brand-300);
+  --color-brand-400: var(--brand-400);
+  --color-brand-500: var(--brand-500);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+  --color-brand-800: var(--brand-800);
+  --color-brand-900: var(--brand-900);
+
+  --color-income: var(--income);
+  --color-income-foreground: var(--income-foreground);
+  --color-expense: var(--expense);
+  --color-expense-foreground: var(--expense-foreground);
+  --color-transfer: var(--transfer);
+  --color-transfer-foreground: var(--transfer-foreground);
+
+  --shadow-soft: var(--shadow-soft);
+  --shadow-card: var(--shadow-card);
+  --shadow-glow: var(--shadow-glow);
+
+  --radius-sm: calc(var(--radius) - 0.6rem);
+  --radius-md: calc(var(--radius) - 0.4rem);
+  --radius-lg: calc(var(--radius) - 0.2rem);
+  --radius-xl: var(--radius);
+  --radius-2xl: calc(var(--radius) + 0.4rem);
+  --radius-3xl: calc(var(--radius) + 0.9rem);
+
+  /* Đổi 2 dòng này theo font đã khai báo trong app/layout.tsx */
+  --font-sans: var(--font-sans-app), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono-app), ui-monospace, monospace;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    /* Ambient glow phía sau các glass card — 3 blob mờ, cố định khi cuộn */
+    background-image:
+      radial-gradient(72rem 42rem at 12% -12%, oklch(0.638 0.196 262 / 0.16), transparent 62%),
+      radial-gradient(60rem 36rem at 100% 0%, oklch(0.7 0.19 350 / 0.12), transparent 58%),
+      radial-gradient(58rem 34rem at 50% 108%, oklch(0.72 0.15 165 / 0.13), transparent 60%);
+    background-attachment: fixed;
+  }
+
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+}
+
+@layer components {
+  /* Thẻ kính mờ dùng chung cho mọi card/panel */
+  .glass {
+    background-color: color-mix(in oklab, var(--card) 74%, transparent);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid color-mix(in oklab, white 55%, transparent);
+    box-shadow: var(--shadow-card);
+  }
+
+  .dark .glass {
+    background-color: color-mix(in oklab, var(--card) 86%, transparent);
+    border-color: color-mix(in oklab, white 16%, transparent);
+  }
+
+  /* Gradient thương hiệu — chỉ dùng cho CTA chính / active state, không phủ nền toàn trang */
+  .brand-gradient {
+    background-image: linear-gradient(
+      135deg,
+      var(--brand-700) 0%,
+      var(--brand-500) 48%,
+      oklch(0.74 0.14 232) 100%
+    );
+  }
+
+  .dark .brand-gradient {
+    background-image: linear-gradient(
+      135deg,
+      var(--brand-900) 0%,
+      var(--brand-700) 50%,
+      oklch(0.46 0.13 235) 100%
+    );
+  }
+
+  .hide-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Vùng an toàn cho bottom nav trên iOS standalone/PWA */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
